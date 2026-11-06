@@ -5,4 +5,4 @@ window.PARCOURS_FIREBASE = null;
 
 // Coach IA : adresse du relais Cloudflare (dossier coach-relais/), qui garde la clé Groq secrète.
 // null = coach IA pas encore branché (les recommandations calculées marchent quand même).
-window.PARCOURS_COACH_URL = null;
+window.PARCOURS_COACH_URL = "https://parcours-coach.remyvancoppenolle.workers.dev";
