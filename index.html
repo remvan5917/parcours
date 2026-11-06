@@ -297,8 +297,9 @@ tr.done td:first-child{color:var(--muted)}
 .record{border:1px solid var(--cone);background:var(--cone-soft);border-radius:10px;padding:12px 14px;font-size:1rem}
 .record i{font-style:normal;color:var(--cone)}
 .install-zone{display:flex;flex-direction:column;gap:10px}
-.install-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:var(--mat);color:#fff;font-size:1.25rem;min-height:58px;border-radius:12px}
-.install-btn svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.inst-chip{flex:0 0 auto;display:inline-flex;align-items:center;gap:5px;font-family:var(--body);font-size:.8rem;font-weight:600;letter-spacing:0;padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--muted)}
+.inst-chip:hover{color:var(--mat);border-color:var(--mat)}
+.inst-chip svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .install-help ol{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:6px}
 footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padding-top:14px;margin-top:10px;display:flex;flex-direction:column;gap:6px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
@@ -310,14 +311,16 @@ footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padd
 <!-- =================== ACCUEIL =================== -->
 <section class="view" id="v-accueil" data-view="accueil">
   <div class="hero">
-    <div class="eyebrow">Concours gardien de la paix · épreuves physiques · femmes</div>
+    <div class="row between" style="gap:8px;flex-wrap:nowrap;align-items:center">
+      <div class="eyebrow">Concours gardien de la paix · épreuves physiques · femmes</div>
+      <button type="button" class="inst-chip" data-install aria-label="Installer l'appli sur ton téléphone"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Installer</button>
+    </div>
     <h1>Parcours d'habileté motrice</h1>
     <div class="count" id="countdown"></div>
     <p class="love" id="love"></p>
   </div>
   <p class="sync" id="sync" hidden></p>
   <div class="install-zone">
-    <button type="button" class="install-btn" data-install><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M12 7v7M9 11l3 3 3-3M10 18h4"/></svg>Installer l'appli sur ton téléphone</button>
     <div class="panel install-help" id="install-help" hidden></div>
   </div>
 
@@ -1781,8 +1784,8 @@ function installSteps(){
 }
 function renderInstall(justInstalled){
   const on = isStandalone() || justInstalled;
-  document.querySelectorAll(".install-zone").forEach(z => z.hidden = on);
-  document.querySelectorAll("[data-install]").forEach(b => { if (!b.classList.contains("install-btn")) b.hidden = on; });
+  document.querySelectorAll("[data-install]").forEach(b => b.hidden = on);
+  if (on && $("install-help")) $("install-help").hidden = true;
   const st = $("install-state"); if (st) st.textContent = on ? "L'appli est installée sur cet appareil." : "Elle s'ouvrira comme une vraie appli, en plein écran, même sans réseau.";
 }
 document.addEventListener("click", async e => {
