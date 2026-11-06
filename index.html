@@ -6,6 +6,7 @@
 <title>Parcours d'habileté motrice</title>
 <meta name="description" content="Préparation aux épreuves sportives du concours de gardien de la paix : parcours chronométré, Luc Léger, ateliers et progression.">
 <meta name="theme-color" content="#2457A6">
+<script>try{var t=JSON.parse(localStorage.getItem("phm-theme"));if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -413,6 +414,13 @@ footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padd
       <input type="date" id="exam-date">
     </div>
     <label class="row note" for="opt-age" style="color:var(--ink)"><input type="checkbox" id="opt-age" checked> 30 à 40 ans au 1er janvier de l'année de l'épreuve (+1 point à chaque épreuve)</label>
+    <h3>Thème</h3>
+    <div class="seg" id="theme-seg" role="group" aria-label="Thème">
+      <button type="button" data-th="auto">Automatique</button>
+      <button type="button" data-th="light">Clair</button>
+      <button type="button" data-th="dark">Sombre</button>
+    </div>
+    <p class="note">« Automatique » suit le réglage clair ou sombre du téléphone.</p>
     <h3>Installer l'appli</h3>
     <p class="note" id="install-state">Elle s'ouvrira comme une vraie appli, en plein écran, même sans réseau.</p>
     <div class="row"><button type="button" class="ghost small" data-install>Installer l'appli sur ce téléphone</button></div>
@@ -1813,6 +1821,15 @@ document.addEventListener("click", async e => {
 });
 document.addEventListener("click", e => { if (e.target.id === "install-close") $("install-help").hidden = true; });
 renderInstall(false);
+
+/* ======================= THÈME ======================= */
+function applyTheme(t){
+  if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+  else document.documentElement.removeAttribute("data-theme");
+  document.querySelectorAll("#theme-seg [data-th]").forEach(b => b.setAttribute("aria-pressed", b.dataset.th === (t || "auto")));
+}
+$("theme-seg").addEventListener("click", e => { const b = e.target.closest("[data-th]"); if (!b) return; lsSet("phm-theme", b.dataset.th); applyTheme(b.dataset.th); });
+applyTheme(lsGet("phm-theme", "auto"));
 
 /* ======================= DÉMARRAGE ======================= */
 function renderAll(){ renderLove(); renderHome(); renderSplits(); renderRecos(); renderWeek(); if (!$("v-progres").hidden) renderProg(); }
