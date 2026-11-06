@@ -1,0 +1,1474 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Parcours d'habileté motrice</title>
+<meta name="description" content="Préparation aux épreuves sportives du concours de gardien de la paix : parcours chronométré, Luc Léger, ateliers et progression.">
+<meta name="theme-color" content="#2457A6">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Parcours">
+<style>
+:root{padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;-webkit-text-size-adjust:100%}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap">
+<style>
+:root{
+  --ground:#EDF0F3;
+  --surface:#FFFFFF;
+  --floor:#E3E8EE;
+  --ink:#14202E;
+  --muted:#5A6878;
+  --line:#C6D0DB;
+  --mat:#2457A6;
+  --mat-soft:#DCE6F5;
+  --cone:#E0602A;
+  --cone-soft:#FBE4D9;
+  --gym:#7A4BA8;
+  --gym-soft:#EEE5F7;
+  --run:#1E7F86;
+  --run-soft:#D9F0F1;
+  --ok:#2E7D4F;
+  --ok-soft:#DDF0E4;
+  --warn:#A8650B;
+  --warn-soft:#F8EBD3;
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ground:#0D141C;--surface:#16202B;--floor:#1B2733;--ink:#E5ECF3;--muted:#98A6B5;--line:#2C3B4B;
+    --mat:#7BA4EC;--mat-soft:#1C2D47;--cone:#F27B47;--cone-soft:#3A2218;--gym:#B994E0;--gym-soft:#2B2140;
+    --run:#5CC6CD;--run-soft:#143436;--ok:#6CC892;--ok-soft:#173225;--warn:#E3A84C;--warn-soft:#352813;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#0D141C;--surface:#16202B;--floor:#1B2733;--ink:#E5ECF3;--muted:#98A6B5;--line:#2C3B4B;
+  --mat:#7BA4EC;--mat-soft:#1C2D47;--cone:#F27B47;--cone-soft:#3A2218;--gym:#B994E0;--gym-soft:#2B2140;
+  --run:#5CC6CD;--run-soft:#143436;--ok:#6CC892;--ok-soft:#173225;--warn:#E3A84C;--warn-soft:#352813;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;padding-inline:16px;padding-block:0 calc(96px + env(safe-area-inset-bottom,0px))}
+.wrap{max-width:1100px;margin:0 auto}
+@media (min-width:1000px){.view{padding-top:32px}.time{font-size:7.5rem}}
+h1,h2,h3,h4{font-family:var(--display);font-weight:700;line-height:1.05;text-wrap:balance;margin:0}
+h1{font-size:clamp(2.2rem,7vw,3.2rem)}
+h2{font-size:1.75rem}
+h3{font-size:1.35rem;font-weight:600}
+h4{font-size:.8rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em}
+p{margin:0}
+a{color:var(--mat)}
+.view{display:flex;flex-direction:column;gap:22px;padding-top:22px}
+.eyebrow{font-family:var(--display);font-weight:600;text-transform:uppercase;letter-spacing:.12em;font-size:.82rem;color:var(--mat)}
+.note{font-size:.9rem;color:var(--muted);max-width:74ch}
+.lab{font-size:.76rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:14px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.between{justify-content:space-between}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+
+/* bottom tabs */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center}
+nav.tabs .in{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;width:100%;max-width:620px}
+nav.tabs button{background:none;border:0;border-radius:10px;padding:6px 2px;display:flex;flex-direction:column;align-items:center;gap:2px;font-family:var(--display);font-weight:600;font-size:.92rem;color:var(--muted);cursor:pointer;min-height:52px}
+nav.tabs button svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+nav.tabs button[aria-current="page"]{color:var(--mat);background:var(--mat-soft)}
+button{font-family:var(--display);font-weight:600;font-size:1.15rem;letter-spacing:.02em;border-radius:9px;border:1px solid transparent;padding:11px 16px;cursor:pointer;color:var(--ink);background:none}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid var(--mat);outline-offset:2px}
+.btn{background:var(--ink);color:var(--ground)}
+.go{background:var(--cone);color:#fff;min-height:76px;font-size:1.55rem;width:100%}
+.go.run{background:var(--run)}
+.ghost{border-color:var(--line);background:var(--surface)}
+.small{font-size:1rem;padding:7px 12px}
+.tiny{font-size:.88rem;padding:3px 9px}
+.danger{color:var(--warn);border-color:var(--warn)}
+select,input[type=number],input[type=date]{font:inherit;font-size:.95rem;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:7px 9px}
+input[type=checkbox]{width:19px;height:19px;accent-color:var(--mat)}
+.seg{display:flex;background:var(--floor);border-radius:10px;padding:3px;gap:3px;flex-wrap:wrap}
+.seg button{flex:1 1 auto;font-size:1rem;padding:8px 12px;border-radius:8px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-family:var(--body);font-size:.88rem;font-weight:500;padding:5px 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface);text-decoration:none;color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--ground);border-color:var(--ink)}
+.sync{font-size:.86rem;border-radius:7px;padding:7px 11px;background:var(--floor);color:var(--muted)}
+.sync.warn{background:var(--warn-soft);color:var(--warn)}
+.verdict{display:inline-block;font-weight:600;font-size:.82rem;border-radius:999px;padding:2px 9px;white-space:nowrap;font-family:var(--body)}
+.verdict.ok{background:var(--ok-soft);color:var(--ok)}
+.verdict.fast{background:var(--mat-soft);color:var(--mat)}
+.verdict.slow{background:var(--warn-soft);color:var(--warn)}
+
+/* accueil */
+.hero{display:flex;flex-direction:column;gap:8px}
+.count{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.count b{font-family:var(--display);font-size:3rem;line-height:1;color:var(--cone);font-variant-numeric:tabular-nums}
+.score{border:1px solid var(--line);border-radius:12px;padding:16px;background:var(--surface);display:flex;flex-direction:column;gap:6px}
+.score .big{font-family:var(--display);font-size:2.6rem;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.score .big small{font-size:1.1rem;color:var(--muted);font-weight:600}
+.score.phm{border-top:4px solid var(--cone)}
+.score.luc{border-top:4px solid var(--run)}
+.gauge{height:8px;border-radius:999px;background:var(--floor);position:relative;overflow:visible}
+.gauge i{position:absolute;left:0;top:0;bottom:0;border-radius:999px}
+.gauge .seuil{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--warn)}
+.quick{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.quick button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:14px}
+.quick button span{font-family:var(--body);font-weight:400;font-size:.85rem;color:var(--muted);letter-spacing:0}
+.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.steps li{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:9px;padding:10px 12px;background:var(--surface)}
+.steps li.done{opacity:.55}
+.steps li.done .s-t{text-decoration:line-through}
+.steps .s-t{font-weight:600}
+.steps .s-d{font-size:.9rem;color:var(--muted)}
+.steps .s-a{margin-left:auto}
+.week{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
+.wk{border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.wk b{font-family:var(--display);font-size:1.15rem}
+.wk.fp{background:var(--cone-soft)} .wk.club{background:var(--gym-soft)} .wk.run{background:var(--run-soft)} .wk.daily{background:var(--mat-soft)}
+.wk p{font-size:.92rem}
+
+/* chrono */
+.time{font-family:var(--display);font-weight:700;font-size:clamp(4.2rem,17vw,7rem);line-height:1;font-variant-numeric:tabular-nums;letter-spacing:.01em}
+.time.countd{color:var(--cone)}
+.status{font-size:1rem;color:var(--muted);min-height:1.5em}
+.status strong{color:var(--ink)}
+.penrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.penrow .val{font-family:var(--display);font-weight:700;font-size:1.3rem;color:var(--warn);font-variant-numeric:tabular-nums;min-width:4ch}
+.result{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.result div{border:1px solid var(--line);border-radius:9px;padding:8px 10px;display:flex;flex-direction:column}
+.result span{font-size:.74rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.result b{font-family:var(--display);font-size:1.6rem;font-variant-numeric:tabular-nums}
+.chrono-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px}
+@media (max-width:760px){.chrono-grid{grid-template-columns:1fr}}
+details.more{border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+details.more>summary{cursor:pointer;padding:12px 14px;font-family:var(--display);font-weight:600;font-size:1.1rem;list-style:none;display:flex;justify-content:space-between;gap:10px}
+details.more>summary::-webkit-details-marker{display:none}
+details.more>summary::after{content:"+";color:var(--muted)}
+details.more[open]>summary::after{content:"−"}
+details.more>.in{padding:0 14px 14px;display:flex;flex-direction:column;gap:10px}
+
+/* tables */
+.tbl{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:8px 8px;border-bottom:1px solid var(--line);font-size:.93rem;vertical-align:top}
+th{font-family:var(--display);font-weight:600;text-transform:uppercase;letter-spacing:.08em;font-size:.76rem;color:var(--muted)}
+td.num,th.num{text-align:right}
+tr.current td{background:var(--cone-soft)}
+tr.done td:first-child{color:var(--muted)}
+.best{color:var(--mat);font-size:.85rem}
+.delta.up{color:var(--ok);font-weight:600}
+.delta.down{color:var(--warn);font-weight:600}
+
+/* luc */
+.luc-top{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.luc-top div{border:1px solid var(--line);border-radius:10px;padding:10px;display:flex;flex-direction:column;align-items:center}
+.luc-top span{font-size:.74rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.luc-top b{font-family:var(--display);font-size:2.4rem;line-height:1.05;font-variant-numeric:tabular-nums}
+.luc-pal{font-family:var(--display);font-weight:700;font-size:clamp(4.5rem,20vw,7.5rem);line-height:1;color:var(--run);text-align:center;font-variant-numeric:tabular-nums}
+.luc-bar{height:10px;border-radius:999px;background:var(--floor);overflow:hidden}
+.luc-bar i{display:block;height:100%;background:var(--run);width:0}
+.flash{animation:fl .25s ease-out}
+@keyframes fl{from{background:var(--run-soft)}to{background:var(--surface)}}
+.ll-bareme{display:grid;grid-template-columns:repeat(auto-fit,minmax(86px,1fr));gap:6px}
+.ll-bareme div{border:1px solid var(--line);border-radius:8px;padding:8px;text-align:center;background:var(--surface)}
+.ll-bareme b{display:block;font-family:var(--display);font-size:1.35rem;font-variant-numeric:tabular-nums}
+.ll-bareme span{font-size:.8rem;color:var(--muted)}
+.ll-bareme .lim{border-color:var(--warn);background:var(--warn-soft)}
+.ll-bareme .tgt{border-color:var(--run);background:var(--run-soft)}
+
+/* ateliers */
+.jump{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.jump a{flex:0 0 auto;font-family:var(--display);font-weight:600;text-decoration:none;color:var(--ink);border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:5px 10px}
+.stations{display:flex;flex-direction:column;gap:12px}
+.st{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px;scroll-margin-top:12px}
+.st-top{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px 10px}
+.n{font-family:var(--display);font-weight:700;font-size:1.8rem;color:var(--mat);min-width:1.4ch;font-variant-numeric:tabular-nums}
+.st.off .n{color:var(--muted)}
+.pill{font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;border-radius:999px;padding:2px 9px;background:var(--mat-soft);color:var(--mat);white-space:nowrap}
+.st.off .pill{background:var(--floor);color:var(--muted)}
+.pen{margin-left:auto;font-size:.82rem;font-weight:600;border-radius:999px;padding:3px 10px;background:var(--warn-soft);color:var(--warn);white-space:nowrap}
+.st-a{display:grid;grid-template-columns:250px minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:760px){.st-a{grid-template-columns:1fr}}
+.fig{margin:0;background:var(--floor);border-radius:8px;padding:6px}
+.fig svg{display:block;width:100%;height:auto;max-width:340px;margin:0 auto}
+.fig svg text{font-family:var(--display);font-size:13px}
+.fig .g{stroke:var(--muted);stroke-width:2}
+.fig .dim{stroke:var(--muted);stroke-width:1.2;fill:none}
+.fig .obj{fill:var(--mat)}
+.fig .soft{fill:var(--mat-soft);stroke:var(--mat);stroke-width:2}
+.fig .cn{fill:var(--cone)}
+.fig .bar{stroke:var(--ink);stroke-width:4;fill:none;stroke-linecap:round}
+.fig .leg{stroke:var(--ink);stroke-width:3;fill:none}
+.fig .ring{fill:none;stroke:var(--mat);stroke-width:2.5}
+.fig .fig-l{stroke:var(--ink);stroke-width:4;fill:none;stroke-linecap:round}
+.fig .fig-h{fill:var(--ink)}
+.fig .path{fill:none;stroke:var(--cone);stroke-width:1.6;stroke-dasharray:4 4}
+.fig .shade{fill:var(--mat-soft)}
+.fig .t{fill:var(--ink);font-weight:600}
+.fig .tm{fill:var(--muted)}
+.col{display:flex;flex-direction:column;gap:9px;min-width:0}
+.specs{display:flex;flex-wrap:wrap;gap:6px}
+.specs span{font-size:.85rem;font-variant-numeric:tabular-nums;background:var(--floor);border-radius:4px;padding:2px 8px}
+.quote{border-left:3px solid var(--mat-soft);padding-left:10px;font-size:.95rem}
+.check{font-size:.9rem;background:var(--ok-soft);border-radius:7px;padding:8px 10px}
+.check b{color:var(--ok)}
+.blk{border-radius:9px;padding:13px;display:flex;flex-direction:column;gap:7px}
+.blk p,.blk li{font-size:.95rem}
+.blk ul{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:3px}
+.blk.fp{background:var(--cone-soft)} .blk.fp h4{color:var(--cone)}
+.blk.club{background:var(--gym-soft)} .blk.club h4{color:var(--gym)}
+.vol{font-weight:600;font-variant-numeric:tabular-nums}
+.tip{font-size:.9rem;color:var(--muted);border-top:1px dashed var(--line);padding-top:9px}
+.tip b{color:var(--ink);font-weight:600}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.rule{background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:12px 14px;font-size:.92rem}
+.rule b{display:block;font-family:var(--display);font-size:1.12rem;font-weight:600;margin-bottom:2px}
+.plan{background:var(--floor);border:1px solid var(--line);border-radius:10px;overflow-x:auto}
+.plan svg{display:block;min-width:700px;width:100%;height:auto}
+.plan text{font-family:var(--display)}
+.bareme{display:grid;grid-template-columns:repeat(auto-fit,minmax(86px,1fr));gap:6px}
+.bar-cell{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px;text-align:center}
+.bar-cell b{display:block;font-family:var(--display);font-size:1.35rem;font-variant-numeric:tabular-nums}
+.bar-cell span{font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.bar-cell.target{border-color:var(--cone);background:var(--cone-soft)}
+.bar-cell.limit{border-color:var(--warn);background:var(--warn-soft)}
+.mat-tbl{min-width:640px}
+.mat-tbl tr.got td{color:var(--muted)}
+.mat-tbl tr.got td:nth-child(n+3){text-decoration:line-through}
+
+/* progrès */
+.chart-wrap{position:relative}
+.chart-wrap svg{display:block;width:100%;height:auto}
+.chart-wrap text{font-family:var(--body);font-size:12px;fill:var(--muted)}
+.tt{position:absolute;pointer-events:none;background:var(--ink);color:var(--ground);font-size:.84rem;border-radius:6px;padding:6px 10px;white-space:nowrap;transform:translate(-50%,calc(-100% - 12px));z-index:2}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.kpi{border:1px solid var(--line);border-radius:9px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.kpi span{font-size:.74rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.kpi b{font-family:var(--display);font-size:1.7rem;font-variant-numeric:tabular-nums}
+.kpi small{font-size:.84rem;color:var(--muted)}
+.mes-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.mes{border:1px solid var(--line);border-radius:9px;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.mes b{font-family:var(--display);font-size:1.8rem;font-variant-numeric:tabular-nums}
+.mes svg{display:block;width:100%;height:40px}
+.mes-row{display:flex;justify-content:space-between;gap:8px;font-size:.88rem;align-items:center}
+.strip{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.sc{flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-start;gap:0;min-width:84px;padding:7px 10px;border:1px solid var(--line);background:var(--surface);border-radius:9px;font-family:var(--body);font-size:.8rem;font-weight:500;letter-spacing:0;text-align:left}
+.sc b{font-family:var(--display);font-size:1.1rem;line-height:1}
+.sc span{font-weight:600}
+.sc small{color:var(--muted);font-variant-numeric:tabular-nums}
+.sc em{font-style:normal;color:var(--warn);font-weight:600}
+.sc.done{background:var(--floor)}
+.sc.current{border-color:var(--cone);background:var(--cone-soft);box-shadow:0 0 0 2px var(--cone) inset}
+.sc.sel{border-color:var(--mat);box-shadow:0 0 0 2px var(--mat) inset}
+.cur{display:flex;flex-direction:column;gap:8px;border:1px solid var(--line);border-radius:10px;padding:12px}
+.cur-in{display:grid;grid-template-columns:200px minmax(0,1fr);gap:14px;align-items:start}
+@media (max-width:560px){.cur-in{grid-template-columns:1fr}.cur-in .fig svg{max-width:260px}}
+.phases{display:flex;flex-direction:column;gap:8px}
+.ph{border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:4px;background:var(--surface)}
+.ph.now{border-color:var(--cone);box-shadow:0 0 0 2px var(--cone) inset}
+.ph.past{opacity:.6}
+.ph .dates{font-size:.85rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.ph p{font-size:.93rem}
+.here{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#fff;background:var(--cone);border-radius:999px;padding:1px 8px}
+.gloss{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:8px 16px}
+.gloss div{font-size:.93rem}
+.gloss b{font-weight:600}
+footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padding-top:14px;margin-top:10px;display:flex;flex-direction:column;gap:6px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- =================== ACCUEIL =================== -->
+<section class="view" id="v-accueil" data-view="accueil">
+  <div class="hero">
+    <div class="eyebrow">Concours gardien de la paix · épreuves physiques · femmes</div>
+    <h1>Parcours d'habileté motrice</h1>
+    <div class="count" id="countdown"></div>
+  </div>
+  <p class="sync" id="sync" hidden></p>
+  <div class="panel" id="install" hidden style="border-top:4px solid var(--mat)">
+    <h3>Installer l'appli sur ton téléphone</h3>
+    <p class="note" id="install-txt"></p>
+    <div class="row"><button type="button" class="btn small" id="install-go" hidden>Installer</button><button type="button" class="ghost small" id="install-no">Plus tard</button></div>
+  </div>
+
+  <div class="grid2">
+    <div class="score phm" id="score-phm"></div>
+    <div class="score luc" id="score-luc"></div>
+  </div>
+  <p class="note" id="score-avg" hidden></p>
+  <p class="note">Ta note de sport est la moyenne de ces deux notes, coefficient 8 dans le concours. Sous 7/20 à l'une des deux, c'est éliminatoire. Les notes sont calculées à partir de ton dernier essai, avec le bonus d'âge réglé plus bas.</p>
+
+  <div class="quick">
+    <button type="button" data-goto="parcours"><b>Chrono parcours</b><span>Sac, 10 ateliers, pénalités</span></button>
+    <button type="button" data-goto="ateliers" data-mode="fp"><b>Plan réel et reconstitution</b><span>Le parcours officiel et sa copie à Fitness Park</span></button>
+    <button type="button" data-goto="luc"><b>Luc Léger</b><span>Bips de la navette 20 m</span></button>
+    <button type="button" data-goto="ateliers"><b>Ateliers</b><span>Concours, Fitness Park, club</span></button>
+    <button type="button" data-goto="progres"><b>Progrès</b><span>Courbes et historique</span></button>
+  </div>
+
+  <div class="panel">
+    <div class="row between"><h2>Séance du jour</h2><span class="note" id="today-date"></span></div>
+    <div class="seg" id="seance-seg" role="group" aria-label="Lieu de la séance">
+      <button type="button" data-s="fp">Fitness Park</button>
+      <button type="button" data-s="club">Club de gym</button>
+      <button type="button" data-s="run">Course</button>
+    </div>
+    <ul class="steps" id="seance-steps"></ul>
+  </div>
+
+  <div class="panel">
+    <h2>Le plan jusqu'au concours</h2>
+    <p class="note">Les épreuves sportives sont prévues fin mars – début avril 2027. Le plan est découpé en étapes ; celle où tu es est entourée en orange. Les dates s'ajustent toutes seules quand la date exacte est saisie dans Réglages.</p>
+    <div class="phases" id="phases"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Semaine type</h2>
+    <p class="note">Quatre séances à placer autour de ton krav maga, de ton jujitsu et de ton renforcement, plus 10 minutes chaque jour. À adapter à ton emploi du temps.</p>
+    <div class="week">
+      <div class="wk fp"><b>Parcours complet</b><p>Fitness Park · 75 min · 3 parcours chronométrés</p></div>
+      <div class="wk club"><b>Agrès</b><p>Club de gym · 60 min · poutre, caisson, barre</p></div>
+      <div class="wk run"><b>Fractionné</b><p>Course · 45 min · alterner vite et lent, prépare le Luc Léger</p></div>
+      <div class="wk run"><b>Footing</b><p>Course lente · 40 min · tu dois pouvoir parler en courant</p></div>
+      <div class="wk daily"><b>Chaque jour, 10 min</b><p>Suspension à la barre, 3 × 5 pompes, mobilité des poignets</p></div>
+    </div>
+  </div>
+
+  <details class="more">
+    <summary>Mode d'emploi de l'outil</summary>
+    <div class="in">
+      <p>L'appli sert à toi et à la personne qui te chronomètre. Tout ce qui est enregistré (temps, tests) reste sur le téléphone. Si le partage est activé (dans Réglages, en bas de l'accueil), c'est visible sur vos deux téléphones. Elle marche aussi sans réseau.</p>
+      <p><b>Accueil</b> : où tu en es, tes notes estimées, la séance à faire aujourd'hui et le plan jusqu'au concours.</p>
+      <p><b>Parcours</b> : le chronomètre du parcours. Il montre l'atelier en cours, ce qui le rend réussi et les pénalités possibles.</p>
+      <p><b>Luc Léger</b> : le téléphone fait les bips de la course navette. Un bouton « Arrêt » donne ton palier et ta note.</p>
+      <p><b>Ateliers</b> : les 10 ateliers expliqués, avec trois vues : comme au concours, comment les recréer à Fitness Park, et quoi travailler au club de gym.</p>
+      <p><b>Progrès</b> : tes courbes, atelier par atelier, et tout l'historique.</p>
+    </div>
+  </details>
+
+  <details class="more">
+    <summary>Les mots utilisés</summary>
+    <div class="in gloss">
+      <div><b>Atelier</b> : une des 10 étapes du parcours (pompes, haies, poutre…).</div>
+      <div><b>Pénalité</b> : des secondes ajoutées à ton temps quand un atelier est raté.</div>
+      <div><b>Note éliminatoire</b> : sous 7/20 à une des deux épreuves, le concours s'arrête.</div>
+      <div><b>Bonus d'âge</b> : +1 point sur chaque note si tu as entre 30 et 40 ans au 1er janvier.</div>
+      <div><b>Luc Léger</b> : course aller-retour entre deux lignes à 20 m, de plus en plus vite, au rythme de bips.</div>
+      <div><b>Navette</b> : un trajet de 20 m d'une ligne à l'autre.</div>
+      <div><b>Palier</b> : une minute de course à la même vitesse. À chaque palier, la vitesse augmente de 0,5 km/h.</div>
+      <div><b>Fractionné</b> : alterner des moments rapides et des moments lents, par exemple 30 s vite puis 30 s en trottinant.</div>
+      <div><b>Footing</b> : course lente, à une allure où tu peux parler.</div>
+      <div><b>Gainage / planche</b> : tenir le corps droit, en appui sur les avant-bras et les pointes de pieds.</div>
+      <div><b>Caisson</b> : le gros bloc de gym en mousse ou en bois, réglable en hauteur.</div>
+      <div><b>Caisse de saut</b> : à Fitness Park, la caisse en mousse ou en bois sur laquelle on saute (« plyo box »).</div>
+      <div><b>Zone fonctionnelle</b> : à Fitness Park, l'espace avec tapis, caisses et barres, sans machines.</div>
+      <div><b>Parade</b> : le coach marche à côté de toi, prêt à te tenir si tu perds l'équilibre.</div>
+    </div>
+  </details>
+
+  <div class="panel">
+    <h2>Réglages</h2>
+    <div class="row">
+      <label for="exam-date" class="note" style="color:var(--ink)">Date des épreuves sportives</label>
+      <input type="date" id="exam-date">
+    </div>
+    <label class="row note" for="opt-age" style="color:var(--ink)"><input type="checkbox" id="opt-age" checked> 30 à 40 ans au 1er janvier de l'année de l'épreuve (+1 point à chaque épreuve)</label>
+    <h3>Partage entre téléphones</h3>
+    <div id="share" class="col"></div>
+    <h3>Sauvegarde</h3>
+    <p class="note">Crée un fichier avec tous les résultats, à garder ou à envoyer. « Restaurer » ajoute les résultats d'un fichier de sauvegarde à ceux déjà dans l'appli.</p>
+    <div class="row"><button type="button" class="ghost small" id="backup-save">Télécharger une sauvegarde</button><button type="button" class="ghost small" id="backup-load">Restaurer une sauvegarde</button><input type="file" id="backup-file" accept="application/json,.json" hidden></div>
+  </div>
+</section>
+
+<!-- =================== PARCOURS =================== -->
+<section class="view" id="v-parcours" data-view="parcours" hidden>
+  <div class="row between">
+    <h2>Chrono parcours</h2>
+    <select id="lieu" aria-label="Lieu de l'essai">
+      <option>Fitness Park Lille</option>
+      <option>Lycée Saint-Quentin (vrai parcours)</option>
+      <option>Club de gym</option>
+      <option>Autre</option>
+    </select>
+  </div>
+  <p class="note">Pour chronométrer un parcours complet. Choisis d'abord le lieu juste au-dessus. La barre ci-dessous montre les 10 ateliers : celui en cours est en orange.</p>
+  <div class="strip" id="strip" aria-label="Avancement du parcours"></div>
+  <div class="panel">
+    <div class="time" id="time" aria-live="off">0:00.0</div>
+    <div class="status" id="status"></div>
+    <div id="cur"></div>
+    <button class="go" id="go" type="button">Sac posé</button>
+    <div class="penrow">
+      <span class="lab">Pénalités</span><span class="val" id="penval">+0 s</span>
+      <button class="ghost small" type="button" id="undo">Annuler la dernière</button>
+      <button class="ghost small" id="reset" type="button">Remettre à zéro</button>
+    </div>
+    <div class="result" id="result" hidden>
+      <div><span>Temps</span><b id="r-time">—</b></div>
+      <div><span>Avec pénalités</span><b id="r-total">—</b></div>
+      <div><span>Note</span><b id="r-note">—</b></div>
+    </div>
+  </div>
+  <div class="panel">
+    <h3>Temps par atelier</h3>
+    <div class="tbl"><table>
+      <thead><tr><th>Atelier</th><th class="num">Temps</th><th class="num">Pénalités</th><th class="num">Total</th><th class="num">Meilleur</th></tr></thead>
+      <tbody id="splits"></tbody>
+    </table></div>
+  </div>
+  <details class="more">
+    <summary>Comment s'en servir</summary>
+    <div class="in">
+      <p>1. La personne qui tient le téléphone appuie sur « Sac posé » quand tu poses le sac : le chrono part tout seul 15 s plus tard, comme au concours, ou tout de suite si elle appuie de nouveau.</p>
+      <p>2. L'écran montre l'atelier en cours, ce qui le valide et ses pénalités. Un appui sur le bouton orange à la fin de chacun de tes ateliers.</p>
+      <p>3. Une pénalité oubliée ? À l'arrivée, touche l'atelier dans la barre du haut pour l'ajouter ; l'essai enregistré se met à jour.</p>
+      <p>Barre d'espace = bouton orange sur ordinateur.</p>
+    </div>
+  </details>
+</section>
+
+<!-- =================== LUC LÉGER =================== -->
+<section class="view" id="v-luc" data-view="luc" hidden>
+  <h2>Luc Léger</h2>
+  <p class="note">Le téléphone fait les bips à ta place. À chaque bip, tu dois être sur la ligne d'en face (20 m). Quand tu n'arrives plus à suivre, on appuie sur « Arrêt » : ton palier et ta note s'affichent.</p>
+  <div class="panel">
+    <div class="luc-pal" id="ll-pal">1</div>
+    <div class="luc-bar" aria-hidden="true"><i id="ll-bar"></i></div>
+    <div class="luc-top">
+      <div><span>Vitesse</span><b id="ll-speed">8</b><span>km/h</span></div>
+      <div><span>Temps</span><b id="ll-time">0:00</b><span>total</span></div>
+      <div><span>Navettes</span><b id="ll-nav">0</b><span>de 20 m</span></div>
+    </div>
+    <div class="status" id="ll-status">Prête ? Le premier bip lance ta course à 8 km/h.</div>
+    <button class="go run" id="ll-go" type="button">Lancer le test</button>
+    <div class="row">
+      <label for="ll-start" class="note" style="color:var(--ink)">Départ</label>
+      <select id="ll-start"></select>
+      <label class="row note" for="ll-voice" style="color:var(--ink)"><input type="checkbox" id="ll-voice" checked> Annoncer les paliers à voix haute</label>
+    </div>
+    <div class="result" id="ll-result" hidden>
+      <div><span>Arrêt</span><b id="ll-r-pal">—</b></div>
+      <div><span>Vitesse</span><b id="ll-r-v">—</b></div>
+      <div><span>Note</span><b id="ll-r-note">—</b></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>Barème femmes</h3>
+    <div class="ll-bareme" id="ll-bareme"></div>
+    <p class="note">Ta note dépend du palier où tu t'arrêtes et des secondes courues dans ce palier (par exemple « palier 4 + 15 s » = 15 secondes courues dans le palier 4). Notes sans le bonus d'âge : ajoute 1 point si tu as entre 30 et 40 ans. Orange : le minimum (7/20). Bleu : l'objectif proposé, palier 8.</p>
+  </div>
+
+  <details class="more">
+    <summary>Les règles du test</summary>
+    <div class="in">
+      <p>Tu fais des allers-retours entre deux lignes à <b>20 m</b>, au rythme des bips. Départ à <b>8 km/h</b>, puis la vitesse augmente chaque minute (un palier = 1 minute). Le texte officiel ne donne pas la hausse exacte ; l'outil utilise +0,5 km/h par palier, la valeur habituelle de ce test.</p>
+      <p>Après l'annonce « début du test », tu as 2 minutes pour caler ta vitesse sur les bips. À chaque bout, <b>bloque un pied juste derrière la ligne</b> pour repartir : les virages en arrondi ne sont pas acceptés. Si tu glisses ou tombes, tu peux continuer, mais les bips ne s'arrêtent pas.</p>
+      <p>Tu dois atteindre la ligne à chaque bip. <b>2 m de retard maximum</b> sont admis, à condition de le maintenir ou de le combler. Si ton retard atteint 2 m et que tu ne peux plus le rattraper, l'épreuve s'arrête : c'est à ce moment-là qu'on appuie sur « Arrêt ».</p>
+      <p>Pour t'entraîner, mesure 20 m au sol (Fitness Park, gymnase, parc) et pose un plot à chaque ligne. Monte le son du téléphone.</p>
+    </div>
+  </details>
+  <details class="more">
+    <summary>Séance d'entraînement pour le Luc Léger (45 min)</summary>
+    <div class="in">
+      <p><b>Échauffement</b> · 15 min de course lente, talons-fesses, montées de genoux, 3 accélérations.</p>
+      <p><b>Fractionné</b> · 30 s vite puis 30 s en trottinant, 8 fois de suite ; 3 min de pause ; encore 8 fois. « Vite », c'est la vitesse de ton palier visé ou un peu plus.</p>
+      <p><b>Navettes au palier</b> · Lance le test avec « Départ » au palier 6 ou 7 et tiens le plus longtemps possible (non enregistré).</p>
+      <p><b>Pour finir</b> · 10 min de course très lente, puis étirements.</p>
+      <p class="note">Un vrai test complet (départ palier 1) toutes les 2 à 3 semaines suffit pour suivre ta progression.</p>
+    </div>
+  </details>
+  <details class="more">
+    <summary>Ajouter un résultat fait ailleurs</summary>
+    <div class="in">
+      <form class="row" id="ll-form">
+        <select id="ll-f-pal" aria-label="Palier"></select>
+        <select id="ll-f-sec" aria-label="Secondes dans le palier"><option value="0">+0 s</option><option value="15">+15 s</option><option value="30">+30 s</option><option value="45">+45 s</option></select>
+        <input type="date" id="ll-f-date" aria-label="Date">
+        <button class="ghost small" type="submit">Ajouter</button>
+      </form>
+    </div>
+  </details>
+</section>
+
+<!-- =================== ATELIERS =================== -->
+<section class="view" id="v-ateliers" data-view="ateliers" hidden>
+  <h2>Les 10 ateliers</h2>
+  <p class="note">Choisis la vue : comment est l'atelier au concours, comment le recréer à Fitness Park, ou quoi travailler seule au club de gym. Les numéros juste en dessous permettent d'aller directement à un atelier.</p>
+  <div class="seg" id="mode-seg" role="group" aria-label="Affichage">
+    <button type="button" data-m="concours">Au concours</button>
+    <button type="button" data-m="fp">À Fitness Park</button>
+    <button type="button" data-m="club">Au club de gym</button>
+  </div>
+  <div id="mode-intro"></div>
+  <nav class="jump" id="jump" aria-label="Aller à l'atelier"></nav>
+  <div class="stations" id="stations"></div>
+</section>
+
+<!-- =================== PROGRÈS =================== -->
+<section class="view" id="v-progres" data-view="progres" hidden>
+  <h2>Progrès</h2>
+  <p class="note">Tout ce qui a été enregistré : tes temps de parcours, tes paliers au Luc Léger, tes tests, et l'historique complet.</p>
+  <div class="panel">
+    <div class="row between"><h3>Parcours : temps total</h3><div class="chips" id="chips" role="group" aria-label="Filtrer par lieu"></div></div>
+    <div class="kpis" id="kpis"></div>
+    <div class="chart-wrap" id="chart-phm"></div>
+    <p class="note">Chaque point est un parcours, pénalités comprises. Plus haut = plus rapide. Bande orange : l'objectif, entre 1 min et 1 min 10. Pointillés : 1 min 49, le temps le plus lent qui donne encore 7/20 (sans le bonus d'âge).</p>
+  </div>
+  <div class="panel">
+    <h3>Luc Léger : palier atteint</h3>
+    <div class="kpis" id="kpis-luc"></div>
+    <div class="chart-wrap" id="chart-luc"></div>
+    <p class="note">Seulement les tests complets (départ au palier 1). Plus haut = mieux. Pointillés : palier 4 et 15 s, le minimum (7/20). Bande bleue : l'objectif, palier 8.</p>
+  </div>
+  <div class="panel">
+    <h3>Atelier par atelier</h3>
+    <div class="tbl"><table style="min-width:500px">
+      <thead><tr><th>Atelier</th><th class="num">Premier</th><th class="num">Dernier</th><th class="num">Meilleur</th><th class="num">Évolution</th></tr></thead>
+      <tbody id="prog-ateliers"></tbody>
+    </table></div>
+    <p class="note">« Évolution » compare ton dernier parcours au premier : en vert, tu vas plus vite sur cet atelier.</p>
+  </div>
+  <div class="panel">
+    <h3>Tests à côté</h3>
+    <p class="note">Note ici tes tests faits en dehors du parcours : combien de temps tu tiens suspendue, combien de pompes tu fais d'affilée, et à quelle hauteur tu traverses la poutre sans les mains.</p>
+    <form class="row" id="mes-form">
+      <select id="mes-type" aria-label="Test">
+        <option value="suspension">Suspension à la barre (s)</option>
+        <option value="pompes">Pompes réglementaires d'affilée</option>
+        <option value="poutre">Poutre : hauteur maîtrisée (cm)</option>
+      </select>
+      <input type="number" id="mes-val" min="0" step="0.5" required aria-label="Valeur" style="width:90px">
+      <input type="date" id="mes-date" aria-label="Date">
+      <button class="ghost small" type="submit">Ajouter</button>
+    </form>
+    <div class="mes-grid" id="mes-grid"></div>
+  </div>
+  <div class="panel">
+    <h3>Historique</h3>
+    <div class="seg" id="hist-seg" role="group" aria-label="Historique">
+      <button type="button" data-h="essais" aria-pressed="true">Parcours</button>
+      <button type="button" data-h="luc" aria-pressed="false">Luc Léger</button>
+    </div>
+    <div class="tbl"><table style="min-width:560px"><thead id="hist-head"></thead><tbody id="hist"></tbody></table></div>
+  </div>
+  <footer>
+    <p>Sources : <a href="https://www.police-nationale.interieur.gouv.fr/sites/policenationale/files/medias/documents/2025-06/descriptif_des_epreuves_sportives_gpx_off_cre.pdf" target="_blank" rel="noopener">descriptif officiel des épreuves sportives (police nationale, 2025)</a>, barèmes compris ; arrêté du 5 mars 2025 modifiant l'arrêté du 18 octobre 2012 relatif aux épreuves d'exercices physiques des concours de la police nationale (<a href="https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000051312508" target="_blank" rel="noopener">Légifrance</a>). Barèmes femmes vérifiés sur le descriptif officiel.</p>
+    <p>Les textes officiels ne précisent ni le nombre de cerceaux, ni l'écart entre les cônes du slalom, ni les distances entre ateliers, ni la hausse de vitesse exacte au Luc Léger : pour ces points, l'outil utilise des valeurs d'entraînement habituelles.</p>
+  </footer>
+</section>
+</div>
+
+<nav class="tabs" aria-label="Navigation">
+  <div class="in">
+    <button type="button" data-tab="accueil"><svg viewBox="0 0 24 24"><path d="M3 11 12 4l9 7v9H3z"/><path d="M9 20v-6h6v6"/></svg>Accueil</button>
+    <button type="button" data-tab="parcours"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M10 2h4"/></svg>Parcours</button>
+    <button type="button" data-tab="luc"><svg viewBox="0 0 24 24"><path d="M4 18h16M6 18V8M18 18V8M6 8l6 5 6-5"/></svg>Luc Léger</button>
+    <button type="button" data-tab="ateliers"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="7" height="7" rx="1.5"/><rect x="14" y="4" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Ateliers</button>
+    <button type="button" data-tab="progres"><svg viewBox="0 0 24 24"><path d="M4 19h16"/><path d="M5 15l4-5 4 3 6-7"/></svg>Progrès</button>
+  </div>
+</nav>
+
+<template id="tpl-plan-officiel">
+  <div class="plan">
+    <svg viewBox="0 0 760 330" role="img" aria-label="Plan schématique du parcours officiel">
+      <rect x="10" y="10" width="740" height="310" rx="6" fill="none" stroke="var(--line)" stroke-width="2"/>
+      <path d="M60 125 H690 Q730 125 730 165 V205 Q730 245 690 245 H70" fill="none" stroke="var(--cone)" stroke-width="2.5" stroke-dasharray="7 7" opacity=".85"/>
+      <polygon points="70,239 58,245 70,251" fill="var(--cone)"/>
+      <rect x="24" y="22" width="170" height="54" rx="6" fill="var(--surface)" stroke="var(--line)" stroke-dasharray="4 4"/>
+      <rect x="38" y="36" width="22" height="26" rx="5" fill="var(--muted)"/>
+      <text x="70" y="44" font-size="13" fill="var(--ink)" font-weight="600">1 · Sac 25 kg sur 20 m</text>
+      <text x="70" y="64" font-size="12" fill="var(--muted)">hors chrono · 15 s puis départ</text>
+      <line x1="40" y1="100" x2="40" y2="150" stroke="var(--ink)" stroke-width="3"/>
+      <text x="40" y="94" font-size="12" text-anchor="middle" fill="var(--ink)" font-weight="700">DÉPART</text>
+      <g transform="translate(110 125)"><rect x="-26" y="-12" width="52" height="24" rx="3" fill="var(--mat-soft)" stroke="var(--mat)"/><circle r="8" fill="var(--cone)"/><text y="44" font-size="14" text-anchor="middle" fill="var(--ink)" font-weight="600">2 · Pompes</text><text y="60" font-size="12" text-anchor="middle" fill="var(--muted)">×3, plot mousse</text></g>
+      <g transform="translate(225 125)"><g stroke="var(--ink)" stroke-width="3" fill="none"><path d="M-34 -14 V14"/><path d="M0 -14 V14"/><path d="M34 -14 V14"/></g><text y="-20" font-size="10" text-anchor="middle" fill="var(--muted)">4 m · 4 m</text><text y="44" font-size="14" text-anchor="middle" fill="var(--ink)" font-weight="600">3 · Haies</text><text y="60" font-size="12" text-anchor="middle" fill="var(--muted)">3 × 60 cm</text></g>
+      <g transform="translate(355 125)"><rect x="-52" y="-5" width="104" height="10" rx="2" fill="var(--mat)"/><rect x="-66" y="-9" width="12" height="18" rx="2" fill="var(--muted)"/><text y="-16" font-size="10" text-anchor="middle" fill="var(--muted)">5 m · h 1 m</text><text y="44" font-size="14" text-anchor="middle" fill="var(--ink)" font-weight="600">4 · Poutre</text><text y="60" font-size="12" text-anchor="middle" fill="var(--muted)">sans les mains</text></g>
+      <g transform="translate(490 125)"><g fill="none" stroke="var(--mat)" stroke-width="2.5"><circle cx="-36" r="11"/><circle cx="-12" r="11"/><circle cx="12" r="11"/><circle cx="36" r="11"/></g><text y="44" font-size="14" text-anchor="middle" fill="var(--ink)" font-weight="600">5 · Multibonds</text><text y="60" font-size="12" text-anchor="middle" fill="var(--muted)">cerceaux Ø 70 cm</text></g>
+      <g transform="translate(630 125)"><rect x="-32" y="-9" width="64" height="18" rx="3" fill="var(--muted)" opacity=".55"/><text y="44" font-size="14" text-anchor="middle" fill="var(--ink)" font-weight="600">6 · Appuis</text><text y="60" font-size="12" text-anchor="middle" fill="var(--muted)">banc 50 cm · 10</text></g>
+      <g transform="translate(630 245)"><rect x="-40" y="-14" width="24" height="28" rx="3" fill="var(--mat-soft)" stroke="var(--mat)" stroke-width="2"/><rect x="16" y="-14" width="24" height="28" rx="3" fill="var(--mat-soft)" stroke="var(--mat)" stroke-width="2"/><text y="-22" font-size="10" text-anchor="middle" fill="var(--muted)">2,20 m</text><text y="40" font-size="14" text-anchor="middle" fill="var(--ink)" font-weight="600">7 · Barrières</text><text y="56" font-size="12" text-anchor="middle" fill="var(--muted)">2 × 1,20 m</text></g>
+      <g transform="translate(500 245)"><rect x="-46" y="-12" width="92" height="24" fill="none" stroke="var(--ink)" stroke-width="2"/><g stroke="var(--ink)" stroke-width="2"><path d="M-27 -12 V12"/><path d="M-9 -12 V12"/><path d="M9 -12 V12"/><path d="M27 -12 V12"/></g><text y="-20" font-size="10" text-anchor="middle" fill="var(--muted)">h 2,30 m · 4 m</text><text y="40" font-size="14" text-anchor="middle" fill="var(--ink)" font-weight="600">8 · Échelle</text><text y="56" font-size="12" text-anchor="middle" fill="var(--muted)">2 m ou 15 s</text></g>
+      <g transform="translate(370 245)"><rect x="-44" y="-14" width="88" height="28" rx="4" fill="var(--floor)" stroke="var(--muted)" stroke-width="2" stroke-dasharray="5 4"/><text y="4" font-size="10" text-anchor="middle" fill="var(--muted)">h 50 cm</text><text y="40" font-size="14" text-anchor="middle" fill="var(--ink)" font-weight="600">9 · Ramper</text><text y="56" font-size="12" text-anchor="middle" fill="var(--muted)">3 m sans toucher</text></g>
+      <g transform="translate(200 245)"><path d="M80 0 C68 -18 56 -18 48 0 S28 18 16 0 S-4 -18 -16 0 S-36 18 -48 0 S-68 -18 -80 0" fill="none" stroke="var(--cone)" stroke-width="1.5" opacity=".6"/><g fill="var(--cone)"><circle cx="64" r="5"/><circle cx="32" r="5"/><circle r="5"/><circle cx="-32" r="5"/><circle cx="-64" r="5"/></g><text y="40" font-size="14" text-anchor="middle" fill="var(--ink)" font-weight="600">10 · Slalom</text><text y="56" font-size="12" text-anchor="middle" fill="var(--muted)">45 m entre cônes</text></g>
+      <line x1="44" y1="220" x2="44" y2="270" stroke="var(--ink)" stroke-width="3"/>
+      <text x="44" y="290" font-size="12" text-anchor="middle" fill="var(--ink)" font-weight="700">ARRIVÉE</text>
+    </svg>
+  </div>
+</template>
+
+<template id="tpl-plan-fp">
+  <div class="plan">
+    <svg viewBox="0 0 800 340" role="img" aria-label="Implantation proposée à Fitness Park : trois lignes en serpentin puis le slalom en aller-retour sur le côté">
+      <rect x="10" y="10" width="780" height="320" rx="6" fill="none" stroke="var(--line)" stroke-width="2"/>
+      <text x="24" y="32" font-size="13" fill="var(--muted)" font-weight="600">ZONE FONCTIONNELLE · environ 15 × 8 m, à adapter</text>
+      <path d="M60 272 H560 Q600 272 600 227 Q600 182 560 182 H80 Q40 182 40 137 Q40 92 80 92 H640 Q690 92 690 132 V300" fill="none" stroke="var(--cone)" stroke-width="2.5" stroke-dasharray="7 7" opacity=".85"/>
+      <polygon points="684,296 690,308 696,296" fill="var(--cone)"/>
+      <g font-size="13" text-anchor="middle">
+        <g transform="translate(130 272)"><rect x="-68" y="-15" width="136" height="30" rx="6" fill="var(--surface)" stroke="var(--muted)" stroke-dasharray="4 3"/><text y="5" fill="var(--ink)" font-weight="600">1 · Sac de sable 25 kg</text><text y="32" font-size="11" fill="var(--muted)">10 m aller-retour</text></g>
+        <g transform="translate(320 272)"><rect x="-68" y="-15" width="136" height="30" rx="6" fill="var(--surface)" stroke="var(--cone)"/><text y="5" fill="var(--ink)" font-weight="600">2 · Tapis + rouleau</text><text y="32" font-size="11" fill="var(--muted)">3 pompes</text></g>
+        <g transform="translate(500 272)"><rect x="-68" y="-15" width="136" height="30" rx="6" fill="var(--surface)" stroke="var(--cone)"/><text y="5" fill="var(--ink)" font-weight="600">3 · 3 haies 60 cm</text><text y="32" font-size="11" fill="var(--muted)">4 m d'écart</text></g>
+        <g transform="translate(500 182)"><rect x="-68" y="-15" width="136" height="30" rx="6" fill="var(--surface)" stroke="var(--cone)"/><text y="5" fill="var(--ink)" font-weight="600">4 · Ligne / banc</text><text y="32" font-size="11" fill="var(--muted)">5 m, sans les mains</text></g>
+        <g transform="translate(320 182)"><rect x="-68" y="-15" width="136" height="30" rx="6" fill="var(--surface)" stroke="var(--cone)"/><text y="5" fill="var(--ink)" font-weight="600">5 · Cerceaux 70 cm</text><text y="32" font-size="11" fill="var(--muted)">6 à 8, bord à bord</text></g>
+        <g transform="translate(130 182)"><rect x="-68" y="-15" width="136" height="30" rx="6" fill="var(--surface)" stroke="var(--cone)"/><text y="5" fill="var(--ink)" font-weight="600">6 · Caisse 50 cm</text><text y="32" font-size="11" fill="var(--muted)">10 appuis</text></g>
+        <g transform="translate(130 92)"><rect x="-68" y="-15" width="136" height="30" rx="6" fill="var(--surface)" stroke="var(--cone)"/><text y="5" fill="var(--ink)" font-weight="600">7 · 2 piles de caisses</text><text y="32" font-size="11" fill="var(--muted)">2,20 m d'écart</text></g>
+        <g transform="translate(320 92)"><rect x="-68" y="-15" width="136" height="30" rx="6" fill="var(--surface)" stroke="var(--cone)"/><text y="5" fill="var(--ink)" font-weight="600">8 · Barres / échelle</text><text y="32" font-size="11" fill="var(--muted)">2 m ou 15 s</text></g>
+        <g transform="translate(500 92)"><rect x="-68" y="-15" width="136" height="30" rx="6" fill="var(--surface)" stroke="var(--cone)"/><text y="5" fill="var(--ink)" font-weight="600">9 · Élastique 50 cm</text><text y="32" font-size="11" fill="var(--muted)">ramper 3 m</text></g>
+      </g>
+      <g fill="var(--cone)"><circle cx="682" cy="140" r="6"/><circle cx="698" cy="170" r="6"/><circle cx="682" cy="200" r="6"/><circle cx="698" cy="230" r="6"/><circle cx="682" cy="260" r="6"/></g>
+      <text x="716" y="190" font-size="14" fill="var(--ink)" font-weight="600">10 · Slalom</text>
+      <text x="716" y="207" font-size="11" fill="var(--muted)">3 × 15 m</text>
+      <line x1="40" y1="250" x2="40" y2="294" stroke="var(--ink)" stroke-width="3"/>
+      <text x="40" y="316" font-size="12" text-anchor="middle" fill="var(--ink)" font-weight="700">DÉPART</text>
+      <text x="740" y="322" font-size="12" text-anchor="middle" fill="var(--ink)" font-weight="700">ARRIVÉE</text>
+    </svg>
+  </div>
+</template>
+
+<template id="tpl-vertige">
+  <div class="panel" id="vertige" style="border-top:4px solid var(--gym)">
+    <h3>Poutre : apprivoiser la hauteur</h3>
+    <p class="note">Si tu as le vertige sur la poutre, monte par paliers, et ne passe au suivant que quand le palier est facile : 10 traversées d'affilée sans les mains et sans t'arrêter, avec une appréhension de 3 sur 10 ou moins. Revenir un palier en arrière les jours difficiles, c'est normal. Les tapis épais de chaque côté réduisent la hauteur ressentie : tu les retires en dernier.</p>
+    <div class="tbl"><table style="min-width:580px">
+      <thead><tr><th>Palier</th><th>Hauteur</th><th>Installation</th><th>Pour passer au suivant</th></tr></thead>
+      <tbody>
+        <tr><td><b>1 · Au sol</b></td><td>0 cm</td><td>Ligne de 5 m, puis poutre posée au sol</td><td>10 traversées rapides sans regarder tes pieds</td></tr>
+        <tr><td><b>2 · Basse</b></td><td>30 à 50 cm</td><td>Poutre basse, tapis de chaque côté</td><td>10 traversées sans les mains, appréhension ≤ 3/10</td></tr>
+        <tr><td><b>3 · Moyenne avec aide</b></td><td>60 à 80 cm</td><td>Tapis épais ; main tenue, puis contact sur l'épaule, puis seule</td><td>10 traversées seule, sans arrêt</td></tr>
+        <tr><td><b>4 · 1 m avec tapis</b></td><td>100 cm</td><td>Gros tapis empilés des deux côtés, montée par la marche de 50 cm</td><td>10 traversées seule, appréhension ≤ 3/10</td></tr>
+        <tr><td><b>5 · 1 m comme au concours</b></td><td>100 cm</td><td>Retirer les tapis un par un : au concours, il n'y a pas de tapis à la sortie</td><td>10 traversées sans arrêt</td></tr>
+        <tr><td><b>6 · Dans le parcours</b></td><td>100 cm</td><td>Tu arrives essoufflée, juste après les haies</td><td>Sans chute dans 3 parcours de suite</td></tr>
+      </tbody>
+    </table></div>
+    <div class="grid2">
+      <div class="col"><span class="lab">Sur la poutre</span>
+        <p><b>Regarde</b> un point fixe au bout, à hauteur des yeux : regarder en bas déclenche le vertige.</p>
+        <p><b>Respire</b> : une longue expiration avant de monter, puis normalement.</p>
+        <p><b>Avance</b> à petits pas réguliers, sans t'arrêter, <b>bras</b> écartés, épaules basses.</p>
+      </div>
+      <div class="col"><span class="lab">Ne plus avoir peur de tomber</span>
+        <p>Dès le palier 2, entraîne-toi à <b>sauter volontairement</b> sur le côté, réception pieds joints sur le tapis, genoux fléchis. Savoir tomber enlève une bonne partie de la peur.</p>
+        <p>Demande au coach une <b>parade</b> pour tes premiers passages à 80 cm et à 1 m.</p>
+        <p>Note ta <b>hauteur maîtrisée</b> dans Progrès › Tests à côté.</p>
+      </div>
+    </div>
+    <p class="note">Si ce sont de vrais vertiges (tête qui tourne, déséquilibre même hors de la poutre), parles-en au médecin du sport.</p>
+  </div>
+</template>
+
+<script src="config.js"></script>
+<script>
+/* ======================= DONNÉES ======================= */
+const SVG = (inner) => `<svg viewBox="0 0 260 124" role="img" aria-hidden="true">${inner}</svg>`;
+const DIM = (x1, x2, y) => `<path class="dim" d="M${x1} ${y} H${x2} M${x1} ${y-5} V${y+5} M${x2} ${y-5} V${y+5}"/>`;
+const STATIONS = [
+  {n:1, name:"Port de sac lesté", short:"Sac", timed:false, pen:"Non conforme : −1 pt",
+   svg: SVG(`<line class="g" x1="10" y1="100" x2="250" y2="100"/><rect class="obj" x="22" y="72" width="30" height="28" rx="7"/><path class="leg" d="M30 72 q7 -9 14 0"/><text class="t" x="37" y="56" text-anchor="middle">25 kg</text>${DIM(62,234,86)}<text class="t" x="148" y="78" text-anchor="middle">20 m</text><line class="leg" x1="238" y1="64" x2="238" y2="100"/><text class="tm" x="130" y="118" text-anchor="middle">3 min max · 3 essais max</text>`),
+   specs:["25 kg","20 m","3 min max","3 essais max"],
+   exec:"En marchant sur 20 m : saisir le sac par les poignées et le porter devant soi en le maintenant contre l'abdomen. Si le sac est posé, il faut tout recommencer. 3 essais au plus, 3 minutes au plus. Hors chrono.",
+   rule:"15 s après avoir posé le sac, le chrono du parcours démarre, même si les pompes n'ont pas commencé.",
+   ok:"tu passes l'arrivée en marchant, sac devant toi contre le ventre, tenu par les poignées, sans l'avoir posé.",
+   fp:{have:["Sac de sable de 25 kg (« sandbag »)","Sinon : un poids à poignée (kettlebell) de 24 kg, tenu contre le ventre"], bring:["Mètre ruban"], setup:"20 m en ligne droite si la place le permet, sinon 10 m aller-retour. Deux plots pour le départ et l'arrivée, le tapis des pompes juste après."},
+   club:{ex:"Pas de sac au club : travaille le gainage, qui sert à tenir le sac contre le ventre.", vol:"3 fois 40 s de planche + 3 fois 30 s de planche sur le côté"},
+   tip:"Il fatigue les bras juste avant les pompes : enchaîner sac puis pompes en moins de 15 s."},
+  {n:2, name:"Pompes", short:"Pompes", timed:true, pen:"Non réalisé : +10 s",
+   svg: SVG(`<line class="g" x1="10" y1="100" x2="250" y2="100"/><rect class="shade" x="30" y="96" width="200" height="4"/><rect class="cn" x="114" y="86" width="30" height="10" rx="3"/><circle class="fig-h" cx="58" cy="74" r="7"/><path class="fig-l" d="M66 79 L206 96"/><path class="fig-l" d="M82 81 V96"/><text class="t" x="129" y="54" text-anchor="middle">3 pompes</text><text class="tm" x="129" y="118" text-anchor="middle">buste au plot · bras tendus, coudes verrouillés</text>`),
+   specs:["3 pompes","plot en mousse"],
+   exec:"Allongée, bras perpendiculaires au sol, corps bien aligné (tête, tronc, jambes), jambes tendues, pieds joints. Descendre en fléchissant les coudes jusqu'à ce que le buste touche le plot en mousse, puis tendre de nouveau complètement les bras, coudes verrouillés.",
+   rule:"Le moniteur compte à voix haute les pompes réussies. Porte un haut près du corps : il doit voir tes coudes et le contact avec le plot.", ok:"le buste touche la mousse à chaque descente et les bras sont complètement tendus en haut.",
+   fp:{have:["Tapis","Un rouleau de massage en mousse, posé sous la poitrine à la place du plot"], bring:[], setup:"Tapis juste après l'arrivée du sac, rouleau sous la poitrine."},
+   club:{ex:"Pompes les mains posées sur un caisson (c'est plus facile), puis au sol. Descends lentement, en 3 secondes.", vol:"4 séries de 5, jusqu'à 3 séries de 8 au sol"},
+   tip:"Corps gainé d'un bloc. Une pompe à moitié ne compte pas : mieux vaut 3 pompes complètes un peu plus lentes."},
+  {n:3, name:"Franchissement de haies", short:"Haies", timed:true, pen:"Non franchies : +10 s",
+   svg: SVG(`<line class="g" x1="10" y1="100" x2="250" y2="100"/><path class="leg" d="M42 100 V72 M58 100 V72"/><path class="bar" d="M40 72 H60"/><path class="leg" d="M122 100 V72 M138 100 V72"/><path class="bar" d="M120 72 H140"/><path class="leg" d="M202 100 V72 M218 100 V72"/><path class="bar" d="M200 72 H220"/>${DIM(50,130,50)}${DIM(130,210,50)}<text class="t" x="90" y="42" text-anchor="middle">4 m</text><text class="t" x="170" y="42" text-anchor="middle">4 m</text><text class="tm" x="130" y="118" text-anchor="middle">3 haies · hauteur 60 cm · dans l'axe</text>`),
+   specs:["3 haies","h 60 cm","4 m entre chaque"],
+   exec:"Franchir les trois haies (type EPS) dans l'ordre et dans leur axe.",
+   rule:"Faire tomber une haie n'est pas pénalisé.", ok:"les trois haies sont franchies dans l'ordre, au milieu, sans passer à côté.",
+   fp:{have:["Caisses de saut, pour accrocher un élastique"], bring:["3 haies réglables à 60 cm, ou 3 élastiques"], setup:"Barre ou élastique à 60 cm du sol, 4 m entre chaque haie : prévoir une ligne d'environ 10 m."},
+   club:{ex:"Élastiques ou mousses à 60 cm sur le grand tapis : passe-les en courant, toujours avec la même jambe devant.", vol:"6 passages de 3 obstacles"},
+   tip:"Même nombre de pas entre chaque haie et même jambe d'attaque. Ne pas piétiner devant."},
+  {n:4, name:"Poutre d'équilibre", short:"Poutre", timed:true, pen:"Non réalisé : +10 s",
+   svg: SVG(`<line class="g" x1="10" y1="100" x2="250" y2="100"/><rect class="soft" x="30" y="82" width="28" height="18" rx="2"/><text class="tm" x="44" y="76" text-anchor="middle">50 cm</text><rect class="obj" x="66" y="58" width="170" height="8" rx="2"/><path class="leg" d="M92 66 V100 M210 66 V100"/>${DIM(66,236,40)}<text class="t" x="151" y="32" text-anchor="middle">5 m</text><path class="dim" d="M246 58 V100 M241 58 H251 M241 100 H251"/><text class="t" x="236" y="86" text-anchor="end">1 m</text><text class="tm" x="130" y="118" text-anchor="middle">marche d'accès · traversée sans les mains</text>`),
+   specs:["5 m de long","h 1 m","marche 50 cm"],
+   exec:"Monter par la marche de 50 cm, puis traverser debout, en équilibre, sans l'aide des mains. Monter et descendre entre les balises, dans l'axe de la poutre.",
+   rule:"Au concours, il n'y a pas de tapis à la sortie de la poutre.", ok:"aucune main ne touche la poutre une fois les deux pieds dessus, et pas de chute.",
+   fp:{have:["Banc de musculation"], bring:["Sangle ou ruban pour une ligne de 5 m au sol"], setup:"Pas de poutre en salle : ligne de 5 m au sol pour la vitesse des pas, ou marche sur le banc. La vraie poutre à 1 m se travaille au club."},
+   club:{ex:"Si tu as le vertige sur la poutre, monte la hauteur par paliers, avec des tapis épais de chaque côté (plan ci-dessus).", vol:"10 traversées par séance, au palier du moment"},
+   tip:"Regarde un point au bout de la poutre, à hauteur des yeux, jamais tes pieds. Petits pas réguliers, bras écartés. Une chute coûte 10 s."},
+  {n:5, name:"Multibonds dans les cerceaux", short:"Cerceaux", timed:true, pen:"Non réalisé : +10 s",
+   svg: SVG(`<ellipse class="ring" cx="40" cy="94" rx="19" ry="6"/><ellipse class="ring" cx="85" cy="94" rx="19" ry="6"/><ellipse class="ring" cx="130" cy="94" rx="19" ry="6"/><ellipse class="ring" cx="175" cy="94" rx="19" ry="6"/><ellipse class="ring" cx="220" cy="94" rx="19" ry="6"/><g class="cn"><ellipse cx="40" cy="94" rx="5" ry="2.5"/><ellipse cx="85" cy="94" rx="5" ry="2.5"/><ellipse cx="130" cy="94" rx="5" ry="2.5"/><ellipse cx="175" cy="94" rx="5" ry="2.5"/><ellipse cx="220" cy="94" rx="5" ry="2.5"/></g><path class="path" d="M40 88 Q62 52 85 88 Q107 52 130 88 Q152 52 175 88 Q197 52 220 88"/>${DIM(21,59,30)}<text class="t" x="40" y="22" text-anchor="middle">Ø 70 cm</text><text class="tm" x="130" y="118" text-anchor="middle">un pied par cerceau · sans toucher · sans arrêt</text>`),
+   specs:["cerceaux Ø 70 cm","posés au sol"],
+   exec:"Dans l'ordre des cerceaux, progresser par bonds successifs, un pied ou une pointe de pied dans chaque cerceau, sans les toucher.",
+   rule:"Le nombre de cerceaux et leur disposition ne sont pas précisés dans les textes officiels.",
+   ok:"un pied dans chaque cerceau, aucun bord touché, aucun arrêt.",
+   fp:{have:[], bring:["6 à 8 cerceaux de 70 cm"], setup:"Cerceaux collés les uns aux autres, en ligne droite, puis en zigzag, pour être prête aux deux."},
+   club:{ex:"Cerceaux de gym sur le grand tapis, puis grandes foulées en sautant d'un pied sur l'autre.", vol:"6 passages de 8 cerceaux"},
+   tip:"Rester sur l'avant du pied et rythmer avec les bras. Regarder deux cerceaux devant."},
+  {n:6, name:"Appuis alternés", short:"Appuis", timed:true, pen:"Non réalisé : +10 s",
+   svg: SVG(`<line class="g" x1="10" y1="100" x2="250" y2="100"/><rect class="obj" x="86" y="74" width="100" height="9" rx="2"/><path class="leg" d="M96 83 V100 M176 83 V100"/><ellipse class="cn" cx="120" cy="71" rx="7" ry="3"/><ellipse class="cn" cx="150" cy="97" rx="7" ry="3"/><path class="dim" d="M206 74 V100 M201 74 H211 M201 100 H211"/><text class="t" x="214" y="92">50 cm</text><text class="t" x="136" y="50" text-anchor="middle">10 appuis</text><text class="tm" x="130" y="118" text-anchor="middle">5 gauche + 5 droite · sans s'arrêter</text>`),
+   specs:["banc h 50 cm","10 appuis","5 par jambe"],
+   exec:"10 appuis alternés, un pied au sol et l'autre au contact du banc, sans s'arrêter (5 jambe gauche, 5 jambe droite).",
+   rule:"Nouveau depuis 2025 : le pied doit toucher le banc par le dessous (la semelle), sur le bord ou sur le dessus du banc. Le banc est tenu ou lesté.", ok:"10 appuis bien alternés, semelle posée sur le banc à chaque fois, sans pause.",
+   fp:{have:["Une caisse de saut de 50 cm de haut, ou un step réglable"], bring:[], setup:"Mesurer la hauteur : 50 cm. Un banc de musculation fait souvent 40 à 45 cm, trop bas."},
+   club:{ex:"Pose un pied puis l'autre, vite, sur un caisson réglé à 50 cm.", vol:"4 séries de 20 appuis, 1 min de repos entre chaque"},
+   tip:"Compter à voix haute pour ne pas en faire 9 ou 11."},
+  {n:7, name:"Franchissement de barrières", short:"Barrières", timed:true, pen:"Non réalisé : +10 s",
+   svg: SVG(`<line class="g" x1="10" y1="100" x2="250" y2="100"/><rect class="soft" x="50" y="42" width="44" height="58" rx="6"/><rect class="soft" x="160" y="42" width="44" height="58" rx="6"/><text class="t" x="72" y="76" text-anchor="middle">1,20</text><text class="t" x="182" y="76" text-anchor="middle">1,20</text>${DIM(94,160,28)}<text class="t" x="127" y="20" text-anchor="middle">2,20 m</text><text class="tm" x="130" y="118" text-anchor="middle">2 chevaux mousse · l 1,50 m · dans l'axe</text>`),
+   specs:["2 chevaux en mousse","h 1,20 m","l 1,50 m","2,20 m entre les deux"],
+   exec:"Tout le corps doit passer au-dessus de chaque cheval en mousse, entre les tiges qui marquent le passage, sans les toucher, même légèrement.",
+   rule:"", ok:"tout ton corps passe au-dessus, entre les repères, sans toucher les tiges.",
+   fp:{have:["Caisses de saut en mousse, à empiler"], bring:["4 plots pour les balises latérales"], setup:"Deux piles de caisses en mousse pour approcher 1,20 m, seulement si la pile est stable, à 2,20 m l'une de l'autre. Sinon, plus bas ici et à 1,20 m au club."},
+   club:{ex:"Caisson ou bloc en mousse : main posée dessus, tu passes les jambes sur le côté. Commence à 80 cm et monte jusqu'à 1,20 m.", vol:"3 séries de 6 passages, des deux côtés"},
+   tip:"Réception déjà tournée vers l'obstacle suivant. Travailler les deux côtés."},
+  {n:8, name:"Échelle horizontale", short:"Échelle", timed:true, pen:"Progression ratée : +10 s",
+   svg: SVG(`<line class="g" x1="10" y1="100" x2="250" y2="100"/><path class="leg" d="M36 18 V100 M224 18 V100"/><path class="bar" d="M36 22 H224"/><path class="leg" d="M59.5 18 V26 M83 18 V26 M106.5 18 V26 M130 18 V26 M153.5 18 V26 M177 18 V26 M200.5 18 V26"/>${DIM(36,130,40)}<text class="t" x="83" y="56" text-anchor="middle">2 m à parcourir</text><text class="t" x="177" y="70" text-anchor="middle">h 2,30 m</text><text class="tm" x="130" y="118" text-anchor="middle">4 m · l 70 cm · barreaux tous les 50 cm</text>`),
+   specs:["h 2,30 m","4 m de long","l 70 cm","barreaux tous les 50 cm"],
+   exec:"Au choix. Avancer : attraper le 2e barreau à deux mains, puis avancer pieds dans le vide jusqu'au barreau de couleur (2 m pour les femmes) et l'attraper à deux mains. Ou rester suspendue 15 s par les deux mains, au barreau de ton choix.",
+   rule:"Avancer raté : +10 s. Suspension de 15 s pas tenue : +20 s. Si tu hésites, avancer coûte moins cher.",
+   ok:"tu attrapes le barreau de couleur à deux mains sans toucher le sol, ou tu tiens 15 s pleines suspendue.",
+   fp:{have:["La structure à barres de la zone fonctionnelle (avec une échelle horizontale si la salle en a une)","Barre de traction"], bring:[], setup:"Avec une échelle horizontale : marque 2 m (4 écarts de 50 cm entre les barreaux). Sans échelle : 15 s suspendue à la barre de traction."},
+   club:{ex:"Barre fixe ou barres asymétriques : reste suspendue, puis avance en déplaçant une main après l'autre.", vol:"5 fois 20 à 30 s suspendue ; 4 traversées"},
+   tip:"Avancer sur 2 m va plus vite que rester 15 s suspendue, si tu y arrives sans tomber. Viser 30 s de suspension pour avoir de la marge."},
+  {n:9, name:"Ramper", short:"Ramper", timed:true, pen:"Non réalisé : +10 s",
+   svg: SVG(`<line class="g" x1="10" y1="100" x2="250" y2="100"/><rect class="shade" x="50" y="76" width="160" height="24"/><path class="leg" d="M50 76 V100 M130 76 V100 M210 76 V100"/><path class="bar" d="M50 76 H210"/>${DIM(50,210,56)}<text class="t" x="130" y="48" text-anchor="middle">3 m</text><text class="tm" x="130" y="93" text-anchor="middle">h 50 cm</text><text class="tm" x="130" y="118" text-anchor="middle">l 1,20 m · franchir sans rien toucher</text>`),
+   specs:["3 m","h 50 cm","l 1,20 m"],
+   exec:"Ramper sous le tunnel sans toucher, même légèrement, les éléments du dispositif.",
+   rule:"", ok:"l'élastique ne bouge pas du début à la fin.",
+   fp:{have:["Tapis","2 caisses de saut de 50 cm"], bring:["1 élastique de 3 à 4 m"], setup:"Élastique tendu à 50 cm entre deux caisses espacées de 3 m, tapis dessous. Le moindre contact fait bouger l'élastique."},
+   club:{ex:"Ramper sous un banc, ou sous un tapis posé sur deux caissons.", vol:"6 passages de 3 m"},
+   tip:"Avant-bras et genoux, bassin bas, tête rentrée. On perd souvent du temps à l'entrée et à la sortie."},
+  {n:10, name:"Course en slalom", short:"Slalom", timed:true, pen:"+5 s par plot",
+   svg: SVG(`<g class="cn"><circle cx="40" cy="62" r="6"/><circle cx="76" cy="62" r="6"/><circle cx="112" cy="62" r="6"/><circle cx="148" cy="62" r="6"/><circle cx="184" cy="62" r="6"/><circle cx="220" cy="62" r="6"/></g><path class="path" d="M18 62 Q40 30 58 62 T94 62 T130 62 T166 62 T202 62 T240 62"/>${DIM(18,240,96)}<text class="t" x="129" y="90" text-anchor="middle">45 m</text><text class="tm" x="130" y="118" text-anchor="middle">alterner droite / gauche · vue de dessus</text>`),
+   specs:["45 m","cônes"],
+   exec:"Course entre des cônes sur 45 m. Les cônes se contournent alternativement par la droite et par la gauche.",
+   rule:"Le premier cône se contourne obligatoirement par la droite : tu le laisses sur ta gauche. L'écart entre les cônes n'est pas précisé.",
+   ok:"premier cône laissé à ta gauche, puis chaque cône contourné en alternant, sans en toucher aucun.",
+   fp:{have:[], bring:["8 à 12 plots ou cônes"], setup:"Il y a rarement 45 m de libre en salle : mets 6 plots sur 15 m et fais aller, retour, aller (3 fois 15 m) en tournant autour du dernier plot. Le temps sera un peu plus long qu'au concours."},
+   club:{ex:"Des plots sur la longueur de la salle : petits pas rapides et changements de direction.", vol:"6 fois 20 m, retour en marchant"},
+   tip:"Petits pas et centre de gravité bas dans les virages, puis accélérer dès la sortie du dernier cône."}
+];
+const TIMED = STATIONS.filter(s => s.timed);
+
+// Barème PHM femmes (< 30 ans) : secondes -> note
+const PHM = {50:20,51:20,52:19.5,53:19.5,54:19,55:19,56:18.5,57:18,58:18,59:17.5,60:17.5,61:17,62:16.5,63:16.5,64:16,65:16,66:15.5,67:15,68:15,69:14.5,70:14.5,71:14,72:13.5,73:13.5,74:13,75:13,76:12.5,77:12,78:12,79:11.5,80:11.5,81:11.5,82:11,83:11,84:10.5,85:10.5,86:10.5,87:10.5,88:10,89:10,90:10,91:10,92:10,93:9.5,94:9.5,95:9.5,96:9.5,97:9.5,98:9,99:9,100:9,101:9,102:8.5,103:8.5,104:8,105:8,106:7.5,107:7.5,108:7,109:7,110:6.5,111:6,112:6,113:5.5,114:5.5,115:5,116:4.5,117:4,118:4,119:3.5,120:3,121:2.5,122:2,123:2,124:1.5,125:1,126:0.5,127:0};
+// Les dixièmes ne comptent pas : temps arrondi à la seconde inférieure (descriptif officiel)
+function phmBase(sec){ const s = Math.floor(sec); if (s <= 50) return 20; if (s > 127) return 0; return PHM[s]; }
+// Barème Luc Léger femmes (< 30 ans) : palier 3 à 10, par quart de palier
+const LUC_F = [2,3,4,5, 6,7,7.5,8, 8.5,9,9.5,10, 10.5,11,11.5,12, 12.5,13,13.5,14, 14.5,15,15.5,16, 16.5,17,17.5,18, 18.5,19,19.5,20];
+function lucBase(p, s){
+  const q = Math.min(3, Math.floor(s / 15));
+  if (p > 10 || (p === 10 && q >= 3)) return 20;
+  if (p < 2 || (p === 2 && q < 3)) return 0;
+  if (p === 2) return 1;
+  return LUC_F[(p - 3) * 4 + q];
+}
+const LUC_TARGET = 8;
+const speedOf = p => 8 + 0.5 * (p - 1);
+
+/* ======================= OUTILS ======================= */
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fr = n => String(n).replace(".", ",");
+function lsGet(k, d){ try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch(e){ return d; } }
+function lsSet(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
+function fmt(ms){ if (ms == null) return "—"; const t = Math.max(0, ms) / 1000, m = Math.floor(t / 60), s = t - m * 60; return m + ":" + (s < 10 ? "0" : "") + s.toFixed(1); }
+function fmtS(s){ s = Math.round(s); const m = Math.floor(s / 60), r = s - m * 60; return m + ":" + String(r).padStart(2, "0"); }
+const dateTxt = at => { const d = new Date(at); return d.toLocaleDateString("fr-FR", {day:"numeric", month:"short"}) + " " + d.toLocaleTimeString("fr-FR", {hour:"2-digit", minute:"2-digit"}); };
+const dayTxt = at => new Date(at).toLocaleDateString("fr-FR", {day:"numeric", month:"short"});
+const noteTxt = n => n == null ? "< 4" : fr(n);
+const ageOn = () => $("opt-age").checked;
+const withBonus = (base, extra) => base == null ? null : Math.max(0, Math.min(20, base + (ageOn() ? 1 : 0) + (extra || 0)));
+function verdict(total){ if (total < 60000) return ['fast', "sous 1:00"]; if (total <= 70000) return ['ok', "dans l'objectif"]; return ['slow', "au-dessus de 1:10"]; }
+const palTxt = (p, s) => `palier ${p}${s ? " + " + s + " s" : ""}`;
+const palBig = (p, s) => `Palier ${p}${s ? " + " + s + " s" : ""}`;
+
+/* ======================= NAVIGATION ======================= */
+const VIEWS = ["accueil", "parcours", "luc", "ateliers", "progres"];
+function show(v, noScroll){
+  if (!VIEWS.includes(v)) v = "accueil";
+  document.querySelectorAll(".view").forEach(el => el.hidden = el.dataset.view !== v);
+  document.querySelectorAll("[data-tab]").forEach(b => b.setAttribute("aria-current", b.dataset.tab === v ? "page" : "false"));
+  try { history.replaceState(null, "", "#" + v); } catch(e){}
+  if (!noScroll) window.scrollTo(0, 0);
+  if (v === "progres") renderProg();
+}
+document.querySelectorAll("[data-tab]").forEach(b => b.addEventListener("click", () => show(b.dataset.tab)));
+document.addEventListener("click", e => { const g = e.target.closest("[data-goto]"); if (g){ show(g.dataset.goto); if (g.dataset.mode) setMode(g.dataset.mode); } });
+
+/* ======================= STOCKAGE =======================
+   Toujours sur ce téléphone. Si le partage est activé (config.js + code d'équipe),
+   aussi dans la base en ligne, visible sur tous les téléphones de l'équipe. */
+const S = { essais: [], mesures: [], luc: [], exam: null, examLabel: null };
+const LKEY = {essais:"phm-essais-v3", mesures:"phm-mesures-v1", luc:"phm-luc-v1"};
+const COLLS = ["essais", "mesures", "luc"];
+const EXAM_DEFAULT = {date:"2027-03-29", label:"fin mars – début avril 2027"};
+const FB = window.PARCOURS_FIREBASE || null;
+let FS = null;
+let team = lsGet("phm-team", null);
+const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+function setSync(msg, warn){ const el = $("sync"); el.textContent = msg; el.className = "sync" + (warn ? " warn" : ""); el.hidden = !msg; }
+function loadLocal(){
+  for (const k of COLLS) S[k] = lsGet(LKEY[k], []);
+  const ex = lsGet("phm-exam-obj", EXAM_DEFAULT); S.exam = ex.date; S.examLabel = ex.label;
+}
+function writeErr(){ setSync("Enregistrement en ligne impossible pour le moment. Le résultat est gardé sur ce téléphone et partira dès que possible.", true); }
+// rejoindre une équipe avec un lien ?equipe=CODE
+(function(){
+  try {
+    const u = new URL(location.href), c = u.searchParams.get("equipe");
+    if (c && /^[a-z0-9]{20,40}$/.test(c)){ team = c; lsSet("phm-team", c); u.searchParams.delete("equipe"); history.replaceState(null, "", u.pathname + u.hash); }
+  } catch(e){}
+})();
+async function connectFirebase(){
+  const V = "10.12.2";
+  const [A, F] = await Promise.all([
+    import(`https://www.gstatic.com/firebasejs/${V}/firebase-app.js`),
+    import(`https://www.gstatic.com/firebasejs/${V}/firebase-firestore.js`)
+  ]);
+  const app = A.initializeApp(FB);
+  let db;
+  try { db = F.initializeFirestore(app, {localCache: F.persistentLocalCache()}); } catch(e){ db = F.getFirestore(app); }
+  FS = Object.assign({db}, F);
+  let pending = COLLS.length;
+  for (const k of COLLS){
+    F.onSnapshot(F.query(F.collection(db, "equipes", team, k), F.orderBy("at", "asc")), snap => {
+      S[k] = snap.docs.map(d => Object.assign({id: d.id}, d.data()));
+      lsSet(LKEY[k], S[k]);
+      if (!snap.metadata.fromCache && pending > 0 && --pending === 0) setSync("");
+      renderAll();
+    }, () => setSync("Le partage ne répond pas. Les résultats restent sur ce téléphone.", true));
+  }
+  F.onSnapshot(F.doc(db, "equipes", team, "reglages", "concours"), snap => {
+    if (snap.exists()){ const d = snap.data(); S.exam = d.date || null; S.examLabel = d.label || null; lsSet("phm-exam-obj", {date: S.exam, label: S.examLabel}); renderHome(); }
+  }, () => {});
+}
+async function initStore(){
+  loadLocal(); renderAll(); renderShare();
+  if (FB && team){
+    setSync("Connexion au partage…");
+    try { await connectFirebase(); } catch(e){ FS = null; setSync("Partage indisponible (pas de réseau ?). Les résultats restent sur ce téléphone.", true); }
+  } else setSync("");
+}
+function upsertLocal(coll, id, body){
+  const i = S[coll].findIndex(x => x.id === id);
+  if (i >= 0) S[coll][i] = Object.assign({id}, body); else S[coll].push(Object.assign({id}, body));
+  lsSet(LKEY[coll], S[coll]);
+}
+function remotePut(coll, id, body){ if (FS) FS.setDoc(FS.doc(FS.db, "equipes", team, coll, id), body).catch(writeErr); }
+async function addDoc(coll, body){ const id = newId(); await setDoc(coll, id, body); return id; }
+async function setDoc(coll, id, body){
+  upsertLocal(coll, id, body);
+  if (FS) remotePut(coll, id, body);
+  renderAll();
+}
+async function delDoc(coll, id){
+  S[coll] = S[coll].filter(x => x.id !== id); lsSet(LKEY[coll], S[coll]);
+  if (FS) FS.deleteDoc(FS.doc(FS.db, "equipes", team, coll, id)).catch(writeErr);
+  renderAll();
+}
+async function saveExam(date){
+  S.exam = date || null; S.examLabel = null; lsSet("phm-exam-obj", {date: S.exam, label: null}); renderHome();
+  if (FS) FS.setDoc(FS.doc(FS.db, "equipes", team, "reglages", "concours"), {date: S.exam, label: null}).catch(writeErr);
+}
+/* ---- partage entre téléphones ---- */
+function shareLink(){ return location.origin + location.pathname + "?equipe=" + team; }
+function renderShare(){
+  const el = $("share"); if (!el) return;
+  if (!FB){
+    el.innerHTML = `<p class="note">Le partage entre téléphones n'est pas encore branché. En attendant, tout est enregistré sur ce téléphone : utilise la sauvegarde ci-dessous pour ne rien perdre.</p>`;
+    return;
+  }
+  if (!team){
+    el.innerHTML = `<p class="note">Pour voir les mêmes résultats sur deux téléphones, active le partage ici, puis envoie le lien à l'autre personne.</p>
+      <button type="button" class="ghost small" id="share-on">Activer le partage</button>`;
+    return;
+  }
+  el.innerHTML = `<p class="note"><b style="color:var(--ink)">Partage activé.</b> Ouvre ce lien sur l'autre téléphone pour le rejoindre. Garde-le pour vous deux : toute personne qui a le lien voit les résultats.</p>
+    <input type="text" readonly id="share-link" value="${esc(shareLink())}" style="font:inherit;font-size:.85rem;width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:7px;background:var(--floor);color:var(--ink)">
+    <div class="row"><button type="button" class="ghost small" id="share-send">Envoyer le lien</button><button type="button" class="ghost small" id="share-off">Arrêter le partage sur ce téléphone</button></div>`;
+}
+document.addEventListener("click", async e => {
+  const t = e.target.closest("button"); if (!t) return;
+  if (t.id === "share-on"){
+    team = Array.from(crypto.getRandomValues(new Uint8Array(24)), b => "abcdefghijklmnopqrstuvwxyz0123456789"[b % 36]).join("");
+    lsSet("phm-team", team);
+    const local = {}; COLLS.forEach(k => local[k] = S[k].slice());
+    const ex = {date: S.exam, label: S.examLabel};
+    try { await connectFirebase(); } catch(err){ setSync("Impossible de joindre le partage. Réessaie avec du réseau.", true); team = null; lsSet("phm-team", null); renderShare(); return; }
+    COLLS.forEach(k => local[k].forEach(x => { const {id, ...body} = x; remotePut(k, id, body); }));
+    FS.setDoc(FS.doc(FS.db, "equipes", team, "reglages", "concours"), ex).catch(writeErr);
+    renderShare(); setSync("Partage activé. Envoie le lien à l'autre téléphone (Réglages).");
+  }
+  if (t.id === "share-send"){
+    const link = shareLink();
+    try { if (navigator.share){ await navigator.share({title: "Parcours", text: "Rejoins le suivi du parcours", url: link}); return; } } catch(err){ return; }
+    try { await navigator.clipboard.writeText(link); t.textContent = "Lien copié"; } catch(err){ $("share-link").select(); }
+  }
+  if (t.id === "share-off"){
+    if (!t.dataset.armed){ t.dataset.armed = "1"; t.textContent = "Confirmer : arrêter le partage ici"; t.classList.add("danger"); return; }
+    lsSet("phm-team", null); location.reload();
+  }
+  if (t.id === "backup-save"){
+    const data = {app: "parcours", version: 1, exportedAt: new Date().toISOString(), essais: S.essais, mesures: S.mesures, luc: S.luc, exam: {date: S.exam, label: S.examLabel}};
+    const blob = new Blob([JSON.stringify(data, null, 1)], {type: "application/json"});
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "parcours-sauvegarde-" + todayKey() + ".json";
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  }
+  if (t.id === "backup-load") $("backup-file").click();
+});
+document.addEventListener("change", async e => {
+  if (e.target.id !== "backup-file" || !e.target.files[0]) return;
+  try {
+    const data = JSON.parse(await e.target.files[0].text());
+    if (data.app !== "parcours") throw new Error("format");
+    let n = 0;
+    for (const k of COLLS) for (const x of (data[k] || [])){ if (!x.id || S[k].some(y => y.id === x.id)) continue; const {id, ...body} = x; upsertLocal(k, id, body); if (FS) remotePut(k, id, body); n++; }
+    renderAll(); setSync(`Sauvegarde restaurée : ${n} résultat${n > 1 ? "s" : ""} ajouté${n > 1 ? "s" : ""}.`);
+  } catch(err){ setSync("Ce fichier n'est pas une sauvegarde de l'appli.", true); }
+  e.target.value = "";
+});
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-del]"); if (!b) return;
+  if (b.dataset.armed){ delDoc(b.dataset.coll, b.dataset.del); return; }
+  const label = b.textContent;
+  b.dataset.armed = "1"; b.textContent = "Confirmer ?"; b.classList.add("danger");
+  setTimeout(() => { if (b.isConnected){ delete b.dataset.armed; b.textContent = label; b.classList.remove("danger"); } }, 3000);
+});
+
+/* ======================= ACCUEIL ======================= */
+const SEANCES = {
+  fp: [
+    {t:"Préviens l'accueil, à une heure creuse", d:"Tôt le matin ou en début d'après-midi : le parcours prend de la place."},
+    {t:"Installer le parcours", d:"20 à 25 min à deux, suivre le plan et la liste du matériel.", go:"ateliers", mode:"fp", btn:"Plan et matériel"},
+    {t:"Échauffement", d:"Footing, talons-fesses, montées de genoux, puis tourner poignets, épaules et chevilles · 12 min"},
+    {t:"Ateliers isolés", d:"Fais chaque atelier une fois, tranquillement, en vérifiant qu'il est réussi · 15 min"},
+    {t:"Moitiés de parcours", d:"Enchaîne les ateliers 2 à 6, puis 7 à 10, deux fois chacun, avec 2 min de pause · 15 min"},
+    {t:"3 parcours complets chronométrés", d:"Avec le sac, et 4 min de pause entre deux parcours.", go:"parcours", btn:"Ouvrir le chrono"},
+    {t:"Ranger, puis s'étirer", d:"Étirements et souplesse · 10 min"}
+  ],
+  club: [
+    {t:"Échauffement", d:"Course légère, talons-fesses, montées de genoux, puis tourner poignets, épaules et chevilles · 10 min"},
+    {t:"Poutre au palier du moment", d:"10 traversées sans les mains, à la hauteur où tu en es dans le plan vertige · 10 min", go:"ateliers", mode:"club", btn:"Plan vertige"},
+    {t:"Barrières", d:"Passer par-dessus un caisson, jusqu'à 1,20 m : 3 séries de 6, des deux côtés · 10 min"},
+    {t:"Barre", d:"5 fois suspendue 20 à 30 s, puis 4 traversées en avançant une main après l'autre · 10 min"},
+    {t:"Pompes et gainage", d:"4 séries de 5 pompes, 3 fois 40 s de planche · 10 min"},
+    {t:"Pieds rapides", d:"Cerceaux, puis un pied après l'autre sur un caisson de 50 cm · 5 min"},
+    {t:"Note ta hauteur de poutre et ta suspension", d:"Dans Progrès › Tests à côté.", go:"progres", btn:"Noter"}
+  ],
+  run: [
+    {t:"Échauffement", d:"15 min de course lente, talons-fesses, montées de genoux, 3 accélérations"},
+    {t:"Fractionné", d:"30 s vite puis 30 s en trottinant, 8 fois de suite. Pause de 3 min, puis encore 8 fois."},
+    {t:"Navettes au palier visé", d:"Luc Léger avec départ au palier 6 ou 7 : tiens le plus longtemps possible.", go:"luc", btn:"Ouvrir le Luc Léger"},
+    {t:"Retour au calme", d:"10 min de course très lente, puis étirements"},
+    {t:"Toutes les 2 à 3 semaines : test complet", d:"Départ palier 1, résultat enregistré dans Progrès.", go:"luc", btn:"Lancer un test"}
+  ]
+};
+const todayKey = () => new Date().toISOString().slice(0, 10);
+let seance = lsGet("phm-seance", "fp");
+let ticks = lsGet("phm-ticks", {});
+function renderSeance(){
+  document.querySelectorAll("#seance-seg [data-s]").forEach(b => b.setAttribute("aria-pressed", b.dataset.s === seance));
+  const key = todayKey() + ":" + seance, done = ticks[key] || [];
+  $("seance-steps").innerHTML = SEANCES[seance].map((s, i) => `<li class="${done.includes(i) ? "done" : ""}">
+    <input type="checkbox" id="st-${i}" ${done.includes(i) ? "checked" : ""} aria-label="Fait : ${esc(s.t)}">
+    <div><div class="s-t">${s.t}</div><div class="s-d">${s.d}</div></div>
+    ${s.go ? `<button type="button" class="ghost tiny s-a" data-goto="${s.go}" ${s.mode ? `data-mode="${s.mode}"` : ""}>${s.btn}</button>` : ""}</li>`).join("");
+}
+$("seance-seg").addEventListener("click", e => { const b = e.target.closest("[data-s]"); if (!b) return; seance = b.dataset.s; lsSet("phm-seance", seance); renderSeance(); });
+$("seance-steps").addEventListener("change", e => {
+  if (e.target.type !== "checkbox") return;
+  const i = Number(e.target.id.slice(3)), key = todayKey() + ":" + seance;
+  const set = new Set(ticks[key] || []); e.target.checked ? set.add(i) : set.delete(i);
+  const keep = {}; Object.keys(ticks).filter(k => k.startsWith(todayKey())).forEach(k => keep[k] = ticks[k]);
+  keep[key] = [...set]; ticks = keep; lsSet("phm-ticks", ticks); renderSeance();
+});
+$("today-date").textContent = new Date().toLocaleDateString("fr-FR", {weekday:"long", day:"numeric", month:"long"});
+
+function scoreCard(el, kind){
+  let main = "—", sub = "", note = null, extra = "";
+  if (kind === "phm"){
+    const list = S.essais.slice().sort((a, b) => a.at - b.at);
+    if (list.length){
+      const last = list[list.length - 1], best = list.reduce((m, e) => e.total < m.total ? e : m, list[0]);
+      note = withBonus(phmBase(last.total / 1000), last.sac ? -1 : 0);
+      main = fmt(last.total); sub = `dernier parcours · meilleur ${fmt(best.total)}`;
+    } else sub = "aucun parcours chronométré";
+  } else {
+    const list = S.luc.slice().sort((a, b) => a.at - b.at);
+    if (list.length){
+      const last = list[list.length - 1], best = list.reduce((m, e) => (e.palier + e.sec / 60) > (m.palier + m.sec / 60) ? e : m, list[0]);
+      note = withBonus(lucBase(last.palier, last.sec));
+      main = palBig(last.palier, last.sec); sub = `dernier test · meilleur ${palTxt(best.palier, best.sec)}`;
+    } else sub = "aucun test enregistré";
+  }
+  const pct = note == null ? 0 : note / 20 * 100;
+  const color = kind === "phm" ? "var(--cone)" : "var(--run)";
+  const badge = note == null ? "" : note >= 7 ? `<span class="verdict ok">au-dessus de 7</span>` : `<span class="verdict slow">sous 7, éliminatoire</span>`;
+  el.innerHTML = `<div class="row between"><span class="lab">${kind === "phm" ? "Parcours d'habileté motrice" : "Luc Léger"}</span>${badge}</div>
+    <div class="big">${note == null ? "—" : fr(note)}<small> /20</small></div>
+    <div class="gauge" aria-hidden="true"><i style="width:${pct}%;background:${color}"></i><span class="seuil" style="left:35%"></span></div>
+    <div class="note"><b style="color:var(--ink)">${main}</b> · ${sub}</div><div class="note" style="font-size:.8rem">Le petit trait sur la barre marque 7/20, le minimum.</div>`;
+  return note;
+}
+function renderHome(){
+  const el = $("countdown");
+  if (S.exam){
+    const d = Math.ceil((new Date(S.exam + "T08:00:00") - new Date()) / 86400000);
+    const when = new Date(S.exam + "T12:00:00").toLocaleDateString("fr-FR", {day:"numeric", month:"long", year:"numeric"});
+    const lbl = S.examLabel ? `${S.examLabel} (date exacte à confirmer)` : `le ${when}`;
+    el.innerHTML = d >= 0 ? `<b>${d} jours</b><span class="note">environ ${Math.floor(d / 7)} semaines avant les épreuves sportives, ${lbl}</span>` : `<span class="note">La date des épreuves (${lbl}) est passée. Mets-la à jour dans Réglages.</span>`;
+  } else el.innerHTML = `<span class="note">Ajoute la date des épreuves sportives dans Réglages pour voir le compte à rebours.</span>`;
+  renderPhases();
+  if (document.activeElement !== $("exam-date")) $("exam-date").value = S.exam || "";
+  const nP = scoreCard($("score-phm"), "phm"), nL = scoreCard($("score-luc"), "luc");
+  $("score-avg").hidden = !(nP != null && nL != null);
+  $("score-avg").innerHTML = (nP != null && nL != null) ? `<b style="color:var(--ink);font-size:1.05rem">Note de sport estimée : ${fr(Math.round((nP + nL) / 2 * 100) / 100)}/20</b> (moyenne de tes deux dernières notes)` : "";
+}
+$("exam-date").addEventListener("change", e => saveExam(e.target.value));
+function renderPhases(){
+  const exam = new Date((S.exam || "2027-03-29") + "T12:00:00"), day = 86400000, now = new Date();
+  const add = (d, n) => new Date(d.getTime() + n * day);
+  const y = exam.getFullYear();
+  const fetesA = new Date((y - 1) + "-12-21T12:00:00"), fetesB = new Date(y + "-01-03T12:00:00");
+  const specA = add(exam, -28), affA = add(exam, -9);
+  const P = [
+    {t:"1 · Les bases", a: now < fetesA ? now : add(fetesA, -42), b: add(fetesA, -1),
+     p:"Apprendre chaque atelier proprement (vue Club et Fitness Park), poutre : paliers 1 à 3 du plan vertige, suspension jusqu'à 30 s, 2 courses lentes par semaine.",
+     o:"Faire un premier parcours chronométré et un premier Luc Léger complet, pour avoir ton point de départ."},
+    {t:"2 · Pause des fêtes", a: fetesA, b: fetesB,
+     p:"2 séances par semaine suffisent : une course, une séance club ou suspension et pompes à la maison.", o:"Ne rien perdre."},
+    {t:"3 · Progresser", a: add(fetesB, 1), b: add(specA, -1),
+     p:"Un parcours complet chaque semaine à Fitness Park, un fractionné par semaine, poutre à 1 m. Un Luc Léger complet toutes les 3 semaines.",
+     o:"Fin de l'étape : parcours en moins de 1 min 15 et palier 7 au Luc Léger."},
+    {t:"4 · Comme au concours", a: specA, b: add(affA, -1),
+     p:"Passer sur le vrai parcours à Saint-Quentin, faire des parcours sans aucune pénalité, un Luc Léger complet.",
+     o:"Parcours entre 1 min et 1 min 10, palier 8 au Luc Léger."},
+    {t:"5 · Dernière ligne droite", a: affA, b: exam,
+     p:"Deux fois moins d'entraînement pour arriver en forme : un parcours, une course courte. Repos complet les 2 jours avant.",
+     o:"Arriver reposée et confiante."}
+  ];
+  const fd = d => d.toLocaleDateString("fr-FR", {day:"numeric", month:"short"});
+  $("phases").innerHTML = P.map(ph => {
+    const cls = now > ph.b ? "past" : (now >= ph.a && now <= ph.b) ? "now" : "";
+    return `<div class="ph ${cls}"><div class="row between"><b style="font-family:var(--display);font-size:1.2rem">${ph.t}</b>${cls === "now" ? `<span class="here">Tu es ici</span>` : ""}</div>
+      <span class="dates">du ${fd(ph.a)} au ${fd(ph.b)}</span><p>${ph.p}</p><p><b>Objectif :</b> ${ph.o}</p></div>`;
+  }).join("");
+}
+$("opt-age").checked = lsGet("phm-age", true);
+$("opt-age").addEventListener("change", () => { lsSet("phm-age", $("opt-age").checked); renderAll(); });
+
+/* ======================= CHRONO PARCOURS ======================= */
+let state = "idle", t0 = 0, splits = [], raf = null, wake = null, countEnd = 0, pens = [], sacKo = false, penSel = 2;
+let lastId = null, lastBody = null, penTimer = null;
+const elTime = $("time"), elStatus = $("status"), elGo = $("go"), selLieu = $("lieu");
+selLieu.value = lsGet("phm-lieu", "Fitness Park Lille");
+selLieu.addEventListener("change", () => { lsSet("phm-lieu", selLieu.value); if (state === "done") applyDone(); });
+const penTotal = () => pens.reduce((a, p) => a + p.s, 0);
+const penOf = n => pens.filter(p => p.n === n).reduce((a, p) => a + p.s, 0);
+function penOpts(n){
+  if (n === 8) return [{s:10, label:"Progression ratée · +10 s"}, {s:20, label:"Suspension non tenue · +20 s"}];
+  if (n === 10) return [{s:5, label:"Plot touché ou oublié · +5 s"}];
+  return [{s:10, label:"Atelier raté · +10 s"}];
+}
+const byN = n => STATIONS.find(s => s.n === n);
+function curStation(){
+  if (state === "idle") return 1;
+  if (state === "count") return 2;
+  if (state === "run") return TIMED[splits.length].n;
+  return penSel;
+}
+function renderCur(){
+  const n = curStation(), s = byN(n), next = STATIONS.find(x => x.n === n + 1);
+  let btns;
+  if (n === 1) btns = `<button type="button" class="ghost small ${sacKo ? "danger" : ""}" data-sac="1">${sacKo ? "Sac non conforme (−1 pt) · annuler" : "Sac non conforme · −1 pt"}</button>`;
+  else btns = penOpts(n).map(o => `<button type="button" class="ghost small" data-pn="${n}" data-ps="${o.s}">${o.label}</button>`).join("");
+  const head = state === "done" ? `<span class="lab">Pénalité oubliée ? Touche l'atelier dans la barre du haut, puis le bouton de pénalité</span>` : `<span class="lab">${state === "idle" ? "Avant le départ" : state === "count" ? "Ensuite" : "Atelier en cours"}</span>`;
+  $("cur").innerHTML = `<div class="cur">${head}
+    <div class="cur-in"><figure class="fig">${s.svg}</figure>
+      <div class="col"><div class="row" style="gap:8px"><span class="n">${n}</span><h3>${s.name}</h3>${penOf(n) ? `<span class="pen">+${penOf(n)} s</span>` : ""}</div>
+        <p class="check"><b>Réussi si</b> ${s.ok}</p>
+        <div class="row">${btns}</div>
+        ${state !== "done" && next ? `<p class="note">Ensuite : <b style="color:var(--ink)">${next.n} · ${next.short}</b> — ${next.specs.slice(0, 2).join(" · ")}</p>` : ""}
+      </div></div></div>`;
+}
+function renderStrip(){
+  const n = curStation();
+  $("strip").innerHTML = STATIONS.map((s, k) => {
+    const i = k - 1, v = i >= 0 ? splits[i] : null;
+    const cls = (state !== "done" && s.n === n) ? "current" : (v != null || (s.n === 1 && state !== "idle")) ? "done" : "";
+    const sel = state === "done" && s.n === penSel ? " sel" : "";
+    const p = s.n === 1 ? (sacKo ? "−1 pt" : "") : (penOf(s.n) ? "+" + penOf(s.n) + " s" : "");
+    return `<button type="button" class="sc ${cls}${sel}" data-sc="${s.n}"><b>${s.n}</b><span>${s.short}</span><small>${v != null ? fmt(v) : s.n === 1 ? "hors chrono" : "—"}${p ? ` <em>${p}</em>` : ""}</small></button>`;
+  }).join("");
+  const cur = $("strip").querySelector(".current, .sel");
+  if (cur && cur.scrollIntoView) try { cur.scrollIntoView({block:"nearest", inline:"center"}); } catch(e){}
+}
+function renderPen(){ $("penval").textContent = "+" + penTotal() + " s" + (sacKo ? " · −1 pt" : ""); }
+function bestsFrom(list){ const b = TIMED.map(() => null); list.forEach(h => (h.splits || []).forEach((v, i) => { if (b[i] == null || v < b[i]) b[i] = v; })); return b; }
+function renderSplits(){
+  const b = bestsFrom(S.essais); let cum = 0;
+  $("splits").innerHTML = TIMED.map((s, i) => {
+    const v = splits[i]; if (v != null) cum += v;
+    const cls = v != null ? "done" : (state === "run" && i === splits.length ? "current" : "");
+    return `<tr class="${cls}"><td>${s.n} · ${s.short}</td><td class="num">${fmt(v)}</td><td class="num">${penOf(s.n) ? "+" + penOf(s.n) + " s" : ""}</td><td class="num">${v != null ? fmt(cum) : "—"}</td><td class="num best">${fmt(b[i])}</td></tr>`;
+  }).join("");
+}
+function renderChrono(){ renderCur(); renderStrip(); renderSplits(); renderPen(); }
+function setStatus(){
+  if (state === "idle"){ elStatus.innerHTML = "Prêt. Appuie quand le sac est posé."; elGo.textContent = "Sac posé"; elTime.classList.remove("countd"); }
+  else if (state === "count"){ elStatus.innerHTML = "Vers les pompes : le chrono part à 0."; elGo.textContent = "Partir maintenant"; }
+  else if (state === "run"){ const s = TIMED[splits.length]; elStatus.innerHTML = `En cours : <strong>${s.n} · ${s.name}</strong>`; elGo.textContent = splits.length === TIMED.length - 1 ? "Arrivée" : `Fin ${s.n} · ${s.short}`; }
+}
+function loop(){
+  const now = performance.now();
+  if (state === "count"){ const left = countEnd - now; if (left <= 0) startRun(countEnd); else elTime.textContent = (left / 1000).toFixed(1) + " s"; }
+  if (state === "run") elTime.textContent = fmt(now - t0);
+  raf = requestAnimationFrame(loop);
+}
+async function grabWake(){ try { wake = await navigator.wakeLock?.request("screen"); } catch(e){ wake = null; } }
+function dropWake(){ try { wake?.release(); } catch(e){} wake = null; }
+function startRun(at){ state = "run"; t0 = at; splits = []; elTime.classList.remove("countd"); setStatus(); renderChrono(); }
+function bodyNow(){
+  const raw = splits.reduce((a, b) => a + b, 0), total = raw + penTotal() * 1000;
+  return {at: lastBody ? lastBody.at : Date.now(), lieu: selLieu.value, raw: Math.round(raw), pen: penTotal(), penBy: pens.map(p => ({n: p.n, s: p.s})), total: Math.round(total),
+          note: withBonus(phmBase(total / 1000), sacKo ? -1 : 0), age: ageOn(), sac: sacKo, splits: splits.map(v => Math.round(v))};
+}
+function showResult(b){
+  $("result").hidden = false;
+  $("r-time").textContent = fmt(b.raw); $("r-total").textContent = fmt(b.total);
+  $("r-note").textContent = noteTxt(b.note) + (b.note == null ? "" : "/20");
+  const [c, label] = verdict(b.total);
+  elStatus.innerHTML = `Terminé en <strong>${fmt(b.total)}</strong> <span class="verdict ${c}">${label}</span>`;
+  elTime.textContent = fmt(b.total);
+}
+async function press(){
+  if (state === "idle"){
+    state = "count"; countEnd = performance.now() + 15000; pens = []; lastId = null; lastBody = null;
+    $("result").hidden = true; elTime.classList.add("countd"); grabWake(); cancelAnimationFrame(raf); loop(); setStatus(); renderChrono(); return;
+  }
+  if (state === "count"){ startRun(performance.now()); return; }
+  if (state === "run"){
+    splits.push(performance.now() - t0 - splits.reduce((a, b) => a + b, 0));
+    if (splits.length === TIMED.length){
+      cancelAnimationFrame(raf); dropWake(); state = "done"; elGo.textContent = "Nouvel essai"; penSel = 10;
+      lastBody = bodyNow(); showResult(lastBody); renderChrono();
+      lastId = await addDoc("essais", lastBody); return;
+    }
+    setStatus(); renderChrono(); return;
+  }
+  if (state === "done") reset();
+}
+function applyDone(){ lastBody = bodyNow(); showResult(lastBody); if (!lastId) return; clearTimeout(penTimer); penTimer = setTimeout(() => setDoc("essais", lastId, lastBody), 900); }
+function reset(){ cancelAnimationFrame(raf); dropWake(); state = "idle"; splits = []; pens = []; sacKo = false; lastId = null; lastBody = null; elTime.textContent = "0:00.0"; $("result").hidden = true; setStatus(); renderChrono(); }
+$("cur").addEventListener("click", e => {
+  const sac = e.target.closest("[data-sac]");
+  if (sac){ sacKo = !sacKo; renderChrono(); if (state === "done") applyDone(); return; }
+  const b = e.target.closest("[data-pn]"); if (!b) return;
+  pens.push({n: Number(b.dataset.pn), s: Number(b.dataset.ps)}); renderChrono(); if (state === "done") applyDone();
+});
+$("strip").addEventListener("click", e => { const b = e.target.closest("[data-sc]"); if (!b || state !== "done") return; penSel = Number(b.dataset.sc); renderChrono(); });
+$("undo").addEventListener("click", () => { pens.pop(); renderChrono(); if (state === "done") applyDone(); });
+elGo.addEventListener("click", press);
+$("reset").addEventListener("click", reset);
+document.addEventListener("keydown", e => {
+  const t = e.target;
+  if (e.code !== "Space" || $("v-parcours").hidden) return;
+  if (t instanceof HTMLButtonElement || t instanceof HTMLInputElement || t instanceof HTMLSelectElement) return;
+  e.preventDefault(); press();
+});
+
+/* ======================= LUC LÉGER ======================= */
+const LL = {state:"idle", t0:0, raf:null, next:0, nav:0, pal:1, start:1, ctx:null};
+for (let p = 1; p <= 10; p++) $("ll-start").insertAdjacentHTML("beforeend", `<option value="${p}">${p === 1 ? "Palier 1 (test complet)" : "Palier " + p + " (entraînement)"}</option>`);
+for (let p = 1; p <= 14; p++) $("ll-f-pal").insertAdjacentHTML("beforeend", `<option value="${p}" ${p === 5 ? "selected" : ""}>Palier ${p}</option>`);
+$("ll-f-date").value = todayKey();
+const shuttleSec = p => 20 / (speedOf(p) / 3.6);
+function tone(freq, dur, when){
+  try {
+    const c = LL.ctx, o = c.createOscillator(), g = c.createGain();
+    o.frequency.value = freq; o.type = "square";
+    g.gain.setValueAtTime(0.0001, when); g.gain.exponentialRampToValueAtTime(0.35, when + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, when + dur);
+    o.connect(g).connect(c.destination); o.start(when); o.stop(when + dur + 0.02);
+  } catch(e){}
+}
+function beep(){ if (LL.ctx) tone(1000, 0.14, LL.ctx.currentTime); }
+function palierSignal(p){
+  if (LL.ctx){ const t = LL.ctx.currentTime; tone(700, 0.12, t); tone(700, 0.12, t + 0.18); tone(1100, 0.2, t + 0.36); }
+  if ($("ll-voice").checked){ try { const u = new SpeechSynthesisUtterance("Palier " + p); u.lang = "fr-FR"; speechSynthesis.cancel(); speechSynthesis.speak(u); } catch(e){} }
+}
+function llRender(el){
+  const p = LL.pal, inPal = el - (p - 1) * 60;
+  $("ll-pal").textContent = p;
+  $("ll-speed").textContent = fr(speedOf(p));
+  $("ll-time").textContent = fmtS(Math.floor(el));
+  $("ll-nav").textContent = LL.nav;
+  $("ll-bar").style.width = Math.min(100, inPal / 60 * 100) + "%";
+}
+function llLoop(){
+  const el = (performance.now() - LL.t0) / 1000;
+  const p = Math.floor(el / 60) + 1;
+  if (p > LL.pal){ LL.pal = p; palierSignal(p); const card = $("ll-pal").closest(".panel"); card.classList.remove("flash"); void card.offsetWidth; card.classList.add("flash"); }
+  while (el >= LL.next){ beep(); LL.nav++; LL.next += shuttleSec(Math.floor(LL.next / 60) + 1); }
+  llRender(el);
+  LL.raf = requestAnimationFrame(llLoop);
+}
+async function llPress(){
+  if (LL.state === "idle" || LL.state === "done"){
+    try { LL.ctx = LL.ctx || new (window.AudioContext || window.webkitAudioContext)(); await LL.ctx.resume(); } catch(e){ LL.ctx = null; }
+    LL.start = Number($("ll-start").value);
+    LL.pal = LL.start; LL.nav = 0;
+    const off = (LL.start - 1) * 60;
+    LL.t0 = performance.now() - off * 1000;
+    LL.next = off + shuttleSec(LL.start);
+    LL.state = "run"; $("ll-result").hidden = true;
+    $("ll-go").textContent = "Arrêt : tu ne suis plus le rythme";
+    $("ll-status").innerHTML = LL.start === 1 ? "Test en cours. À chaque bip, tu dois être sur la ligne." : `Entraînement depuis le palier ${LL.start} : non enregistré.`;
+    palierSignal(LL.start); grabWake(); cancelAnimationFrame(LL.raf); llLoop();
+    if (!LL.ctx) $("ll-status").textContent = "Son indisponible sur cet appareil : suivre la barre et le compteur de navettes.";
+    return;
+  }
+  if (LL.state === "run"){
+    cancelAnimationFrame(LL.raf); dropWake();
+    const el = (performance.now() - LL.t0) / 1000, p = Math.floor(el / 60) + 1, sec = Math.floor(Math.min(59, el - (p - 1) * 60));
+    const q = Math.floor(sec / 15) * 15;
+    LL.state = "done"; $("ll-go").textContent = "Relancer";
+    const note = withBonus(lucBase(p, sec));
+    $("ll-result").hidden = false;
+    $("ll-r-pal").textContent = palBig(p, q);
+    $("ll-r-v").textContent = fr(speedOf(p)) + " km/h";
+    $("ll-r-note").textContent = fr(note) + "/20";
+    if (LL.start === 1){
+      $("ll-status").innerHTML = `Arrêt au <strong>${palTxt(p, q)}</strong>, ${LL.nav} navettes. Résultat enregistré.`;
+      await addDoc("luc", {at: Date.now(), palier: p, sec: q, note, age: ageOn(), navettes: LL.nav, source: "chrono"});
+    } else $("ll-status").innerHTML = `Arrêt au <strong>${palTxt(p, q)}</strong> (entraînement, non enregistré).`;
+  }
+}
+$("ll-go").addEventListener("click", llPress);
+$("ll-form").addEventListener("submit", async e => {
+  e.preventDefault();
+  const p = Number($("ll-f-pal").value), s = Number($("ll-f-sec").value);
+  const at = $("ll-f-date").value ? new Date($("ll-f-date").value + "T12:00:00").getTime() : Date.now();
+  await addDoc("luc", {at, palier: p, sec: s, note: withBonus(lucBase(p, s)), age: ageOn(), source: "manuel"});
+  $("ll-status").textContent = `Résultat ajouté : ${palTxt(p, s)}.`;
+});
+function renderLucBareme(){
+  const cells = [];
+  for (let p = 3; p <= 10; p++) cells.push([p, 0]);
+  cells.splice(2, 0, [4, 15]);
+  $("ll-bareme").innerHTML = cells.map(([p, s]) => {
+    const n = lucBase(p, s), cls = (p === 4 && s === 15) ? "lim" : (p === LUC_TARGET && s === 0 ? "tgt" : "");
+    return `<div class="${cls}"><b>${fr(n)}</b><span>palier ${p}${s ? " + " + s + " s" : ""} · ${fr(speedOf(p))} km/h</span></div>`;
+  }).join("");
+}
+
+/* ======================= ATELIERS ======================= */
+let mode = lsGet("phm-mode", "concours");
+function setMode(m){ mode = m; lsSet("phm-mode", m); renderAteliers(); }
+$("mode-seg").addEventListener("click", e => { const b = e.target.closest("[data-m]"); if (b) setMode(b.dataset.m); });
+const MAT_KEY = "phm-materiel-fp-v1";
+let got = lsGet(MAT_KEY, {});
+function introHTML(){
+  if (mode === "concours"){
+    const cells = [[50,""],[60,"target"],[70,"target"],[80,""],[90,""],[100,""],[109,"limit"]].map(([s, c]) => `<div class="bar-cell ${c}"><b>${fr(PHM[s])}</b><span>${fmtS(s)}${c === "limit" ? " · seuil" : ""}</span></div>`).join("");
+    return `<div class="rules">
+      <div class="rule"><b>Dans l'ordre, tous tentés</b>Les dix ateliers se font dans l'ordre. Si tu oublies un atelier, le moniteur te le signale tout de suite et tu dois le faire. <b style="display:inline;font-family:inherit;font-size:inherit">Un atelier pas tenté, ou un abandon, donne 0 à tout le parcours.</b></div>
+      <div class="rule"><b>Mal fait = à refaire</b>Si tu ne respectes pas la consigne, tu dois refaire l'exercice. Si tu ne le réussis pas, des secondes sont ajoutées à ton temps : +10 s en général, +5 s par plot au slalom.</div>
+      <div class="rule"><b>Le sac avant le chrono</b>Hors chrono, en marchant, 3 essais au plus. Le chrono démarre 15 s après que tu as posé le sac, même si tu n'as pas commencé les pompes. Sac pas conforme : −1 point.</div>
+      <div class="rule"><b>Le temps et la note</b>Les dixièmes ne comptent pas (1:09,8 = 1:09). La note dépend du temps avec pénalités. Il y a aussi +5 s par plot du trajet non contourné. Sous 7/20 : éliminée.</div>
+      <div class="rule"><b>Avant le Luc Léger</b>Le moniteur fait une démonstration et tu peux essayer le parcours pendant l'échauffement. Ensuite, au moins 30 min de repos avant le Luc Léger.</div>
+      <div class="rule"><b>Ta note finale</b>C'est la moyenne de tes deux notes (parcours et Luc Léger). Chacune doit faire au moins 7/20.</div>
+    </div>
+    ${$("tpl-plan-officiel").innerHTML}
+    <div class="panel"><h3>Barème femmes</h3><div class="bareme">${cells}</div><p class="note">Note si tu as moins de 30 ans ; +1 point si tu as entre 30 et 40 ans. Orange : objectif 1:00 – 1:10.</p></div>`;
+  }
+  if (mode === "fp"){
+    const rows = STATIONS.map(s => { const id = "m" + s.n; return `<tr class="${got[id] ? "got" : ""}"><td><input type="checkbox" id="${id}" ${got[id] ? "checked" : ""} aria-label="Prêt : atelier ${s.n}"></td><td>${s.n} · ${s.short}</td><td>${s.fp.have.join(" — ") || "—"}</td><td>${s.fp.bring.join(" — ") || "—"}</td></tr>`; }).join("");
+    return `<p class="note">Le parcours complet, dans l'ordre, dans la zone fonctionnelle de Fitness Park Lille. 20 à 25 min d'installation à deux. Le matériel « sur place » est celui qu'on trouve d'habitude dans ces clubs : à vérifier sur place.</p>
+    <div class="col"><span class="lab" style="color:var(--mat)">Plan réel · au concours</span>${$("tpl-plan-officiel").innerHTML}</div>
+    <div class="col"><span class="lab" style="color:var(--cone)">Reconstitution · à Fitness Park</span>${$("tpl-plan-fp").innerHTML}
+    <p class="note">Même ordre qu'au concours. Différences : sac en 10 m aller-retour, poutre remplacée par une ligne ou un banc, barrières plus basses si les box ne montent pas à 1,20 m, slalom en 3 × 15 m.</p></div>
+    <div class="panel"><h3>Matériel</h3>
+      <div class="tbl"><table class="mat-tbl"><thead><tr><th></th><th>Atelier</th><th>Sur place</th><th>À apporter</th></tr></thead><tbody id="materiel">${rows}</tbody></table></div>
+      <p class="note"><b style="color:var(--ink)">Le sac à préparer :</b> 3 haies réglables (ou élastiques), 6 à 8 cerceaux de 70 cm, 8 à 12 plots, 2 élastiques de 3 à 4 m, un mètre ruban de 20 m, une sangle pour la ligne de poutre.</p>
+    </div>`;
+  }
+  return `<p class="note">Au club, tu ne peux pas monter le parcours, mais tu as les vrais agrès : c'est là que tu travailles la poutre à 1 m, les barrières à 1,20 m et la barre. Chaque fiche montre l'atelier réel à côté de l'exercice à faire seule ; la séance type est sur l'accueil.</p>${$("tpl-vertige").innerHTML}`;
+}
+function cardHTML(s){
+  const top = `<div class="st-top"><span class="n">${s.n}</span><h3>${s.name}</h3><span class="pill">${s.timed ? "chronométré" : "hors chrono"}</span><span class="pen">${s.pen}</span></div>`;
+  const specs = `<div class="specs">${s.specs.map(x => `<span>${x}</span>`).join("")}</div>`;
+  const ok = `<p class="check"><b>Réussi si</b> ${s.ok}</p>`;
+  let body;
+  if (mode === "concours"){
+    body = `<div class="st-a"><figure class="fig">${s.svg}</figure><div class="col">${specs}<p class="quote">${s.exec}</p>${s.rule ? `<p class="note">${s.rule}</p>` : ""}${ok}</div></div>`;
+  } else if (mode === "fp"){
+    body = `<div class="st-a"><div class="col"><span class="lab" style="color:var(--mat)">Réel · au concours</span><figure class="fig">${s.svg}</figure>${specs}</div>
+      <div class="blk fp"><h4>Reconstitué à Fitness Park</h4>
+      ${s.fp.have.length ? `<div><span class="lab">Sur place</span><ul>${s.fp.have.map(x => `<li>${x}</li>`).join("")}</ul></div>` : ""}
+      ${s.fp.bring.length ? `<div><span class="lab">À apporter</span><ul>${s.fp.bring.map(x => `<li>${x}</li>`).join("")}</ul></div>` : ""}
+      <p>${s.fp.setup}</p>${ok}</div></div>`;
+  } else {
+    body = `<div class="st-a"><div class="col"><span class="lab" style="color:var(--mat)">Réel · au concours</span><figure class="fig">${s.svg}</figure>${specs}</div>
+      <div class="blk club"><h4>Au club de gym, seule</h4><p>${s.club.ex}</p><p class="vol">${s.club.vol}</p>${ok}</div></div>`;
+  }
+  return `<article class="st${s.timed ? "" : " off"}" id="atelier-${s.n}">${top}${body}<p class="tip"><b>Pour gagner du temps :</b> ${s.tip}</p></article>`;
+}
+function renderAteliers(){
+  document.querySelectorAll("#mode-seg [data-m]").forEach(b => b.setAttribute("aria-pressed", b.dataset.m === mode));
+  $("mode-intro").innerHTML = `<div style="display:flex;flex-direction:column;gap:14px">${introHTML()}</div>`;
+  $("jump").innerHTML = STATIONS.map(s => `<a href="#atelier-${s.n}" data-jump="${s.n}">${s.n} · ${s.short}</a>`).join("");
+  $("stations").innerHTML = STATIONS.map(cardHTML).join("");
+  const mt = $("materiel");
+  if (mt) mt.addEventListener("change", e => { if (e.target.type === "checkbox"){ got[e.target.id] = e.target.checked; lsSet(MAT_KEY, got); e.target.closest("tr").classList.toggle("got", e.target.checked); } });
+}
+$("jump").addEventListener("click", e => { const a = e.target.closest("[data-jump]"); if (!a) return; e.preventDefault(); $("atelier-" + a.dataset.jump).scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"}); });
+
+/* ======================= PROGRÈS ======================= */
+const LIEUX = ["Tous", "Fitness Park Lille", "Lycée Saint-Quentin (vrai parcours)", "Club de gym", "Autre"];
+let filt = lsGet("phm-filtre", "Tous");
+let histMode = "essais";
+const filtered = () => S.essais.filter(e => filt === "Tous" || e.lieu === filt).sort((a, b) => a.at - b.at);
+function renderChips(){
+  const present = new Set(S.essais.map(e => e.lieu));
+  $("chips").innerHTML = LIEUX.filter(l => l === "Tous" || present.has(l) || l === filt)
+    .map(l => `<button type="button" class="chip" aria-pressed="${l === filt}" data-l="${esc(l)}">${esc(l.startsWith("Lycée") ? "Saint-Quentin" : l)}</button>`).join("");
+}
+$("chips").addEventListener("click", e => { const b = e.target.closest("[data-l]"); if (!b) return; filt = b.dataset.l; lsSet("phm-filtre", filt); renderProg(); });
+
+function lineChart(host, pts, o){
+  const W = 640, H = 250, L = 52, R = 14, T = 14, B = 30;
+  const vals = pts.map(p => p.v);
+  let lo = Math.min(o.lo, ...vals.map(v => v - o.pad)), hi = Math.max(o.hi, ...vals.map(v => v + o.pad));
+  lo = Math.floor(lo / o.step) * o.step; hi = Math.ceil(hi / o.step) * o.step;
+  const y = v => o.smallUp ? T + (v - lo) / (hi - lo) * (H - T - B) : T + (hi - v) / (hi - lo) * (H - T - B);
+  const n = pts.length, x = i => n <= 1 ? (L + W - R) / 2 : L + i * (W - L - R) / (n - 1);
+  let g = "";
+  for (let v = lo; v <= hi + 1e-9; v += o.step){ g += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" opacity=".7"/><text x="${L - 8}" y="${y(v) + 4}" text-anchor="end">${o.tick(v)}</text>`; }
+  if (o.band){ const a = y(o.band[0]), b = y(o.band[1]); g += `<rect x="${L}" y="${Math.min(a, b)}" width="${W - L - R}" height="${Math.max(4, Math.abs(b - a))}" fill="${o.bandFill}"/><text x="${W - R - 4}" y="${Math.min(a, b) + 13}" text-anchor="end" style="fill:${o.bandInk};font-weight:600">objectif</text>`; }
+  if (o.limit != null){ g += `<line x1="${L}" x2="${W - R}" y1="${y(o.limit)}" y2="${y(o.limit)}" stroke="var(--warn)" stroke-width="1.5" stroke-dasharray="5 5"/><text x="${W - R - 4}" y="${y(o.limit) - 5}" text-anchor="end" style="fill:var(--warn);font-weight:600">7/20</text>`; }
+  if (!n) g += `<text x="${(L + W - R) / 2}" y="${H / 2 - 10}" text-anchor="middle" style="font-size:14px">${o.empty}</text>`;
+  else {
+    if (n > 1) g += `<polyline fill="none" stroke="${o.color}" stroke-width="2" stroke-linejoin="round" points="${pts.map((p, i) => x(i) + "," + y(p.v)).join(" ")}"/>`;
+    pts.forEach((p, i) => { g += `<circle cx="${x(i)}" cy="${y(p.v)}" r="${i === n - 1 ? 6 : 4.5}" fill="${o.color}" stroke="var(--surface)" stroke-width="2"/>`; });
+    g += `<text x="${L}" y="${H - 8}">1er</text><text x="${W - R}" y="${H - 8}" text-anchor="end">dernier</text>`;
+    g += `<rect class="hit" x="${L}" y="${T}" width="${W - L - R}" height="${H - T - B}" fill="transparent"/>`;
+  }
+  host.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${o.aria}">${g}</svg><div class="tt" hidden></div>`;
+  const hit = host.querySelector(".hit"); if (!hit) return;
+  const svg = host.querySelector("svg"), tt = host.querySelector(".tt");
+  const showTip = ev => {
+    const r = svg.getBoundingClientRect(), px = (ev.clientX - r.left) / r.width * W;
+    let bi = 0, bd = Infinity; pts.forEach((p, i) => { const d = Math.abs(x(i) - px); if (d < bd){ bd = d; bi = i; } });
+    tt.hidden = false; tt.style.left = (x(bi) / W * r.width) + "px"; tt.style.top = (y(pts[bi].v) / H * r.height) + "px"; tt.textContent = pts[bi].tip;
+  };
+  hit.addEventListener("pointermove", showTip); hit.addEventListener("pointerdown", showTip); hit.addEventListener("pointerleave", () => tt.hidden = true);
+}
+function delta(d, unit, goodIfNeg){ const good = goodIfNeg ? d <= 0 : d >= 0; return `<span class="delta ${good ? "up" : "down"}">${d < 0 ? "−" : "+"}${fr(Math.abs(d).toFixed(1))} ${unit}</span>`; }
+function renderProg(){
+  renderChips();
+  const list = filtered();
+  if (list.length){
+    const best = list.reduce((m, e) => e.total < m.total ? e : m, list[0]), last = list[list.length - 1], first = list[0];
+    const recent = list.slice(-3), avg = recent.reduce((a, e) => a + e.total, 0) / recent.length;
+    $("kpis").innerHTML = `<div class="kpi"><span>Dernier</span><b>${fmt(last.total)}</b><small>${list.length > 1 ? delta((last.total - first.total) / 1000, "s depuis le 1er", true) : "premier essai"}</small></div>
+      <div class="kpi"><span>Meilleur</span><b>${fmt(best.total)}</b><small>${dayTxt(best.at)}</small></div>
+      <div class="kpi"><span>Moyenne 3 derniers</span><b>${fmt(avg)}</b><small>≈ ${noteTxt(withBonus(phmBase(avg / 1000)))}/20</small></div>
+      <div class="kpi"><span>Essais</span><b>${list.length}</b><small>${esc(filt === "Tous" ? "tous lieux" : filt)}</small></div>`;
+  } else $("kpis").innerHTML = "";
+  lineChart($("chart-phm"), list.map(e => ({v: e.total / 1000, tip: `${dateTxt(e.at)} · ${fmt(e.total)}${e.pen ? ` (dont +${e.pen} s)` : ""} · ${noteTxt(e.note)}/20 · ${e.lieu}`})),
+    {lo:50, hi:120, pad:5, step:10, smallUp:true, tick: v => fmtS(v), band:[60, 70], bandFill:"var(--cone-soft)", bandInk:"var(--cone)", limit:109, color:"var(--mat)", empty:"Les parcours chronométrés apparaîtront ici.", aria:"Évolution du temps du parcours"});
+
+  const luc = S.luc.slice().sort((a, b) => a.at - b.at);
+  if (luc.length){
+    const lv = e => e.palier + e.sec / 60, best = luc.reduce((m, e) => lv(e) > lv(m) ? e : m, luc[0]), last = luc[luc.length - 1];
+    $("kpis-luc").innerHTML = `<div class="kpi"><span>Dernier</span><b>${palBig(last.palier, last.sec)}</b><small>${fr(withBonus(lucBase(last.palier, last.sec)))}/20 · ${dayTxt(last.at)}</small></div>
+      <div class="kpi"><span>Meilleur</span><b>${palBig(best.palier, best.sec)}</b><small>${fr(withBonus(lucBase(best.palier, best.sec)))}/20</small></div>
+      <div class="kpi"><span>Objectif</span><b>Palier ${LUC_TARGET}</b><small>${fr(withBonus(lucBase(LUC_TARGET, 0)))}/20</small></div>
+      <div class="kpi"><span>Tests</span><b>${luc.length}</b><small>${luc.length > 1 ? delta(lv(last) - lv(luc[0]), "palier", false) : "premier test"}</small></div>`;
+  } else $("kpis-luc").innerHTML = "";
+  lineChart($("chart-luc"), luc.map(e => ({v: e.palier + e.sec / 60, tip: `${dayTxt(e.at)} · ${palTxt(e.palier, e.sec)} · ${fr(withBonus(lucBase(e.palier, e.sec)))}/20`})),
+    {lo:3, hi:10, pad:0.5, step:1, smallUp:false, tick: v => "pal. " + v, band:[LUC_TARGET, LUC_TARGET + 0.25], bandFill:"var(--run-soft)", bandInk:"var(--run)", limit:4.25, color:"var(--run)", empty:"Les tests Luc Léger apparaîtront ici.", aria:"Évolution du palier au Luc Léger"});
+
+  const b = bestsFrom(list), withS = list.filter(e => e.splits && e.splits.length === TIMED.length), f = withS[0], l = withS[withS.length - 1];
+  $("prog-ateliers").innerHTML = TIMED.map((s, i) => `<tr><td>${s.n} · ${s.short}</td><td class="num">${fmt(f ? f.splits[i] : null)}</td><td class="num">${fmt(l ? l.splits[i] : null)}</td><td class="num best">${fmt(b[i])}</td><td class="num">${withS.length > 1 ? delta((l.splits[i] - f.splits[i]) / 1000, "s", true) : "—"}</td></tr>`).join("");
+  renderMesures(); renderHist();
+}
+function renderHist(){
+  document.querySelectorAll("#hist-seg [data-h]").forEach(b => b.setAttribute("aria-pressed", b.dataset.h === histMode));
+  if (histMode === "essais"){
+    $("hist-head").innerHTML = `<tr><th>Date</th><th>Lieu</th><th class="num">Temps</th><th class="num">Pénalités</th><th class="num">Total</th><th class="num">Note</th><th></th></tr>`;
+    const list = filtered().slice().reverse();
+    $("hist").innerHTML = list.length ? list.map(e => { const [c, label] = verdict(e.total); return `<tr><td>${dateTxt(e.at)}</td><td>${esc(e.lieu || "—")}</td><td class="num">${fmt(e.raw)}</td><td class="num">${e.pen ? "+" + e.pen + " s" : "—"}</td><td class="num"><b>${fmt(e.total)}</b> <span class="verdict ${c}">${label}</span></td><td class="num">${noteTxt(e.note)}</td><td class="num"><button type="button" class="ghost tiny" data-del="${esc(e.id)}" data-coll="essais">Supprimer</button></td></tr>`; }).join("") : `<tr><td colspan="7" class="note">Aucun parcours pour l'instant.</td></tr>`;
+  } else {
+    $("hist-head").innerHTML = `<tr><th>Date</th><th>Résultat</th><th class="num">Vitesse</th><th class="num">Note</th><th>Source</th><th></th></tr>`;
+    const list = S.luc.slice().sort((a, b) => b.at - a.at);
+    $("hist").innerHTML = list.length ? list.map(e => `<tr><td>${dayTxt(e.at)}</td><td><b>${palTxt(e.palier, e.sec)}</b></td><td class="num">${fr(speedOf(e.palier))} km/h</td><td class="num">${fr(withBonus(lucBase(e.palier, e.sec)))}</td><td>${e.source === "manuel" ? "ajouté à la main" : "chrono"}</td><td class="num"><button type="button" class="ghost tiny" data-del="${esc(e.id)}" data-coll="luc">Supprimer</button></td></tr>`).join("") : `<tr><td colspan="6" class="note">Aucun test pour l'instant.</td></tr>`;
+  }
+}
+$("hist-seg").addEventListener("click", e => { const b = e.target.closest("[data-h]"); if (!b) return; histMode = b.dataset.h; renderHist(); });
+
+const MES = {
+  suspension: {label:"Suspension à la barre", unit:"s", goal:"15 s requises · viser 30 s"},
+  pompes: {label:"Pompes réglementaires d'affilée", unit:"", goal:"3 requises · viser 8"},
+  poutre: {label:"Poutre : hauteur maîtrisée", unit:"cm", goal:"10 traversées sans les mains · objectif 100 cm"}
+};
+$("mes-date").value = todayKey();
+$("mes-form").addEventListener("submit", async e => {
+  e.preventDefault();
+  const v = parseFloat($("mes-val").value); if (isNaN(v)) return;
+  const at = $("mes-date").value ? new Date($("mes-date").value + "T12:00:00").getTime() : Date.now();
+  await addDoc("mesures", {at, type: $("mes-type").value, value: v}); $("mes-val").value = "";
+});
+function spark(vals, color){
+  if (vals.length < 2) return "";
+  const W = 200, H = 40, lo = Math.min(...vals), hi = Math.max(...vals), span = hi - lo || 1;
+  const pts = vals.map((v, i) => [4 + i * (W - 8) / (vals.length - 1), H - 5 - (v - lo) / span * (H - 10)]), last = pts[pts.length - 1];
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true"><polyline fill="none" stroke="${color}" stroke-width="2" points="${pts.map(p => p.join(",")).join(" ")}"/><circle cx="${last[0]}" cy="${last[1]}" r="4" fill="${color}"/></svg>`;
+}
+function renderMesures(){
+  $("mes-grid").innerHTML = Object.entries(MES).map(([k, m]) => {
+    const list = S.mesures.filter(x => x.type === k).sort((a, b) => a.at - b.at), last = list[list.length - 1];
+    const best = list.length ? Math.max(...list.map(x => x.value)) : null, u = m.unit ? " " + m.unit : "";
+    const rows = list.slice(-3).reverse().map(x => `<div class="mes-row"><span>${dayTxt(x.at)} · ${fr(x.value)}${u}</span><button type="button" class="ghost tiny" data-del="${esc(x.id)}" data-coll="mesures" aria-label="Supprimer">×</button></div>`).join("");
+    return `<div class="mes"><span class="lab">${m.label}</span><b>${last ? fr(last.value) + u : "—"}</b><small class="note">${best != null ? "meilleur " + fr(best) + u + " · " : ""}${m.goal}</small>${spark(list.map(x => x.value), "var(--mat)")}${rows}</div>`;
+  }).join("");
+}
+
+/* ======================= INSTALLATION ======================= */
+(function(){
+  const standalone = matchMedia("(display-mode: standalone)").matches || navigator.standalone;
+  if (standalone || lsGet("phm-install-no", false)) return;
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const box = $("install"), txt = $("install-txt"), go = $("install-go");
+  let deferred = null;
+  window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferred = e; txt.textContent = "Elle s'ouvrira comme une vraie appli, en plein écran, même sans réseau."; go.hidden = false; box.hidden = false; });
+  if (ios){ txt.innerHTML = "Sur iPhone, dans Safari : touche le bouton <b>Partager</b> (le carré avec une flèche vers le haut), puis <b>Sur l'écran d'accueil</b>, puis <b>Ajouter</b>."; box.hidden = false; }
+  go.addEventListener("click", async () => { if (!deferred) return; deferred.prompt(); await deferred.userChoice.catch(() => {}); deferred = null; box.hidden = true; });
+  $("install-no").addEventListener("click", () => { lsSet("phm-install-no", true); box.hidden = true; });
+})();
+
+/* ======================= DÉMARRAGE ======================= */
+function renderAll(){ renderHome(); renderSplits(); if (!$("v-progres").hidden) renderProg(); }
+setStatus(); renderChrono(); renderSeance(); renderLucBareme(); renderAteliers(); renderAll();
+show((location.hash || "#accueil").slice(1), true);
+initStore();
+</script>
+<script>
+if ("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+</script>
+</body>
+</html>
