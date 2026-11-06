@@ -1787,17 +1787,27 @@ let deferredInstall = null;
 const isStandalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
 window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferredInstall = e; });
 window.addEventListener("appinstalled", () => { deferredInstall = null; renderInstall(true); });
+const UA = navigator.userAgent;
+const IS_IOS = /iphone|ipad|ipod/i.test(UA) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+let installTab = IS_IOS ? "ios" : "android";
+function androidSteps(){
+  const now = deferredInstall ? `<button type="button" class="btn" id="install-now">Installer maintenant</button><p class="note">Ou à la main :</p>` : "";
+  return `${now}<p><b>Avec Chrome</b> (le navigateur habituel sur Android) :</p>
+    <ol><li>Ouvre ce site dans <b>Chrome</b>.</li><li>Touche les <b>3 points ⋮</b> en haut à droite.</li><li>Touche <b>Installer l'application</b> (ou <b>Ajouter à l'écran d'accueil</b>).</li><li>Confirme avec <b>Installer</b>.</li></ol>
+    <p class="note">Avec <b>Samsung Internet</b> : menu <b>≡</b> en bas à droite › <b>Ajouter page à</b> › <b>Écran d'accueil</b>.</p>
+    <p class="note">L'icône « Parcours » apparaît sur ton écran d'accueil : ouvre toujours l'appli depuis cette icône.</p>`;
+}
+function iosSteps(){
+  return `<p><b>Avec Safari</b> :</p>
+    <ol><li>Ouvre ce site dans <b>Safari</b>.</li><li>Touche le bouton <b>Partager</b> en bas de l'écran (le carré avec une flèche vers le haut).</li><li>Fais défiler et touche <b>Sur l'écran d'accueil</b>.</li><li>Touche <b>Ajouter</b> en haut à droite.</li></ol>
+    <p class="note">Avec Chrome sur iPhone : bouton <b>Partager</b> dans la barre d'adresse › <b>Sur l'écran d'accueil</b>. Si tu ne le trouves pas, passe par Safari.</p>
+    <p class="note"><b>Important sur iPhone :</b> installe l'appli <b>avant</b> de saisir tes résultats, puis utilise toujours l'icône « Parcours » (ce qui est saisi dans le navigateur n'apparaît pas dans l'appli). Pour le partage, colle le lien dans l'appli : Réglages › Partage entre téléphones.</p>`;
+}
 function installSteps(){
-  const ua = navigator.userAgent;
-  const ios = /iphone|ipad|ipod/i.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-  const iosNote = `<p class="note">Important sur iPhone : installe l'appli <b>avant</b> de saisir tes résultats, et utilise ensuite toujours l'icône « Parcours » (ce qui est saisi dans le navigateur n'apparaît pas dans l'appli installée). Pour le partage, colle le lien dans l'appli : Réglages › Partage entre téléphones.</p>`;
-  if (ios && /crios|fxios|edgios/i.test(ua))
-    return `<p><b>Sur iPhone (Chrome, Firefox ou Edge) :</b></p><ol><li>Touche le bouton <b>Partager</b> (le carré avec une flèche vers le haut, dans la barre d'adresse ou le menu).</li><li>Touche <b>Sur l'écran d'accueil</b>.</li><li>Touche <b>Ajouter</b>.</li></ol><p class="note">Si tu ne trouves pas « Sur l'écran d'accueil », ouvre cette page dans <b>Safari</b> et fais pareil.</p>` + iosNote;
-  if (ios) return `<p><b>Sur iPhone (Safari) :</b></p><ol><li>Touche le bouton <b>Partager</b> en bas de l'écran (le carré avec une flèche vers le haut).</li><li>Fais défiler et touche <b>Sur l'écran d'accueil</b>.</li><li>Touche <b>Ajouter</b> en haut à droite.</li></ol><p class="note">L'icône « Parcours » apparaît sur ton écran d'accueil.</p>` + iosNote;
-  if (/samsungbrowser/i.test(ua)) return `<p><b>Avec Samsung Internet :</b></p><ol><li>Touche le menu <b>≡</b> en bas à droite.</li><li>Touche <b>Ajouter page à</b>, puis <b>Écran d'accueil</b>.</li></ol>`;
-  if (/firefox|fxios/i.test(ua) && /android/i.test(ua)) return `<p><b>Avec Firefox :</b></p><ol><li>Touche le menu <b>⋮</b>.</li><li>Touche <b>Installer</b> (ou « Ajouter à l'écran d'accueil »).</li></ol>`;
-  if (/android/i.test(ua)) return `<p><b>Sur Android (Chrome) :</b></p><ol><li>Touche le menu <b>⋮</b> en haut à droite.</li><li>Touche <b>Installer l'application</b> (ou « Ajouter à l'écran d'accueil »).</li><li>Confirme avec <b>Installer</b>.</li></ol>`;
-  return `<p><b>Sur ordinateur (Chrome ou Edge) :</b> clique sur l'icône d'installation à droite de la barre d'adresse, ou menu <b>⋮</b> › <b>Installer Parcours</b>.</p><p class="note">Pour son téléphone : ouvre ce site sur le téléphone et touche ce même bouton.</p>`;
+  const tab = (k, l) => `<button type="button" data-itab="${k}" aria-pressed="${installTab === k}">${l}</button>`;
+  return `<div class="row between"><h3>Installer l'appli</h3><button type="button" class="ghost tiny" id="install-close">Fermer</button></div>
+    <div class="seg" role="group" aria-label="Type de téléphone">${tab("android", "Android")}${tab("ios", "iPhone")}</div>
+    <div class="col">${installTab === "ios" ? iosSteps() : androidSteps()}</div>`;
 }
 function renderInstall(justInstalled){
   const on = isStandalone() || justInstalled;
@@ -1805,19 +1815,22 @@ function renderInstall(justInstalled){
   if (on && $("install-help")) $("install-help").hidden = true;
   const st = $("install-state"); if (st) st.textContent = on ? "L'appli est installée sur cet appareil." : "Elle s'ouvrira comme une vraie appli, en plein écran, même sans réseau.";
 }
+function openInstall(){
+  const h = $("install-help");
+  h.innerHTML = installSteps(); h.hidden = false;
+  if ($("v-accueil").hidden) show("accueil");
+  h.scrollIntoView({block: "center", behavior: "smooth"});
+}
 document.addEventListener("click", async e => {
-  const b = e.target.closest("[data-install]"); if (!b) return;
-  if (deferredInstall){
+  if (e.target.closest("[data-install]")){ openInstall(); return; }
+  const tb = e.target.closest("[data-itab]");
+  if (tb){ installTab = tb.dataset.itab; $("install-help").innerHTML = installSteps(); return; }
+  if (e.target.id === "install-now" && deferredInstall){
     deferredInstall.prompt();
     const r = await deferredInstall.userChoice.catch(() => null);
     deferredInstall = null;
-    if (r && r.outcome === "accepted"){ renderInstall(true); return; }
+    if (r && r.outcome === "accepted") renderInstall(true); else $("install-help").innerHTML = installSteps();
   }
-  const h = $("install-help");
-  h.innerHTML = installSteps() + `<div class="row"><button type="button" class="ghost tiny" id="install-close">Fermer</button></div>`;
-  h.hidden = false;
-  if ($("v-accueil").hidden) show("accueil");
-  h.scrollIntoView({block: "center", behavior: "smooth"});
 });
 document.addEventListener("click", e => { if (e.target.id === "install-close") $("install-help").hidden = true; });
 renderInstall(false);
