@@ -290,6 +290,12 @@ tr.done td:first-child{color:var(--muted)}
 .msg.me{align-self:flex-end;background:var(--mat);color:#fff;border-bottom-right-radius:4px}
 .msg.bot{align-self:flex-start;background:var(--floor);border-bottom-left-radius:4px}
 .ai-box{background:var(--run-soft);border-radius:10px;padding:12px 14px;font-size:.95rem;line-height:1.55}
+.love{font-size:.98rem;color:var(--muted);font-style:italic;max-width:60ch}
+.love i{font-style:normal;color:var(--cone)}
+.sign{text-align:center;font-size:.92rem;color:var(--muted);padding:10px 0 4px}
+.sign i{font-style:normal;color:var(--cone)}
+.record{border:1px solid var(--cone);background:var(--cone-soft);border-radius:10px;padding:12px 14px;font-size:1rem}
+.record i{font-style:normal;color:var(--cone)}
 footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padding-top:14px;margin-top:10px;display:flex;flex-direction:column;gap:6px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
@@ -303,6 +309,7 @@ footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padd
     <div class="eyebrow">Concours gardien de la paix · épreuves physiques · femmes</div>
     <h1>Parcours d'habileté motrice</h1>
     <div class="count" id="countdown"></div>
+    <p class="love" id="love"></p>
   </div>
   <p class="sync" id="sync" hidden></p>
   <div class="panel" id="install" hidden style="border-top:4px solid var(--mat)">
@@ -406,6 +413,7 @@ footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padd
     <p class="note">Crée un fichier avec tous les résultats, à garder ou à envoyer. « Restaurer » ajoute les résultats d'un fichier de sauvegarde à ceux déjà dans l'appli.</p>
     <div class="row"><button type="button" class="ghost small" id="backup-save">Télécharger une sauvegarde</button><button type="button" class="ghost small" id="backup-load">Restaurer une sauvegarde</button><input type="file" id="backup-file" accept="application/json,.json" hidden></div>
   </div>
+  <p class="sign">Fait avec <i>♥</i> par ton Rémy</p>
 </section>
 
 <!-- =================== PARCOURS =================== -->
@@ -436,6 +444,7 @@ footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padd
       <div><span>Avec pénalités</span><b id="r-total">—</b></div>
       <div><span>Note</span><b id="r-note">—</b></div>
     </div>
+    <p class="record" id="run-love" hidden></p>
     <p class="check" id="run-tip" hidden></p>
   </div>
   <div class="panel">
@@ -475,6 +484,7 @@ footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padd
       <select id="ll-start"></select>
       <label class="row note" for="ll-voice" style="color:var(--ink)"><input type="checkbox" id="ll-voice" checked> Annoncer les paliers à voix haute</label>
     </div>
+    <p class="record" id="ll-love" hidden></p>
     <div class="result" id="ll-result" hidden>
       <div><span>Arrêt</span><b id="ll-r-pal">—</b></div>
       <div><span>Vitesse</span><b id="ll-r-v">—</b></div>
@@ -1221,6 +1231,8 @@ async function press(){
       cancelAnimationFrame(raf); dropWake(); state = "done"; elGo.textContent = "Nouvel essai"; penSel = 10;
       lastBody = bodyNow(); showResult(lastBody); renderChrono();
       coachAfterRun(lastBody);
+      const prevBest = S.essais.length ? Math.min(...S.essais.map(e => e.total)) : null;
+      if (prevBest != null && lastBody.total < prevBest){ $("run-love").innerHTML = recordMot(); $("run-love").hidden = false; }
       lastId = await addDoc("essais", lastBody); return;
     }
     setStatus(); renderChrono(); return;
@@ -1228,7 +1240,7 @@ async function press(){
   if (state === "done") reset();
 }
 function applyDone(){ lastBody = bodyNow(); showResult(lastBody); if (!lastId) return; clearTimeout(penTimer); penTimer = setTimeout(() => setDoc("essais", lastId, lastBody), 900); }
-function reset(){ cancelAnimationFrame(raf); dropWake(); state = "idle"; splits = []; pens = []; sacKo = false; lastId = null; lastBody = null; elTime.textContent = "0:00.0"; $("result").hidden = true; $("run-tip").hidden = true; setStatus(); renderChrono(); }
+function reset(){ cancelAnimationFrame(raf); dropWake(); state = "idle"; splits = []; pens = []; sacKo = false; lastId = null; lastBody = null; elTime.textContent = "0:00.0"; $("result").hidden = true; $("run-tip").hidden = true; $("run-love").hidden = true; setStatus(); renderChrono(); }
 $("cur").addEventListener("click", e => {
   const sac = e.target.closest("[data-sac]");
   if (sac){ sacKo = !sacKo; renderChrono(); if (state === "done") applyDone(); return; }
@@ -1289,7 +1301,7 @@ async function llPress(){
     const off = (LL.start - 1) * 60;
     LL.t0 = performance.now() - off * 1000;
     LL.next = off + shuttleSec(LL.start);
-    LL.state = "run"; $("ll-result").hidden = true;
+    LL.state = "run"; $("ll-result").hidden = true; $("ll-love").hidden = true;
     $("ll-go").textContent = "Arrêt : tu ne suis plus le rythme";
     $("ll-status").innerHTML = LL.start === 1 ? "Test en cours. À chaque bip, tu dois être sur la ligne." : `Entraînement depuis le palier ${LL.start} : non enregistré.`;
     palierSignal(LL.start); grabWake(); cancelAnimationFrame(LL.raf); llLoop();
@@ -1308,6 +1320,8 @@ async function llPress(){
     $("ll-r-note").textContent = fr(note) + "/20";
     if (LL.start === 1){
       $("ll-status").innerHTML = `Arrêt au <strong>${palTxt(p, q)}</strong>, ${LL.nav} navettes. Résultat enregistré.`;
+      const prevL = S.luc.length ? Math.max(...S.luc.map(e => e.palier + e.sec / 60)) : null;
+      if (prevL != null && p + q / 60 > prevL){ $("ll-love").innerHTML = recordMot(); $("ll-love").hidden = false; }
       await addDoc("luc", {at: Date.now(), palier: p, sec: q, note, age: ageOn(), navettes: LL.nav, source: "chrono"});
     } else $("ll-status").innerHTML = `Arrêt au <strong>${palTxt(p, q)}</strong> (entraînement, non enregistré).`;
   }
@@ -1714,6 +1728,35 @@ async function coachAfterRun(b){
   } catch(e){}
 }
 
+/* ======================= PETITS MOTS ======================= */
+const MOTS = [
+  "Allez la guerrière <i>♥</i>",
+  "« Le seul adversaire qu'on ait, c'est nous-même. » C'est toi qui l'as dit, et c'est vrai. <i>♥</i>",
+  "« On ne s'élève pas au niveau de ses attentes, on retombe à son niveau d'entraînement. » Et ton entraînement est solide. <i>♥</i>",
+  "Apprentie guerrière ? Plus pour très longtemps. <i>♥</i>",
+  "Une séance à la fois. Je suis là. <i>♥</i>",
+  "Même les jours difficiles comptent. Surtout eux. <i>♥</i>",
+  "Chaque séance te rapproche de ton uniforme. Je suis fier de toi. <i>♥</i>",
+  "Un jour de repos, c'est aussi de l'entraînement. Prends soin de toi. <i>♥</i>",
+  "Tu vas y arriver. Et je serai là pour fêter ça. <i>♥</i>",
+  "Je crois en toi, chaque jour un peu plus. <i>♥</i>",
+  "Bois de l'eau, étire-toi, et souris : tu avances. <i>♥</i>",
+  "Fière de toi ? Moi, je le suis déjà. <i>♥</i>"
+];
+function renderLove(){
+  const el = $("love"); if (!el) return;
+  const dl = daysLeft();
+  if (dl === 0) el.innerHTML = "C'est aujourd'hui. Tu t'es préparée pour ce moment, respire, et fais ce que tu sais faire. Je crois en toi. <i>♥</i> Ton Rémy";
+  else if (dl === 1) el.innerHTML = "Demain, c'est ton jour. Repose-toi, mange bien, dors tôt : tout le travail est déjà fait. <i>♥</i> Ton Rémy";
+  else { const n = Math.floor(new Date().setHours(0, 0, 0, 0) / 86400000); el.innerHTML = MOTS[n % MOTS.length]; }
+}
+const RECORD_MOTS = [
+  "Nouveau record ! Je suis tellement fier de toi. <i>♥</i> Ton Rémy",
+  "Record battu, la guerrière ! <i>♥</i> Ton Rémy",
+  "Encore mieux que la dernière fois. Tu m'impressionnes. <i>♥</i> Ton Rémy"
+];
+const recordMot = () => RECORD_MOTS[Math.floor(Math.random() * RECORD_MOTS.length)];
+
 /* ======================= INSTALLATION ======================= */
 (function(){
   const standalone = matchMedia("(display-mode: standalone)").matches || navigator.standalone;
@@ -1728,7 +1771,7 @@ async function coachAfterRun(b){
 })();
 
 /* ======================= DÉMARRAGE ======================= */
-function renderAll(){ renderHome(); renderSplits(); renderRecos(); renderWeek(); if (!$("v-progres").hidden) renderProg(); }
+function renderAll(){ renderLove(); renderHome(); renderSplits(); renderRecos(); renderWeek(); if (!$("v-progres").hidden) renderProg(); }
 setStatus(); renderChrono(); renderSeance(); renderLucBareme(); renderAteliers(); renderAll();
 show((location.hash || "#accueil").slice(1), true);
 initStore();
