@@ -1571,6 +1571,7 @@ Parcours (derniers essais) :\n${e}
 Meilleurs temps par atelier : ${best.map((v, i) => `${TIMED[i].short} ${v == null ? "-" : (v / 1000).toFixed(1) + "s"}`).join(", ")}
 Luc Léger :\n${l}
 Tests :\n${m}
+Vitesses Luc Léger : palier 1 = 8 km/h, +0,5 km/h par palier (palier 5 = 10 km/h, palier 6 = 10,5, palier 8 = 11,5, palier 10 = 12,5).${luc.length ? ` Son dernier palier atteint correspond à ${fr(speedOf(luc[luc.length - 1].palier))} km/h.` : ""}
 Recommandations déjà calculées par l'appli :\n${recos().map(r => "- " + r.t + " : " + r.d).join("\n")}`;
 }
 const RULES = `Règles officielles (descriptif 2025, femmes) :
@@ -1582,6 +1583,7 @@ const RULES = `Règles officielles (descriptif 2025, femmes) :
 function systemPrompt(){
   return `Tu es le coach sportif d'une candidate au concours de gardien de la paix (police nationale), qui prépare les épreuves sportives. Tu la tutoies, en français simple, chaleureux et motivant, sans jargon : si tu utilises un mot technique, explique-le en quelques mots. Réponses courtes et concrètes (séances, durées, répétitions, quel atelier, où).
 Appuie-toi UNIQUEMENT sur ses données ci-dessous et sur les règles officielles ; n'invente pas de chiffres. Si une donnée manque, dis-lui quel test faire.
+Chaque conseil doit être réaliste et faisable dans sa semaine : où (Fitness Park, club de gym, dehors), combien de fois, combien de répétitions. Pour le fractionné, la partie rapide se court à la vitesse de son palier visé (ou un peu plus), jamais plus lentement que son dernier palier atteint. Le lycée de Saint-Quentin est loin : seulement pour un passage de temps en temps sur le vrai parcours, pas pour courir. Ne répète pas deux fois le même conseil.
 Ne parle jamais de poids, de régime ou d'apparence. En cas de douleur, blessure, malaise ou vrai vertige : pas de diagnostic, conseille le repos et un médecin.
 ${RULES}
 
