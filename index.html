@@ -909,7 +909,8 @@ async function connectFirebase(){
   }, () => {});
 }
 async function initStore(){
-  loadLocal(); renderAll(); renderShare();
+  loadLocal(); storeReady = true; renderAll(); renderShare();
+  if (!$("v-coach").hidden) genWeek(false);
   if (FB && team){
     setSync("Connexion au partage…");
     try { await connectFirebase(); } catch(e){ FS = null; setSync("Partage indisponible (pas de réseau ?). Les résultats restent sur ce téléphone.", true); }
@@ -1619,7 +1620,7 @@ function mdLite(t){ return esc(t).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace
 /* ---- rapport hebdomadaire ---- */
 function weekStart(t){ const d = new Date(t); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return d; }
 const wkKey = d => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
-let wkOffset = 0, wkBusy = false;
+let wkOffset = 0, wkBusy = false, storeReady = false;
 function weekData(start){
   const end = start.getTime() + 7 * 86400000, inW = x => x.at >= start.getTime() && x.at < end;
   return {essais: sortedBy(S.essais.filter(inW)), luc: sortedBy(S.luc.filter(inW)), mesures: sortedBy(S.mesures.filter(inW))};
@@ -1667,14 +1668,14 @@ function renderWeek(){
   if (hw) hw.innerHTML = rep && wkOffset === 0 ? `Les recommandations de la semaine sont prêtes dans l'onglet Coach.` : (aiOn() ? "Le coach écrit tes recommandations de la semaine quand tu ouvres l'onglet Coach." : "");
 }
 async function genWeek(force){
-  if (!aiOn() || wkBusy) return;
+  if (!aiOn() || wkBusy || !storeReady) return;
   const start = weekStart(Date.now()), key = wkKey(start);
   if (!force && S.rapports.some(r => r.id === key)) return;
   if (!navigator.onLine) return;
   wkBusy = true; renderWeek();
   const prev = new Date(start.getTime() - 7 * 86400000);
   try {
-    const t = await askGroq([{role: "system", content: systemPrompt()}, {role: "user", content: `C'est le début de la semaine du ${dayTxt(start)}. Voici le bilan de la semaine dernière :\n${bilanText(prev)}\nEt ce qui est déjà fait cette semaine :\n${bilanText(start)}\n\nÉcris mes recommandations pour cette semaine, en tenant compte de ma semaine habituelle (2 Freeletics, 2 gym, 3 courses de 5 km, 2 krav maga, 1 jujitsu ; on ne change ni la gym, ni le krav maga, ni le jujitsu). Commence par une phrase de bilan de la semaine dernière. Puis 3 à 5 recommandations, chacune avec un titre court en gras puis 1 ou 2 phrases concrètes (quoi, quel jour de sa semaine, combien). Puis l'objectif chiffré de la semaine sur une ligne commençant par « Objectif de la semaine : ». Pas de tableau.`}], 800);
+    const t = await askGroq([{role: "system", content: systemPrompt()}, {role: "user", content: `C'est le début de la semaine du ${dayTxt(start)}. Voici le bilan de la semaine dernière :\n${bilanText(prev)}\nEt ce qui est déjà fait cette semaine :\n${bilanText(start)}\n\nÉcris mes recommandations pour cette semaine, en tenant compte de ma semaine habituelle (2 Freeletics, 2 gym, 3 courses de 5 km, 2 krav maga, 1 jujitsu ; on ne change ni la gym, ni le krav maga, ni le jujitsu). Base-toi STRICTEMENT sur ces bilans chiffrés (nombre de parcours, de Luc Léger, de tests) : ne dis jamais qu'il n'y a rien eu si le bilan indique des résultats. Commence par une phrase de bilan de la semaine dernière, avec ses chiffres. Puis 3 à 5 recommandations, chacune avec un titre court en gras puis 1 ou 2 phrases concrètes (quoi, quel jour de sa semaine, combien). Puis l'objectif chiffré de la semaine sur une ligne commençant par « Objectif de la semaine : ». Rappel : la routine quotidienne dure 10 min AU TOTAL (3 suspensions à la barre + 3 séries de 5 pompes + mobilité des poignets). Pour le fractionné, la partie rapide se court à la vitesse du palier visé (palier 8 = 11,5 km/h) ou au moins au palier au-dessus de son dernier test. Pas de tableau.`}], 800);
     if (t) await setDoc("rapports", key, {at: Date.now(), week: key, conseils: t, bilan: bilanText(prev)});
   } catch(e){ $("wk-recos").innerHTML = `<p class="sync warn">${esc(e.message || "Le coach ne répond pas.")}</p>`; wkBusy = false; return; }
   wkBusy = false; renderWeek();
