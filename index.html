@@ -413,7 +413,8 @@ footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padd
       <label for="exam-date" class="note" style="color:var(--ink)">Date des épreuves sportives</label>
       <input type="date" id="exam-date">
     </div>
-    <label class="row note" for="opt-age" style="color:var(--ink)"><input type="checkbox" id="opt-age" checked> 30 à 40 ans au 1er janvier de l'année de l'épreuve (+1 point à chaque épreuve)</label>
+    <div class="row"><label for="opt-age" class="note" style="color:var(--ink)">Ton âge au 1er janvier de l'année des épreuves</label>
+      <select id="opt-age"><option value="0">moins de 30 ans</option><option value="1">30 à 40 ans (+1 point)</option><option value="2">plus de 40 ans (+2 points)</option></select></div>
     <h3>Thème</h3>
     <div class="seg" id="theme-seg" role="group" aria-label="Thème">
       <button type="button" data-th="auto">Automatique</button>
@@ -495,6 +496,7 @@ footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padd
       <div><span>Navettes</span><b id="ll-nav">0</b><span>de 20 m</span></div>
     </div>
     <div class="status" id="ll-status">Prête ? Le premier bip lance ta course à 8 km/h.</div>
+    <p class="note" style="font-size:.85rem"><b style="color:var(--ink)">Avant de lancer :</b> monte le son, enlève le mode silencieux, et désactive le verrouillage automatique de l'écran le temps du test (iPhone : Réglages › Luminosité et affichage › Verrouillage auto › Jamais). Pose le téléphone au bout de la ligne, écran allumé.</p>
     <button class="go run" id="ll-go" type="button">Lancer le test</button>
     <div class="row">
       <label for="ll-start" class="note" style="color:var(--ink)">Départ</label>
@@ -868,8 +870,9 @@ function fmtS(s){ s = Math.round(s); const m = Math.floor(s / 60), r = s - m * 6
 const dateTxt = at => { const d = new Date(at); return d.toLocaleDateString("fr-FR", {day:"numeric", month:"short"}) + " " + d.toLocaleTimeString("fr-FR", {hour:"2-digit", minute:"2-digit"}); };
 const dayTxt = at => new Date(at).toLocaleDateString("fr-FR", {day:"numeric", month:"short"});
 const noteTxt = n => n == null ? "< 4" : fr(n);
-const ageOn = () => $("opt-age").checked;
-const withBonus = (base, extra) => base == null ? null : Math.max(0, Math.min(20, base + (ageOn() ? 1 : 0) + (extra || 0)));
+const ageBonus = () => { const v = Number($("opt-age").value); return v === 1 || v === 2 ? v : 0; };
+const ageOn = () => ageBonus() > 0;
+const withBonus = (base, extra) => base == null ? null : Math.max(0, Math.min(20, base + ageBonus() + (extra || 0)));
 function verdict(total){ if (total < 60000) return ['fast', "sous 1:00"]; if (total <= 70000) return ['ok', "dans l'objectif"]; return ['slow', "au-dessus de 1:10"]; }
 const palTxt = (p, s) => `palier ${p}${s ? " + " + s + " s" : ""}`;
 const palBig = (p, s) => `Palier ${p}${s ? " + " + s + " s" : ""}`;
@@ -901,7 +904,7 @@ let team = lsGet("phm-team", null);
 const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 function setSync(msg, warn){ const el = $("sync"); el.textContent = msg; el.className = "sync" + (warn ? " warn" : ""); el.hidden = !msg; }
 function loadLocal(){
-  for (const k of COLLS) S[k] = lsGet(LKEY[k], []);
+  for (const k of COLLS) S[k] = lsGet(LKEY[k], []).filter(x => x && x.id).map(x => cleanItem(k, x));
   const ex = lsGet("phm-exam-obj", EXAM_DEFAULT); S.exam = ex.date; S.examLabel = ex.label;
 }
 function writeErr(){ setSync("Enregistrement en ligne impossible pour le moment. Le résultat est gardé sur ce téléphone et partira dès que possible.", true); }
@@ -923,9 +926,20 @@ async function connectFirebase(){
   try { db = F.initializeFirestore(app, {localCache: F.persistentLocalCache()}); } catch(e){ db = F.getFirestore(app); }
   FS = Object.assign({db}, F);
   let pending = COLLS.length;
+  const seenKey = "phm-seen-" + team, seen = lsGet(seenKey, {});
   for (const k of COLLS){
+    const localBefore = S[k].slice(); let first = true;
     F.onSnapshot(F.query(F.collection(db, "equipes", team, k), F.orderBy("at", "asc")), snap => {
-      S[k] = snap.docs.map(d => Object.assign({id: d.id}, d.data()));
+      const remote = snap.docs.map(d => cleanItem(k, Object.assign({id: d.id}, d.data())));
+      seen[k] = seen[k] || {};
+      remote.forEach(x => seen[k][x.id] = 1);
+      if (first && !snap.metadata.fromCache){
+        first = false;
+        // résultats enregistrés sur ce téléphone et jamais envoyés : on les envoie (sans ressusciter ceux supprimés ailleurs)
+        localBefore.filter(x => x.id && !seen[k][x.id]).forEach(x => { const {id, ...body} = x; remotePut(k, id, body); remote.push(x); seen[k][id] = 1; });
+        lsSet(seenKey, seen);
+      }
+      S[k] = remote.sort((a, b) => a.at - b.at);
       lsSet(LKEY[k], S[k]);
       if (!snap.metadata.fromCache && pending > 0 && --pending === 0) setSync("");
       renderAll();
@@ -940,8 +954,19 @@ async function initStore(){
   if (!$("v-coach").hidden) genWeek(false);
   if (FB && team){
     setSync("Connexion au partage…");
-    try { await connectFirebase(); } catch(e){ FS = null; setSync("Partage indisponible (pas de réseau ?). Les résultats restent sur ce téléphone.", true); }
+    const t = setTimeout(() => { if (/Connexion au partage/.test($("sync").textContent)) setSync("Pas de réseau pour le moment : tes résultats sont gardés sur ce téléphone et seront partagés au retour du réseau.", true); }, 8000);
+    try { await connectFirebase(); } catch(e){ FS = null; clearTimeout(t); setSync("Partage indisponible (pas de réseau ?). Les résultats restent sur ce téléphone.", true); }
   } else setSync("");
+}
+const NUMS = {essais:["at","raw","pen","total","note","age"], mesures:["at","value"], luc:["at","palier","sec","note","age","navettes"], rapports:["at"]};
+function cleanItem(k, x){
+  const o = Object.assign({}, x);
+  (NUMS[k] || []).forEach(f => { if (o[f] != null && typeof o[f] !== "boolean"){ const n = Number(o[f]); o[f] = isFinite(n) ? n : null; } });
+  if (k === "essais"){ o.splits = Array.isArray(o.splits) ? o.splits.map(Number).filter(isFinite) : []; o.penBy = Array.isArray(o.penBy) ? o.penBy.map(p => ({n: Number(p.n), s: Number(p.s)})).filter(p => p.n >= 1 && p.n <= 10 && isFinite(p.s)) : []; o.lieu = String(o.lieu || ""); }
+  if (k === "mesures") o.type = ["suspension", "pompes", "poutre"].includes(o.type) ? o.type : "suspension";
+  if (k === "rapports"){ o.conseils = String(o.conseils || ""); o.week = String(o.week || ""); }
+  if (typeof o.id !== "string") o.id = String(o.id || newId());
+  return o;
 }
 function upsertLocal(coll, id, body){
   const i = S[coll].findIndex(x => x.id === id);
@@ -990,7 +1015,7 @@ document.addEventListener("click", async e => {
     const local = {}; COLLS.forEach(k => local[k] = S[k].slice());
     const ex = {date: S.exam, label: S.examLabel};
     try { await connectFirebase(); } catch(err){ setSync("Impossible de joindre le partage. Réessaie avec du réseau.", true); team = null; lsSet("phm-team", null); renderShare(); return; }
-    COLLS.forEach(k => local[k].forEach(x => { const {id, ...body} = x; remotePut(k, id, body); }));
+    const seenUp = {}; COLLS.forEach(k => { seenUp[k] = {}; local[k].forEach(x => { const {id, ...body} = x; remotePut(k, id, body); seenUp[k][id] = 1; }); }); lsSet("phm-seen-" + team, seenUp);
     FS.setDoc(FS.doc(FS.db, "equipes", team, "reglages", "concours"), ex).catch(writeErr);
     renderShare(); setSync("Partage activé. Envoie le lien à l'autre téléphone (Réglages).");
   }
@@ -1024,7 +1049,8 @@ document.addEventListener("change", async e => {
     const data = JSON.parse(await e.target.files[0].text());
     if (data.app !== "parcours") throw new Error("format");
     let n = 0;
-    for (const k of COLLS) for (const x of (data[k] || [])){ if (!x.id || S[k].some(y => y.id === x.id)) continue; const {id, ...body} = x; upsertLocal(k, id, body); if (FS) remotePut(k, id, body); n++; }
+    for (const k of COLLS) for (const raw of (Array.isArray(data[k]) ? data[k] : [])){ if (!raw || !raw.id || S[k].some(y => y.id === raw.id)) continue; const x = cleanItem(k, raw); if (x.at == null) continue; const {id, ...body} = x; upsertLocal(k, id, body); if (FS) remotePut(k, id, body); n++; }
+    if (data.exam && /^\d{4}-\d{2}-\d{2}$/.test(String(data.exam.date || "")) && !lsGet("phm-exam-obj", null)) saveExam(data.exam.date);
     renderAll(); setSync(`Sauvegarde restaurée : ${n} résultat${n > 1 ? "s" : ""} ajouté${n > 1 ? "s" : ""}.`);
   } catch(err){ setSync("Ce fichier n'est pas une sauvegarde de l'appli.", true); }
   e.target.value = "";
@@ -1062,7 +1088,7 @@ const SEANCES = {
     {t:"Toutes les 2 à 3 semaines : test complet", d:"Départ palier 1, résultat enregistré dans Progrès.", go:"luc", btn:"Lancer un test"}
   ]
 };
-const todayKey = () => new Date().toISOString().slice(0, 10);
+const todayKey = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
 let seance = lsGet("phm-seance", "fp");
 let ticks = lsGet("phm-ticks", {});
 function renderSeance(){
@@ -1157,12 +1183,12 @@ function renderPhases(){
       <span class="dates">du ${fd(ph.a)} au ${fd(ph.b)}</span><p>${ph.p}</p><p><b>Objectif :</b> ${ph.o}</p></div>`;
   }).join("");
 }
-$("opt-age").checked = lsGet("phm-age", true);
-$("opt-age").addEventListener("change", () => { lsSet("phm-age", $("opt-age").checked); renderAll(); });
+$("opt-age").value = String(lsGet("phm-age2", lsGet("phm-age", true) ? 1 : 0));
+$("opt-age").addEventListener("change", () => { lsSet("phm-age2", Number($("opt-age").value)); renderAll(); });
 
 /* ======================= CHRONO PARCOURS ======================= */
 let state = "idle", t0 = 0, splits = [], raf = null, wake = null, countEnd = 0, pens = [], sacKo = false, penSel = 2;
-let lastId = null, lastBody = null, penTimer = null;
+let lastId = null, lastBody = null, penTimer = null, lastPress = 0, doneAt = 0, prevBestAtRun = null;
 const elTime = $("time"), elStatus = $("status"), elGo = $("go"), selLieu = $("lieu");
 selLieu.value = lsGet("phm-lieu", "Fitness Park Lille");
 selLieu.addEventListener("change", () => { lsSet("phm-lieu", selLieu.value); if (state === "done") applyDone(); });
@@ -1229,12 +1255,14 @@ function loop(){
   raf = requestAnimationFrame(loop);
 }
 async function grabWake(){ try { wake = await navigator.wakeLock?.request("screen"); } catch(e){ wake = null; } }
+// l'écran se rallume après un passage en arrière-plan : on redemande à le garder allumé
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && (state === "count" || state === "run" || LL.state === "run")) grabWake(); });
 function dropWake(){ try { wake?.release(); } catch(e){} wake = null; }
 function startRun(at){ state = "run"; t0 = at; splits = []; elTime.classList.remove("countd"); setStatus(); renderChrono(); }
 function bodyNow(){
   const raw = splits.reduce((a, b) => a + b, 0), total = raw + penTotal() * 1000;
   return {at: lastBody ? lastBody.at : Date.now(), lieu: selLieu.value, raw: Math.round(raw), pen: penTotal(), penBy: pens.map(p => ({n: p.n, s: p.s})), total: Math.round(total),
-          note: withBonus(phmBase(total / 1000), sacKo ? -1 : 0), age: ageOn(), sac: sacKo, splits: splits.map(v => Math.round(v))};
+          note: withBonus(phmBase(total / 1000), sacKo ? -1 : 0), age: ageBonus(), sac: sacKo, splits: splits.map(v => Math.round(v))};
 }
 function showResult(b){
   $("result").hidden = false;
@@ -1245,6 +1273,10 @@ function showResult(b){
   elTime.textContent = fmt(b.total);
 }
 async function press(){
+  const nowP = performance.now();
+  if (nowP - lastPress < 300) return;            // double appui involontaire
+  if (state === "done" && nowP - doneAt < 1500) return; // laisser le temps de lire le résultat
+  lastPress = nowP;
   if (state === "idle"){
     state = "count"; countEnd = performance.now() + 15000; pens = []; lastId = null; lastBody = null;
     $("result").hidden = true; elTime.classList.add("countd"); grabWake(); cancelAnimationFrame(raf); loop(); setStatus(); renderChrono(); return;
@@ -1253,19 +1285,28 @@ async function press(){
   if (state === "run"){
     splits.push(performance.now() - t0 - splits.reduce((a, b) => a + b, 0));
     if (splits.length === TIMED.length){
-      cancelAnimationFrame(raf); dropWake(); state = "done"; elGo.textContent = "Nouvel essai"; penSel = 10;
+      cancelAnimationFrame(raf); dropWake(); state = "done"; doneAt = performance.now(); elGo.textContent = "Nouvel essai"; penSel = 10;
       lastBody = bodyNow(); showResult(lastBody); renderChrono();
       coachAfterRun(lastBody);
-      const prevBest = S.essais.length ? Math.min(...S.essais.map(e => e.total)) : null;
-      if (prevBest != null && lastBody.total < prevBest){ $("run-love").innerHTML = recordMot(); $("run-love").hidden = false; }
+      prevBestAtRun = S.essais.length ? Math.min(...S.essais.map(e => e.total)) : null;
+      showRecord();
       lastId = await addDoc("essais", lastBody); return;
     }
     setStatus(); renderChrono(); return;
   }
   if (state === "done") reset();
 }
-function applyDone(){ lastBody = bodyNow(); showResult(lastBody); if (!lastId) return; clearTimeout(penTimer); penTimer = setTimeout(() => setDoc("essais", lastId, lastBody), 900); }
-function reset(){ cancelAnimationFrame(raf); dropWake(); state = "idle"; splits = []; pens = []; sacKo = false; lastId = null; lastBody = null; elTime.textContent = "0:00.0"; $("result").hidden = true; $("run-tip").hidden = true; $("run-love").hidden = true; setStatus(); renderChrono(); }
+function showRecord(){
+  const el = $("run-love"), rec = prevBestAtRun != null && lastBody && lastBody.total < prevBestAtRun;
+  if (rec && el.hidden){ el.innerHTML = recordMot(); el.hidden = false; } else if (!rec) el.hidden = true;
+}
+function flushPen(){ if (penTimer){ clearTimeout(penTimer); penTimer = null; if (lastId && lastBody) setDoc("essais", lastId, lastBody); } }
+function applyDone(){
+  lastBody = bodyNow(); showResult(lastBody); showRecord(); if (!lastId) return;
+  const id = lastId, body = lastBody;
+  clearTimeout(penTimer); penTimer = setTimeout(() => { penTimer = null; setDoc("essais", id, body); }, 900);
+}
+function reset(){ flushPen(); cancelAnimationFrame(raf); dropWake(); state = "idle"; splits = []; pens = []; sacKo = false; lastId = null; lastBody = null; elTime.textContent = "0:00.0"; $("result").hidden = true; $("run-tip").hidden = true; $("run-love").hidden = true; setStatus(); renderChrono(); }
 $("cur").addEventListener("click", e => {
   const sac = e.target.closest("[data-sac]");
   if (sac){ sacKo = !sacKo; renderChrono(); if (state === "done") applyDone(); return; }
@@ -1306,7 +1347,7 @@ function llRender(el){
   const p = LL.pal, inPal = el - (p - 1) * 60;
   $("ll-pal").textContent = p;
   $("ll-speed").textContent = fr(speedOf(p));
-  $("ll-time").textContent = fmtS(Math.floor(el));
+  $("ll-time").textContent = fmtS(Math.floor(el - (LL.start - 1) * 60));
   $("ll-nav").textContent = LL.nav;
   $("ll-bar").style.width = Math.min(100, inPal / 60 * 100) + "%";
 }
@@ -1320,6 +1361,7 @@ function llLoop(){
 }
 async function llPress(){
   if (LL.state === "idle" || LL.state === "done"){
+    try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch(e){}
     try { LL.ctx = LL.ctx || new (window.AudioContext || window.webkitAudioContext)(); await LL.ctx.resume(); } catch(e){ LL.ctx = null; }
     LL.start = Number($("ll-start").value);
     LL.pal = LL.start; LL.nav = 0;
@@ -1347,7 +1389,7 @@ async function llPress(){
       $("ll-status").innerHTML = `Arrêt au <strong>${palTxt(p, q)}</strong>, ${LL.nav} navettes. Résultat enregistré.`;
       const prevL = S.luc.length ? Math.max(...S.luc.map(e => e.palier + e.sec / 60)) : null;
       if (prevL != null && p + q / 60 > prevL){ $("ll-love").innerHTML = recordMot(); $("ll-love").hidden = false; }
-      await addDoc("luc", {at: Date.now(), palier: p, sec: q, note, age: ageOn(), navettes: LL.nav, source: "chrono"});
+      await addDoc("luc", {at: Date.now(), palier: p, sec: q, note, age: ageBonus(), navettes: LL.nav, source: "chrono"});
     } else $("ll-status").innerHTML = `Arrêt au <strong>${palTxt(p, q)}</strong> (entraînement, non enregistré).`;
   }
 }
@@ -1355,8 +1397,8 @@ $("ll-go").addEventListener("click", llPress);
 $("ll-form").addEventListener("submit", async e => {
   e.preventDefault();
   const p = Number($("ll-f-pal").value), s = Number($("ll-f-sec").value);
-  const at = $("ll-f-date").value ? new Date($("ll-f-date").value + "T12:00:00").getTime() : Date.now();
-  await addDoc("luc", {at, palier: p, sec: s, note: withBonus(lucBase(p, s)), age: ageOn(), source: "manuel"});
+  const at = (!$("ll-f-date").value || $("ll-f-date").value === todayKey()) ? Date.now() : new Date($("ll-f-date").value + "T12:00:00").getTime();
+  await addDoc("luc", {at, palier: p, sec: s, note: withBonus(lucBase(p, s)), age: ageBonus(), source: "manuel"});
   $("ll-status").textContent = `Résultat ajouté : ${palTxt(p, s)}.`;
 });
 function renderLucBareme(){
@@ -1444,7 +1486,7 @@ function renderChips(){
 $("chips").addEventListener("click", e => { const b = e.target.closest("[data-l]"); if (!b) return; filt = b.dataset.l; lsSet("phm-filtre", filt); renderProg(); });
 
 function lineChart(host, pts, o){
-  const W = 640, H = 250, L = 52, R = 14, T = 14, B = 30;
+  const W = Math.round(Math.max(330, Math.min(720, host.clientWidth || 640))), H = W < 520 ? 230 : 250, L = 46, R = 10, T = 14, B = 30;
   const vals = pts.map(p => p.v);
   let lo = Math.min(o.lo, ...vals.map(v => v - o.pad)), hi = Math.max(o.hi, ...vals.map(v => v + o.pad));
   lo = Math.floor(lo / o.step) * o.step; hi = Math.ceil(hi / o.step) * o.step;
@@ -1524,7 +1566,7 @@ $("mes-date").value = todayKey();
 $("mes-form").addEventListener("submit", async e => {
   e.preventDefault();
   const v = parseFloat($("mes-val").value); if (isNaN(v)) return;
-  const at = $("mes-date").value ? new Date($("mes-date").value + "T12:00:00").getTime() : Date.now();
+  const at = (!$("mes-date").value || $("mes-date").value === todayKey()) ? Date.now() : new Date($("mes-date").value + "T12:00:00").getTime();
   await addDoc("mesures", {at, type: $("mes-type").value, value: v}); $("mes-val").value = "";
 });
 function spark(vals, color){
@@ -1551,6 +1593,7 @@ const curPhase = () => { const now = new Date(); return PHASES.find(p => now >= 
 const sortedBy = arr => arr.slice().sort((a, b) => a.at - b.at);
 function lastMes(type){ const l = sortedBy(S.mesures.filter(x => x.type === type)); return l.length ? l[l.length - 1].value : null; }
 
+function gapTxt(d){ const p = Math.floor(d + 1e-9), sec = Math.round((d - p) * 60); return [p ? `${p} palier${p > 1 ? "s" : ""}` : "", sec ? `${sec} s` : ""].filter(Boolean).join(" et ") || "un rien"; }
 // Recommandations calculées (sans IA)
 function recos(){
   const R = [], essais = sortedBy(S.essais), luc = sortedBy(S.luc), dl = daysLeft();
@@ -1580,7 +1623,7 @@ function recos(){
   if (lastL){
     const v = lastL.palier + lastL.sec / 60;
     if (v < 4.25) R.push({t:"Luc Léger : priorité au palier 4 + 15 s", d:`Ton dernier test : ${palTxt(lastL.palier, lastL.sec)}, sous le minimum. 2 footings et 1 fractionné par semaine.`, go:"luc", btn:"Luc Léger"});
-    else if (v < LUC_TARGET) R.push({t:`Luc Léger : encore ${fr((LUC_TARGET - v).toFixed(1))} palier${LUC_TARGET - v >= 2 ? "s" : ""} jusqu'au palier ${LUC_TARGET}`, d:`Ton dernier test : ${palTxt(lastL.palier, lastL.sec)} (${fr(withBonus(lucBase(lastL.palier, lastL.sec)))}/20). Garde un fractionné par semaine.`});
+    else if (v < LUC_TARGET) R.push({t:`Luc Léger : encore ${gapTxt(LUC_TARGET - v)} jusqu'au palier ${LUC_TARGET}`, d:`Ton dernier test : ${palTxt(lastL.palier, lastL.sec)} (${fr(withBonus(lucBase(lastL.palier, lastL.sec)))}/20). Garde un fractionné par semaine.`});
     const days = Math.floor((Date.now() - lastL.at) / 86400000);
     if (days > 21) R.push({t:"Refais un Luc Léger complet", d:`Le dernier date de ${days} jours : un test toutes les 2 à 3 semaines montre tes progrès.`, go:"luc", btn:"Luc Léger"});
   }
@@ -1610,12 +1653,12 @@ function renderRecos(){
 function contextText(){
   const essais = sortedBy(S.essais).slice(-8), luc = sortedBy(S.luc).slice(-6), dl = daysLeft(), ph = curPhase();
   const best = bestsFrom(S.essais);
-  const e = essais.map(x => `- ${dayTxt(x.at)} (${x.lieu}) : ${fmt(x.total)} pénalités comprises, note ${noteTxt(x.note)}/20, pénalités : ${(x.penBy || []).map(p => `atelier ${p.n} +${p.s}s`).join(", ") || "aucune"}, temps par atelier : ${(x.splits || []).map((v, i) => `${TIMED[i].short} ${(v / 1000).toFixed(1)}s`).join(", ")}`).join("\n") || "- aucun";
+  const e = essais.map(x => `- ${dayTxt(x.at)} (${x.lieu}) : ${fmt(x.total)} pénalités comprises, note ${noteTxt(x.note)}/20, pénalités : ${(x.penBy || []).map(p => `atelier ${p.n} ${byN(p.n).short} +${p.s}s`).join(", ") || "aucune"}, temps par atelier : ${(x.splits || []).map((v, i) => `${TIMED[i].short} ${(v / 1000).toFixed(1)}s`).join(", ")}`).join("\n") || "- aucun";
   const l = luc.map(x => `- ${dayTxt(x.at)} : ${palTxt(x.palier, x.sec)} (${fr(withBonus(lucBase(x.palier, x.sec)))}/20)`).join("\n") || "- aucun";
   const m = Object.keys(MES).map(k => { const v = sortedBy(S.mesures.filter(x => x.type === k)).slice(-4).map(x => `${dayTxt(x.at)} ${x.value}${MES[k].unit ? " " + MES[k].unit : ""}`).join(", "); return `- ${MES[k].label} : ${v || "pas encore testé"}`; }).join("\n");
   return `Aujourd'hui : ${new Date().toLocaleDateString("fr-FR", {weekday:"long", day:"numeric", month:"long", year:"numeric"})}.
 Épreuves sportives : ${S.examLabel || S.exam || "date inconnue"}${dl != null ? `, dans ${dl} jours` : ""}. Étape du plan : ${ph ? ph.t + " — " + ph.p + " Objectif : " + ph.o : "inconnue"}.
-Bonus d'âge (30-40 ans) : ${ageOn() ? "oui, +1 point" : "non"}.
+Bonus d'âge : +${ageBonus()} point(s).
 Parcours (derniers essais) :\n${e}
 Meilleurs temps par atelier : ${best.map((v, i) => `${TIMED[i].short} ${v == null ? "-" : (v / 1000).toFixed(1) + "s"}`).join(", ")}
 Luc Léger :\n${l}
@@ -1625,7 +1668,7 @@ Recommandations déjà calculées par l'appli :\n${recos().map(r => "- " + r.t +
 }
 const RULES = `Règles officielles (descriptif 2025, femmes) :
 - Note de sport = moyenne de 2 notes sur 20 : parcours d'habileté motrice (PHM) et Luc Léger. Sous 7/20 à l'une : éliminée. +1 point si 30-40 ans.
-- PHM : sac 25 kg sur 20 m hors chrono, puis chrono 15 s après la pose du sac. Ateliers : pompes x3 (buste au plot, coudes verrouillés), 3 haies 60 cm à 4 m, poutre 5 m à 1 m de haut sans les mains (pas de tapis à la sortie), multibonds cerceaux 70 cm, 10 appuis alternés banc 50 cm (semelle sur le banc), 2 barrières mousse 1,20 m à 2,20 m, échelle horizontale 2 m (ou suspension 15 s), ramper 3 m sous 50 cm, slalom 45 m (1er cône par la droite). Pénalités : +10 s par atelier raté, +20 s suspension non tenue, +5 s par plot. Atelier pas tenté ou abandon = 0. Dixièmes non comptés.
+- PHM : atelier 1 sac 25 kg sur 20 m hors chrono, puis chrono 15 s après la pose du sac. Ateliers numérotés : 2 pompes x3 (buste au plot, coudes verrouillés), 3 haies (3 haies de 60 cm à 4 m), 4 poutre (5 m à 1 m de haut sans les mains, pas de tapis à la sortie), 5 multibonds (cerceaux 70 cm), 6 appuis alternés (banc 50 cm, semelle sur le banc), 7 barrières (2 chevaux mousse 1,20 m à 2,20 m), 8 échelle horizontale (2 m ou suspension 15 s), 9 ramper (3 m sous 50 cm), 10 slalom (45 m, 1er cône par la droite). Utilise toujours le bon nom avec le bon numéro. Pénalités : +10 s par atelier raté, +20 s suspension non tenue, +5 s par plot. Atelier pas tenté ou abandon = 0. Dixièmes non comptés.
 - Barème PHM femmes : 0:50=20, 1:00=17,5, 1:10=14,5, 1:20=11,5, 1:30=10, 1:40=9, 1:49=7, 2:07=0.
 - Luc Léger : navette 20 m, départ 8 km/h, +0,5 km/h par palier d'1 min environ. Femmes : palier 4+15 s = 7/20, palier 6 = 10,5, palier 8 = 14,5, palier 10 = 18,5, palier 10+45 s = 20.
 - Sa semaine actuelle : 2 Freeletics, 2 gymnastique, 3 courses de 5 km, 2 krav maga, 1 jujitsu (10 séances). On ne rajoute pas de séances. La gym, le krav maga et le jujitsu ne se modifient JAMAIS (ne propose pas de les changer). On transforme seulement : 1 course devient fractionné, 1 Freeletics devient le parcours complet à Fitness Park. En plus : 10 min par jour de suspension et pompes, et si possible 10-15 min de poutre avant ou après un cours de gym. Au moins 1 jour de repos. Pas de pause pendant les fêtes. Premiers tests chronométrés (parcours + Luc Léger) la semaine du 9 novembre 2026.
@@ -1633,7 +1676,7 @@ const RULES = `Règles officielles (descriptif 2025, femmes) :
 function systemPrompt(){
   return `Tu es le coach sportif d'une candidate au concours de gardien de la paix (police nationale), qui prépare les épreuves sportives. Tu la tutoies, en français simple, chaleureux et motivant, sans jargon : si tu utilises un mot technique, explique-le en quelques mots. Réponses courtes et concrètes (séances, durées, répétitions, quel atelier, où). FORMAT : jamais de tableau, jamais de titre, pas d'emoji numéroté ; des phrases courtes ou une liste simple avec des tirets. En discussion, 120 mots au maximum.
 Appuie-toi UNIQUEMENT sur ses données ci-dessous et sur les règles officielles ; n'invente pas de chiffres. Si une donnée manque, dis-lui quel test faire.
-Chaque conseil doit être réaliste et faisable dans sa semaine : où (Fitness Park, club de gym, dehors), combien de fois, combien de répétitions. Pour le fractionné, la partie rapide se court à la vitesse de son palier visé (ou un peu plus), jamais plus lentement que son dernier palier atteint. Le lycée de Saint-Quentin est loin : seulement pour un passage de temps en temps sur le vrai parcours, pas pour courir. Ne répète pas deux fois le même conseil.
+Chaque conseil doit être réaliste et faisable dans sa semaine : où (Fitness Park, club de gym, dehors), combien de fois, combien de répétitions. Ne donne JAMAIS de jour de la semaine (lundi, mardi…) ni d'horaire : elle a son propre planning et ses cours en club ; parle de « une fois dans la semaine », « à une de tes courses », « avant ou après un cours de gym ». Pour le fractionné, la partie rapide se court à la vitesse de son palier visé (ou un peu plus), jamais plus lentement que son dernier palier atteint. Le lycée de Saint-Quentin est loin : seulement pour un passage de temps en temps sur le vrai parcours, pas pour courir. Ne répète pas deux fois le même conseil.
 Ne parle jamais de poids, de régime ou d'apparence. En cas de douleur, blessure, malaise ou vrai vertige : pas de diagnostic, conseille le repos et un médecin.
 ${RULES}
 
@@ -1657,15 +1700,16 @@ async function askGroq(messages, maxTokens){
 }
 function mdLite(t){ return esc(t).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/^#+\s*/gm, "").replace(/^\s*[-•]\s+/gm, "• ").replace(/\n/g, "<br>"); }
 /* ---- rapport hebdomadaire ---- */
+function addDays(d, n){ const x = new Date(d); x.setDate(x.getDate() + n); return x; }
 function weekStart(t){ const d = new Date(t); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return d; }
 const wkKey = d => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
 let wkOffset = 0, wkBusy = false, storeReady = false;
 function weekData(start){
-  const end = start.getTime() + 7 * 86400000, inW = x => x.at >= start.getTime() && x.at < end;
+  const end = addDays(start, 7).getTime(), inW = x => x.at >= start.getTime() && x.at < end;
   return {essais: sortedBy(S.essais.filter(inW)), luc: sortedBy(S.luc.filter(inW)), mesures: sortedBy(S.mesures.filter(inW))};
 }
 function weekBilan(start){
-  const W = weekData(start), P = weekData(new Date(start.getTime() - 7 * 86400000));
+  const W = weekData(start), P = weekData(addDays(start, -7));
   const best = l => l.length ? l.reduce((m, e) => e.total < m.total ? e : m, l[0]) : null;
   const bestL = l => l.length ? l.reduce((m, e) => (e.palier + e.sec / 60) > (m.palier + m.sec / 60) ? e : m, l[0]) : null;
   const b = best(W.essais), pb = best(P.essais), bl = bestL(W.luc), pbl = bestL(P.luc);
@@ -1684,8 +1728,8 @@ function bilanText(start){
   return `Semaine du ${dayTxt(start)} : ${B.W.essais.length} parcours, ${B.W.luc.length} Luc Léger, ${B.W.mesures.length} tests.\n` + B.facts.map(f => "- " + f.t + " : " + f.d).join("\n");
 }
 function renderWeek(){
-  const cur = weekStart(Date.now()), start = new Date(cur.getTime() + wkOffset * 7 * 86400000);
-  const end = new Date(start.getTime() + 6 * 86400000), key = wkKey(start);
+  const cur = weekStart(Date.now()), start = addDays(cur, wkOffset * 7);
+  const end = addDays(start, 6), key = wkKey(start);
   const B = weekBilan(start), dl = daysLeft();
   $("wk-title").textContent = `Du ${start.toLocaleDateString("fr-FR", {weekday:"long", day:"numeric", month:"long"})} au ${end.toLocaleDateString("fr-FR", {weekday:"long", day:"numeric", month:"long"})}${wkOffset === 0 ? " (cette semaine)" : ""}`;
   $("wk-next").disabled = wkOffset >= 0;
@@ -1712,9 +1756,9 @@ async function genWeek(force){
   if (!force && S.rapports.some(r => r.id === key)) return;
   if (!navigator.onLine) return;
   wkBusy = true; renderWeek();
-  const prev = new Date(start.getTime() - 7 * 86400000);
+  const prev = addDays(start, -7);
   try {
-    const t = await askGroq([{role: "system", content: systemPrompt()}, {role: "user", content: `C'est le début de la semaine du ${dayTxt(start)}. Voici le bilan de la semaine dernière :\n${bilanText(prev)}\nEt ce qui est déjà fait cette semaine :\n${bilanText(start)}\n\nÉcris mes recommandations pour cette semaine, en tenant compte de ma semaine habituelle (2 Freeletics, 2 gym, 3 courses de 5 km, 2 krav maga, 1 jujitsu ; on ne change ni la gym, ni le krav maga, ni le jujitsu). Base-toi STRICTEMENT sur ces bilans chiffrés (nombre de parcours, de Luc Léger, de tests) : ne dis jamais qu'il n'y a rien eu si le bilan indique des résultats. Commence par une phrase de bilan de la semaine dernière, avec ses chiffres. Puis 3 à 5 recommandations, chacune avec un titre court en gras puis 1 ou 2 phrases concrètes (quoi, quel jour de sa semaine, combien). Puis l'objectif chiffré de la semaine sur une ligne commençant par « Objectif de la semaine : ». Rappel : la routine quotidienne dure 10 min AU TOTAL (3 suspensions à la barre + 3 séries de 5 pompes + mobilité des poignets). Pour le fractionné, la partie rapide se court à la vitesse du palier visé (palier 8 = 11,5 km/h) ou au moins au palier au-dessus de son dernier test. Pas de tableau.`}], 800);
+    const t = await askGroq([{role: "system", content: systemPrompt()}, {role: "user", content: `C'est le début de la semaine du ${dayTxt(start)}. Voici le bilan de la semaine dernière :\n${bilanText(prev)}\nEt ce qui est déjà fait cette semaine :\n${bilanText(start)}\n\nÉcris mes recommandations pour cette semaine, en tenant compte de ma semaine habituelle (2 Freeletics, 2 gym, 3 courses de 5 km, 2 krav maga, 1 jujitsu ; on ne change ni la gym, ni le krav maga, ni le jujitsu). Base-toi STRICTEMENT sur ces bilans chiffrés (nombre de parcours, de Luc Léger, de tests) : ne dis jamais qu'il n'y a rien eu si le bilan indique des résultats. Commence par une phrase de bilan de la semaine dernière, avec ses chiffres. Puis 3 à 5 recommandations, chacune avec un titre court en gras puis 1 ou 2 phrases concrètes (quoi, à quelle séance de sa semaine, combien). Ne cite JAMAIS de jour (lundi, mardi…) : elle a déjà son planning et ses cours en club ; dis plutôt « une fois dans la semaine », « à une de tes courses », « à ta séance Freeletics remplacée ». Puis l'objectif chiffré de la semaine sur une ligne commençant par « Objectif de la semaine : ». Rappel : la routine quotidienne dure 10 min AU TOTAL (3 suspensions à la barre + 3 séries de 5 pompes + mobilité des poignets). Pour le fractionné, la partie rapide se court à la vitesse du palier visé (palier 8 = 11,5 km/h) ou au moins au palier au-dessus de son dernier test. Pas de tableau.`}], 800);
     if (t) await setDoc("rapports", key, {at: Date.now(), week: key, conseils: t, bilan: bilanText(prev)});
   } catch(e){ $("wk-recos").innerHTML = `<p class="sync warn">${esc(e.message || "Le coach ne répond pas.")}</p>`; wkBusy = false; return; }
   wkBusy = false; renderWeek();
@@ -1748,7 +1792,7 @@ async function coachAfterRun(b){
   el.hidden = false; el.innerHTML = `<b>Le coach :</b> ${esc(tip)}`;
   if (!aiOn()) return;
   try {
-    const t = await askGroq([{role: "system", content: systemPrompt()}, {role: "user", content: `Je viens de finir un parcours en ${fmt(b.total)} (pénalités : ${(b.penBy || []).map(p => `atelier ${p.n} +${p.s}s`).join(", ") || "aucune"}). Réagis en 2 phrases maximum : un point positif et le point à travailler en priorité.`}], 160);
+    const t = await askGroq([{role: "system", content: systemPrompt()}, {role: "user", content: `Je viens de finir un parcours en ${fmt(b.total)} (pénalités : ${(b.penBy || []).map(p => `atelier ${p.n} ${byN(p.n).short} +${p.s}s`).join(", ") || "aucune"}). Réagis en 2 phrases maximum : un point positif et le point à travailler en priorité.`}], 160);
     if (t) el.innerHTML = `<b>Le coach :</b> ${mdLite(t)}`;
   } catch(e){}
 }

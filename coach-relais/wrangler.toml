@@ -1,3 +1,9 @@
 name = "parcours-coach"
 main = "worker.js"
 compatibility_date = "2026-11-01"
+
+# Limite de débit Cloudflare : 12 demandes par minute et par adresse
+[[ratelimits]]
+name = "LIMITER"
+namespace_id = "1001"
+simple = { limit = 12, period = 60 }

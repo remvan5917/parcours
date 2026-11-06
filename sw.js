@@ -1,5 +1,5 @@
 // Garde l'appli disponible sans réseau (au gymnase, au stade…).
-const CACHE = 'parcours-v21';
+const CACHE = 'parcours-v22';
 const FILES = ['./', 'index.html', 'config.js', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png', 'icons/apple-touch-icon.png'];
 const FIXED = /fonts\.gstatic\.com|fonts\.googleapis\.com|www\.gstatic\.com\/firebasejs/;
 
@@ -19,6 +19,13 @@ self.addEventListener('fetch', e => {
   }
   if (url.origin !== location.origin) return;
   // nos fichiers : le réseau d'abord (pour avoir la dernière version), la réserve si pas de réseau
-  e.respondWith(fetch(req, { cache: 'no-cache' }).then(res => { if (res.ok) caches.open(CACHE).then(c => c.put(req, res.clone())); return res; })
-    .catch(() => caches.match(req).then(hit => hit || caches.match('index.html'))));
+  // réseau d'abord ; si le réseau traîne plus de 3 s (salle de sport, 4G faible), la copie en réserve
+  const net = fetch(req, { cache: 'no-cache' }).then(res => { if (res.ok) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); } return res; });
+  const fallback = () => caches.match(req).then(hit => hit || caches.match('index.html'));
+  e.respondWith(new Promise(resolve => {
+    let done = false;
+    const t = setTimeout(() => fallback().then(hit => { if (hit && !done) { done = true; resolve(hit); } }), 3000);
+    net.then(res => { if (!done) { done = true; clearTimeout(t); resolve(res); } })
+       .catch(() => fallback().then(hit => { if (!done) { done = true; clearTimeout(t); resolve(hit || Response.error()); } }));
+  }));
 });
