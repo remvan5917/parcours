@@ -1,0 +1,10 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Les données d'une équipe sont rangées sous un code secret de 24 caractères.
+    match /equipes/{code}/{coll}/{doc} {
+      allow read, write: if code.size() >= 20
+        && coll in ['essais', 'mesures', 'luc', 'reglages', 'rapports'];
+    }
+  }
+}
