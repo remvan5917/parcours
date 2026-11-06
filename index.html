@@ -536,7 +536,7 @@ footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padd
 <!-- =================== COACH =================== -->
 <section class="view" id="v-coach" data-view="coach" hidden>
   <h2>Coach</h2>
-  <p class="note">Des conseils calculés à partir de tes résultats, de tes tests et du temps qui reste avant le concours. Avec le coach IA (à activer dans Réglages), tu peux aussi lui poser tes questions.</p>
+  <p class="note">Des conseils calculés à partir de tes résultats, de tes tests et du temps qui reste avant le concours. Plus bas, le coach IA te propose un programme pour la semaine et répond à tes questions.</p>
   <div class="panel">
     <div class="row between"><h3>Tes priorités du moment</h3><span class="note" id="coach-phase"></span></div>
     <ul class="steps" id="recos"></ul>
@@ -1518,7 +1518,7 @@ function recos(){
     const cnt = {}; essais.slice(-3).forEach(e => (e.penBy || []).forEach(p => cnt[p.n] = (cnt[p.n] || 0) + 1));
     Object.entries(cnt).sort((a, b) => b[1] - a[1]).slice(0, 2).forEach(([n, c]) => {
       const s = byN(Number(n));
-      R.push({t:`Atelier ${n} · ${s.short} : ${c} pénalité${c > 1 ? "s" : ""} récente${c > 1 ? "s" : ""}`, d:`Au club : ${s.club.ex} (${s.club.vol}). Rappel : réussi si ${s.ok}`, go:"ateliers", mode:"club", btn:"Voir l'atelier"});
+      R.push({t:`Atelier ${n} · ${s.short} : ${c} pénalité${c > 1 ? "s" : ""} récente${c > 1 ? "s" : ""}`, d:`Au club : ${s.club.ex.replace(" (plan ci-dessus)", " (plan vertige dans la vue Club)")} (${s.club.vol}). Rappel : réussi si ${s.ok}.`, go:"ateliers", mode:"club", btn:"Voir l'atelier"});
     });
     // atelier qui a le plus reculé, ou le plus loin de son record
     if (essais.length > 1 && last.splits){
