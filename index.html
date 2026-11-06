@@ -349,12 +349,11 @@ footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padd
 
   <div class="panel">
     <h2>Ta semaine, adaptée au concours</h2>
-    <p class="note">Tu fais déjà 10 séances par semaine. On n'en ajoute pas : on en transforme quelques-unes pour qu'elles servent directement au parcours et au Luc Léger.</p>
+    <p class="note">Tu fais déjà 10 séances par semaine. On n'en ajoute pas, et la gym, le krav maga et le jujitsu ne changent pas. On transforme seulement une course et une séance Freeletics pour qu'elles servent directement au parcours et au Luc Léger.</p>
     <div class="week">
       <div class="wk run"><b>3 courses de 5 km</b><p>Garde-en 2 en footing tranquille. La 3e devient un <b>fractionné</b> (30 s vite / 30 s en trottinant) : c'est elle qui fait progresser au Luc Léger.</p></div>
       <div class="wk fp"><b>2 Freeletics</b><p>Une fois par semaine, remplace une séance Freeletics par le <b>parcours complet à Fitness Park</b> (3 parcours chronométrés). Garde l'autre telle quelle.</p></div>
-      <div class="wk club"><b>2 gymnastique</b><p>À une des deux, garde 20 à 30 min pour les <b>agrès du concours</b> : poutre (plan vertige), caisson à 1,20 m, barre.</p></div>
-      <div class="wk club"><b>2 krav maga + 1 jujitsu</b><p>On ne change rien : cardio, gainage et résistance, ça sert aussi au concours.</p></div>
+      <div class="wk club"><b>2 gym, 2 krav maga, 1 jujitsu</b><p>On ne change rien. Si c'est possible, 10 à 15 min sur la poutre avant ou après un cours de gym, pour avancer dans le plan vertige.</p></div>
       <div class="wk daily"><b>Chaque jour, 10 min</b><p>Suspension à la barre, 3 × 5 pompes, mobilité des poignets.</p></div>
       <div class="wk daily"><b>Au moins 1 jour de repos</b><p>Sans sport du tout. Si tu es fatiguée, enlève d'abord un footing, jamais le fractionné ou le parcours.</p></div>
     </div>
@@ -1003,12 +1002,9 @@ const SEANCES = {
     {t:"Ranger, puis s'étirer", d:"Étirements et souplesse · 10 min"}
   ],
   club: [
-    {t:"Échauffement", d:"Course légère, talons-fesses, montées de genoux, puis tourner poignets, épaules et chevilles · 10 min"},
-    {t:"Poutre au palier du moment", d:"10 traversées sans les mains, à la hauteur où tu en es dans le plan vertige · 10 min", go:"ateliers", mode:"club", btn:"Plan vertige"},
-    {t:"Barrières", d:"Passer par-dessus un caisson, jusqu'à 1,20 m : 3 séries de 6, des deux côtés · 10 min"},
-    {t:"Barre", d:"5 fois suspendue 20 à 30 s, puis 4 traversées en avançant une main après l'autre · 10 min"},
-    {t:"Pompes et gainage", d:"4 séries de 5 pompes, 3 fois 40 s de planche · 10 min"},
-    {t:"Pieds rapides", d:"Cerceaux, puis un pied après l'autre sur un caisson de 50 cm · 5 min"},
+    {t:"Ton cours de gym, comme d'habitude", d:"On ne change rien au cours."},
+    {t:"Avant ou après le cours, si c'est possible : la poutre", d:"10 traversées sans les mains, à la hauteur où tu en es dans le plan vertige · 10 à 15 min", go:"ateliers", mode:"club", btn:"Plan vertige"},
+    {t:"Si tu as encore 5 min : la barre", d:"3 fois suspendue le plus longtemps possible"},
     {t:"Note ta hauteur de poutre et ta suspension", d:"Dans Progrès › Tests à côté.", go:"progres", btn:"Noter"}
   ],
   run: [
@@ -1581,7 +1577,7 @@ const RULES = `Règles officielles (descriptif 2025, femmes) :
 - PHM : sac 25 kg sur 20 m hors chrono, puis chrono 15 s après la pose du sac. Ateliers : pompes x3 (buste au plot, coudes verrouillés), 3 haies 60 cm à 4 m, poutre 5 m à 1 m de haut sans les mains (pas de tapis à la sortie), multibonds cerceaux 70 cm, 10 appuis alternés banc 50 cm (semelle sur le banc), 2 barrières mousse 1,20 m à 2,20 m, échelle horizontale 2 m (ou suspension 15 s), ramper 3 m sous 50 cm, slalom 45 m (1er cône par la droite). Pénalités : +10 s par atelier raté, +20 s suspension non tenue, +5 s par plot. Atelier pas tenté ou abandon = 0. Dixièmes non comptés.
 - Barème PHM femmes : 0:50=20, 1:00=17,5, 1:10=14,5, 1:20=11,5, 1:30=10, 1:40=9, 1:49=7, 2:07=0.
 - Luc Léger : navette 20 m, départ 8 km/h, +0,5 km/h par palier d'1 min environ. Femmes : palier 4+15 s = 7/20, palier 6 = 10,5, palier 8 = 14,5, palier 10 = 18,5, palier 10+45 s = 20.
-- Sa semaine actuelle : 2 Freeletics, 2 gymnastique, 3 courses de 5 km, 2 krav maga, 1 jujitsu (10 séances). On ne rajoute pas de séances, on transforme : 1 course devient fractionné, 1 Freeletics devient le parcours complet à Fitness Park, 20-30 min d'agrès du concours dans 1 séance de gym, 10 min par jour de suspension et pompes, au moins 1 jour de repos. Pas de pause pendant les fêtes. Premiers tests chronométrés (parcours + Luc Léger) la semaine du 9 novembre 2026.
+- Sa semaine actuelle : 2 Freeletics, 2 gymnastique, 3 courses de 5 km, 2 krav maga, 1 jujitsu (10 séances). On ne rajoute pas de séances. La gym, le krav maga et le jujitsu ne se modifient JAMAIS (ne propose pas de les changer). On transforme seulement : 1 course devient fractionné, 1 Freeletics devient le parcours complet à Fitness Park. En plus : 10 min par jour de suspension et pompes, et si possible 10-15 min de poutre avant ou après un cours de gym. Au moins 1 jour de repos. Pas de pause pendant les fêtes. Premiers tests chronométrés (parcours + Luc Léger) la semaine du 9 novembre 2026.
 - Elle s'entraîne à Fitness Park Lille (parcours recréé dans la zone fonctionnelle), dans un club de gymnastique (exercices seule sur les agrès) et en course. Le vrai parcours existe au lycée professionnel sécurité de Saint-Quentin. Elle peut avoir le vertige sur la poutre. La poutre du concours est à 1 m de haut, sans tapis à la sortie. Le plan vertige de l'appli (ne pas en inventer un autre) : palier 1 au sol (ligne de 5 m puis poutre posée au sol) ; palier 2 poutre basse 30 à 50 cm avec tapis ; palier 3 60 à 80 cm avec tapis épais, d'abord main tenue puis contact sur l'épaule puis seule ; palier 4 1 m avec gros tapis empilés ; palier 5 1 m sans les tapis surélevés ; palier 6 dans le parcours, essoufflée. On passe au palier suivant après 10 traversées d'affilée sans les mains, sans s'arrêter, avec une appréhension de 3 sur 10 ou moins. Conseils : regarder un point au bout de la poutre à hauteur des yeux, longue expiration avant de monter, petits pas réguliers, bras écartés, s'entraîner à sauter volontairement sur le tapis, demander une parade au coach du club.`;
 function systemPrompt(){
   return `Tu es le coach sportif d'une candidate au concours de gardien de la paix (police nationale), qui prépare les épreuves sportives. Tu la tutoies, en français simple, chaleureux et motivant, sans jargon : si tu utilises un mot technique, explique-le en quelques mots. Réponses courtes et concrètes (séances, durées, répétitions, quel atelier, où). FORMAT : jamais de tableau, jamais de titre, pas d'emoji numéroté ; des phrases courtes ou une liste simple avec des tirets. En discussion, 120 mots au maximum.
