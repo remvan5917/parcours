@@ -25,7 +25,7 @@ service cloud.firestore {
   match /databases/{database}/documents {
     match /equipes/{code}/{coll}/{doc} {
       allow read, write: if code.size() >= 20
-        && coll in ['essais', 'mesures', 'luc', 'reglages'];
+        && coll in ['essais', 'mesures', 'luc', 'reglages', 'rapports'];
     }
   }
 }

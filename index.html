@@ -319,7 +319,8 @@ footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padd
   <p class="note">Ta note de sport est la moyenne de ces deux notes, coefficient 8 dans le concours. Sous 7/20 à l'une des deux, c'est éliminatoire. Les notes sont calculées à partir de ton dernier essai, avec le bonus d'âge réglé plus bas.</p>
 
   <div class="panel" style="border-top:4px solid var(--run)">
-    <div class="row between"><h2>Conseils du coach</h2><button type="button" class="ghost tiny" data-goto="coach">Tous les conseils</button></div>
+    <div class="row between"><h2>Conseils du coach</h2><button type="button" class="ghost tiny" data-goto="coach">Rapport de la semaine</button></div>
+    <p class="note" id="home-week"></p>
     <ul class="steps" id="home-recos"></ul>
   </div>
 
@@ -536,7 +537,19 @@ footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padd
 <!-- =================== COACH =================== -->
 <section class="view" id="v-coach" data-view="coach" hidden>
   <h2>Coach</h2>
-  <p class="note">Des conseils calculés à partir de tes résultats, de tes tests et du temps qui reste avant le concours. Plus bas, le coach IA te propose un programme pour la semaine et répond à tes questions.</p>
+  <p class="note">Chaque semaine : ton bilan chiffré et les recommandations du coach, gardés en archive (flèches pour revoir les semaines passées). En dessous, tes priorités du moment et le coach IA pour poser tes questions.</p>
+  <div class="panel" id="rapport" style="border-top:4px solid var(--mat)">
+    <div class="row between">
+      <h3>Rapport de la semaine</h3>
+      <div class="row" style="gap:6px"><button type="button" class="ghost tiny" id="wk-prev" aria-label="Semaine précédente">‹ Précédente</button><button type="button" class="ghost tiny" id="wk-next" aria-label="Semaine suivante">Suivante ›</button></div>
+    </div>
+    <p class="note" id="wk-title"></p>
+    <div class="kpis" id="wk-kpis"></div>
+    <ul class="steps" id="wk-facts"></ul>
+    <h3 style="margin-top:6px">Les recommandations du coach pour cette semaine</h3>
+    <div id="wk-recos" class="col"></div>
+  </div>
+
   <div class="panel">
     <div class="row between"><h3>Tes priorités du moment</h3><span class="note" id="coach-phase"></span></div>
     <ul class="steps" id="recos"></ul>
@@ -547,8 +560,6 @@ footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padd
       <p class="note">Le coach IA n'est pas encore branché sur le site. En attendant, les priorités ci-dessus sont calculées à partir de tes résultats.</p>
     </div>
     <div id="ai-on" class="col" hidden>
-      <button type="button" class="btn" id="ai-plan">Mes conseils pour cette semaine</button>
-      <div id="ai-plan-out" class="col"></div>
       <div class="chat" id="chat-log" aria-live="polite"></div>
       <div class="chips" id="chat-sugg"></div>
       <form class="row" id="chat-form">
@@ -845,7 +856,7 @@ function show(v, noScroll){
   try { history.replaceState(null, "", "#" + v); } catch(e){}
   if (!noScroll) window.scrollTo(0, 0);
   if (v === "progres") renderProg();
-  if (v === "coach"){ renderRecos(); renderChat(); }
+  if (v === "coach"){ renderRecos(); renderChat(); renderWeek(); genWeek(false); }
 }
 document.querySelectorAll("[data-tab]").forEach(b => b.addEventListener("click", () => show(b.dataset.tab)));
 document.addEventListener("click", e => { const g = e.target.closest("[data-goto]"); if (g){ show(g.dataset.goto); if (g.dataset.mode) setMode(g.dataset.mode); } });
@@ -853,9 +864,9 @@ document.addEventListener("click", e => { const g = e.target.closest("[data-goto
 /* ======================= STOCKAGE =======================
    Toujours sur ce téléphone. Si le partage est activé (config.js + code d'équipe),
    aussi dans la base en ligne, visible sur tous les téléphones de l'équipe. */
-const S = { essais: [], mesures: [], luc: [], exam: null, examLabel: null };
-const LKEY = {essais:"phm-essais-v3", mesures:"phm-mesures-v1", luc:"phm-luc-v1"};
-const COLLS = ["essais", "mesures", "luc"];
+const S = { essais: [], mesures: [], luc: [], rapports: [], exam: null, examLabel: null };
+const LKEY = {essais:"phm-essais-v3", mesures:"phm-mesures-v1", luc:"phm-luc-v1", rapports:"phm-rapports-v1"};
+const COLLS = ["essais", "mesures", "luc", "rapports"];
 const EXAM_DEFAULT = {date:"2027-03-29", label:"fin mars – début avril 2027"};
 const FB = window.PARCOURS_FIREBASE || null;
 let FS = null;
@@ -1605,21 +1616,77 @@ async function askGroq(messages, maxTokens){
   }
 }
 function mdLite(t){ return esc(t).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/^#+\s*/gm, "").replace(/^\s*[-•]\s+/gm, "• ").replace(/\n/g, "<br>"); }
-$("ai-plan").addEventListener("click", async () => {
-  const out = $("ai-plan-out"), b = $("ai-plan");
-  b.disabled = true; out.innerHTML = `<p class="note">Le coach regarde tes résultats…</p>`;
+/* ---- rapport hebdomadaire ---- */
+function weekStart(t){ const d = new Date(t); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return d; }
+const wkKey = d => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+let wkOffset = 0, wkBusy = false;
+function weekData(start){
+  const end = start.getTime() + 7 * 86400000, inW = x => x.at >= start.getTime() && x.at < end;
+  return {essais: sortedBy(S.essais.filter(inW)), luc: sortedBy(S.luc.filter(inW)), mesures: sortedBy(S.mesures.filter(inW))};
+}
+function weekBilan(start){
+  const W = weekData(start), P = weekData(new Date(start.getTime() - 7 * 86400000));
+  const best = l => l.length ? l.reduce((m, e) => e.total < m.total ? e : m, l[0]) : null;
+  const bestL = l => l.length ? l.reduce((m, e) => (e.palier + e.sec / 60) > (m.palier + m.sec / 60) ? e : m, l[0]) : null;
+  const b = best(W.essais), pb = best(P.essais), bl = bestL(W.luc), pbl = bestL(P.luc);
+  const pens = {}; W.essais.forEach(e => (e.penBy || []).forEach(p => pens[p.n] = (pens[p.n] || 0) + p.s));
+  const facts = [];
+  if (b) facts.push({t:`Parcours : meilleur temps ${fmt(b.total)} (${noteTxt(b.note)}/20)`, d: pb ? `Semaine d'avant : ${fmt(pb.total)}. ${b.total <= pb.total ? "Tu as gagné " + fr(((pb.total - b.total) / 1000).toFixed(1)) + " s." : "Tu as perdu " + fr(((b.total - pb.total) / 1000).toFixed(1)) + " s."}` : "Pas de parcours la semaine d'avant pour comparer."});
+  else facts.push({t:"Aucun parcours chronométré cette semaine", d:"Objectif : au moins un parcours complet par semaine."});
+  const pk = Object.keys(pens);
+  if (W.essais.length) facts.push({t: pk.length ? `Pénalités : ${pk.map(n => byN(Number(n)).short + " +" + pens[n] + " s").join(", ")}` : "Aucune pénalité cette semaine", d: pk.length ? "Ce sont les ateliers à travailler en priorité." : "Bravo : c'est là qu'on gagne le plus de temps."});
+  if (bl) facts.push({t:`Luc Léger : ${palTxt(bl.palier, bl.sec)} (${fr(withBonus(lucBase(bl.palier, bl.sec)))}/20)`, d: pbl ? `Semaine d'avant : ${palTxt(pbl.palier, pbl.sec)}.` : "Objectif : palier " + LUC_TARGET + "."});
+  if (W.mesures.length) facts.push({t:"Tests notés", d: W.mesures.map(m => `${MES[m.type].label} : ${fr(m.value)}${MES[m.type].unit ? " " + MES[m.type].unit : ""}`).join(" · ")});
+  return {W, b, bl, facts, pens};
+}
+function bilanText(start){
+  const B = weekBilan(start);
+  return `Semaine du ${dayTxt(start)} : ${B.W.essais.length} parcours, ${B.W.luc.length} Luc Léger, ${B.W.mesures.length} tests.\n` + B.facts.map(f => "- " + f.t + " : " + f.d).join("\n");
+}
+function renderWeek(){
+  const cur = weekStart(Date.now()), start = new Date(cur.getTime() + wkOffset * 7 * 86400000);
+  const end = new Date(start.getTime() + 6 * 86400000), key = wkKey(start);
+  const B = weekBilan(start), dl = daysLeft();
+  $("wk-title").textContent = `Du ${start.toLocaleDateString("fr-FR", {weekday:"long", day:"numeric", month:"long"})} au ${end.toLocaleDateString("fr-FR", {weekday:"long", day:"numeric", month:"long"})}${wkOffset === 0 ? " (cette semaine)" : ""}`;
+  $("wk-next").disabled = wkOffset >= 0;
+  $("wk-kpis").innerHTML = `<div class="kpi"><span>Parcours</span><b>${B.W.essais.length}</b><small>${B.b ? "meilleur " + fmt(B.b.total) : "aucun"}</small></div>
+    <div class="kpi"><span>Luc Léger</span><b>${B.W.luc.length}</b><small>${B.bl ? palTxt(B.bl.palier, B.bl.sec) : "aucun test"}</small></div>
+    <div class="kpi"><span>Tests notés</span><b>${B.W.mesures.length}</b><small>suspension, pompes, poutre</small></div>
+    <div class="kpi"><span>Avant le concours</span><b>${dl != null ? dl : "—"}</b><small>jours à partir d'aujourd'hui</small></div>`;
+  $("wk-facts").innerHTML = B.facts.map(f => `<li><div><div class="s-t">${esc(f.t)}</div><div class="s-d">${esc(f.d)}</div></div></li>`).join("");
+  const rep = S.rapports.find(r => r.id === key || r.week === key);
+  let html = "";
+  if (rep && rep.conseils) html = `<div class="ai-box">${mdLite(rep.conseils)}</div><p class="note" style="font-size:.8rem">Écrites le ${dateTxt(rep.at)}.</p>`;
+  else if (!aiOn()) html = `<p class="note">Le coach IA n'est pas branché : voici les priorités calculées.</p><ul class="steps">${recos().slice(0, 4).map(recoHTML).join("")}</ul>`;
+  else if (wkOffset < 0) html = `<p class="note">Pas de recommandations enregistrées pour cette semaine-là.</p>`;
+  else html = `<p class="note">${wkBusy ? "Le coach prépare tes recommandations…" : "Pas encore de recommandations pour cette semaine."}</p>`;
+  if (aiOn() && wkOffset === 0 && !wkBusy) html += `<div class="row"><button type="button" class="ghost small" id="wk-gen">${rep ? "Refaire les recommandations" : "Demander les recommandations"}</button></div>`;
+  $("wk-recos").innerHTML = html;
+  // accueil
+  const hw = $("home-week");
+  if (hw) hw.innerHTML = rep && wkOffset === 0 ? `Les recommandations de la semaine sont prêtes dans l'onglet Coach.` : (aiOn() ? "Le coach écrit tes recommandations de la semaine quand tu ouvres l'onglet Coach." : "");
+}
+async function genWeek(force){
+  if (!aiOn() || wkBusy) return;
+  const start = weekStart(Date.now()), key = wkKey(start);
+  if (!force && S.rapports.some(r => r.id === key)) return;
+  if (!navigator.onLine) return;
+  wkBusy = true; renderWeek();
+  const prev = new Date(start.getTime() - 7 * 86400000);
   try {
-    const t = await askGroq([{role: "system", content: systemPrompt()}, {role: "user", content: "Donne-moi 3 à 5 conseils pour cette semaine, du plus important au moins important. Pour chacun : un titre court en gras, puis 1 ou 2 phrases concrètes (quoi faire, combien, où). Termine par une phrase d'encouragement."}], 700);
-    out.innerHTML = `<div class="ai-box">${mdLite(t)}</div>`;
-    lsSet("phm-ai-plan", {at: Date.now(), t});
-  } catch(e){ out.innerHTML = `<p class="sync warn">${esc(e.message || "Le coach ne répond pas. Vérifie le réseau.")}</p>`; }
-  b.disabled = false;
-});
+    const t = await askGroq([{role: "system", content: systemPrompt()}, {role: "user", content: `C'est le début de la semaine du ${dayTxt(start)}. Voici le bilan de la semaine dernière :\n${bilanText(prev)}\nEt ce qui est déjà fait cette semaine :\n${bilanText(start)}\n\nÉcris mes recommandations pour cette semaine, en tenant compte de ma semaine habituelle (2 Freeletics, 2 gym, 3 courses de 5 km, 2 krav maga, 1 jujitsu ; on ne change ni la gym, ni le krav maga, ni le jujitsu). Commence par une phrase de bilan de la semaine dernière. Puis 3 à 5 recommandations, chacune avec un titre court en gras puis 1 ou 2 phrases concrètes (quoi, quel jour de sa semaine, combien). Puis l'objectif chiffré de la semaine sur une ligne commençant par « Objectif de la semaine : ». Pas de tableau.`}], 800);
+    if (t) await setDoc("rapports", key, {at: Date.now(), week: key, conseils: t, bilan: bilanText(prev)});
+  } catch(e){ $("wk-recos").innerHTML = `<p class="sync warn">${esc(e.message || "Le coach ne répond pas.")}</p>`; wkBusy = false; return; }
+  wkBusy = false; renderWeek();
+}
+$("wk-prev").addEventListener("click", () => { wkOffset--; renderWeek(); });
+$("wk-next").addEventListener("click", () => { if (wkOffset < 0){ wkOffset++; renderWeek(); } });
+document.addEventListener("click", e => { if (e.target.id === "wk-gen") genWeek(true); });
 let chat = lsGet("phm-chat", []), chatBusy = false;
 function renderChat(){
   $("chat-log").innerHTML = chat.length ? chat.map(m => `<div class="msg ${m.role === "user" ? "me" : "bot"}">${m.role === "user" ? esc(m.content) : mdLite(m.content)}</div>`).join("") : `<div class="msg bot">Salut ! Pose-moi une question sur ta préparation : un atelier, ta course, ta semaine…</div>`;
   $("chat-log").scrollTop = $("chat-log").scrollHeight;
-  $("chat-sugg").innerHTML = ["Que travailler cette semaine ?", "J'ai peur sur la poutre", "Comment gagner du temps au slalom ?", "Je suis fatiguée aujourd'hui", "Comment progresser au Luc Léger ?"].map(s => `<button type="button" class="chip" data-ask="${esc(s)}">${esc(s)}</button>`).join("");
+  $("chat-sugg").innerHTML = ["Explique-moi mes recommandations de la semaine", "J'ai peur sur la poutre", "Comment gagner du temps au slalom ?", "Je suis fatiguée aujourd'hui", "Comment progresser au Luc Léger ?"].map(s => `<button type="button" class="chip" data-ask="${esc(s)}">${esc(s)}</button>`).join("");
 }
 async function sendChat(text){
   text = text.trim(); if (!text || chatBusy) return;
@@ -1660,7 +1727,7 @@ async function coachAfterRun(b){
 })();
 
 /* ======================= DÉMARRAGE ======================= */
-function renderAll(){ renderHome(); renderSplits(); renderRecos(); if (!$("v-progres").hidden) renderProg(); }
+function renderAll(){ renderHome(); renderSplits(); renderRecos(); renderWeek(); if (!$("v-progres").hidden) renderProg(); }
 setStatus(); renderChrono(); renderSeance(); renderLucBareme(); renderAteliers(); renderAll();
 show((location.hash || "#accueil").slice(1), true);
 initStore();
