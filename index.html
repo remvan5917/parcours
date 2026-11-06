@@ -82,7 +82,8 @@ a{color:var(--mat)}
 
 /* bottom tabs */
 nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center}
-nav.tabs .in{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;width:100%;max-width:620px}
+nav.tabs .in{display:grid;grid-template-columns:repeat(6,1fr);gap:2px;width:100%;max-width:700px}
+@media (max-width:400px){nav.tabs button{font-size:.82rem}}
 nav.tabs button{background:none;border:0;border-radius:10px;padding:6px 2px;display:flex;flex-direction:column;align-items:center;gap:2px;font-family:var(--display);font-weight:600;font-size:.92rem;color:var(--muted);cursor:pointer;min-height:52px}
 nav.tabs button svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 nav.tabs button[aria-current="page"]{color:var(--mat);background:var(--mat-soft)}
@@ -284,6 +285,11 @@ tr.done td:first-child{color:var(--muted)}
 .gloss{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:8px 16px}
 .gloss div{font-size:.93rem}
 .gloss b{font-weight:600}
+.chat{display:flex;flex-direction:column;gap:8px;max-height:420px;overflow-y:auto;padding:4px 2px}
+.msg{max-width:88%;padding:9px 12px;border-radius:12px;font-size:.95rem;line-height:1.45}
+.msg.me{align-self:flex-end;background:var(--mat);color:#fff;border-bottom-right-radius:4px}
+.msg.bot{align-self:flex-start;background:var(--floor);border-bottom-left-radius:4px}
+.ai-box{background:var(--run-soft);border-radius:10px;padding:12px 14px;font-size:.95rem;line-height:1.55}
 footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padding-top:14px;margin-top:10px;display:flex;flex-direction:column;gap:6px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
@@ -311,6 +317,11 @@ footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padd
   </div>
   <p class="note" id="score-avg" hidden></p>
   <p class="note">Ta note de sport est la moyenne de ces deux notes, coefficient 8 dans le concours. Sous 7/20 à l'une des deux, c'est éliminatoire. Les notes sont calculées à partir de ton dernier essai, avec le bonus d'âge réglé plus bas.</p>
+
+  <div class="panel" style="border-top:4px solid var(--run)">
+    <div class="row between"><h2>Conseils du coach</h2><button type="button" class="ghost tiny" data-goto="coach">Tous les conseils</button></div>
+    <ul class="steps" id="home-recos"></ul>
+  </div>
 
   <div class="quick">
     <button type="button" data-goto="parcours"><b>Chrono parcours</b><span>Sac, 10 ateliers, pénalités</span></button>
@@ -356,6 +367,7 @@ footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padd
       <p><b>Parcours</b> : le chronomètre du parcours. Il montre l'atelier en cours, ce qui le rend réussi et les pénalités possibles.</p>
       <p><b>Luc Léger</b> : le téléphone fait les bips de la course navette. Un bouton « Arrêt » donne ton palier et ta note.</p>
       <p><b>Ateliers</b> : les 10 ateliers expliqués, avec trois vues : comme au concours, comment les recréer à Fitness Park, et quoi travailler au club de gym.</p>
+      <p><b>Coach</b> : tes priorités du moment, calculées à partir de tes résultats, et un coach IA à qui poser tes questions.</p>
       <p><b>Progrès</b> : tes courbes, atelier par atelier, et tout l'historique.</p>
     </div>
   </details>
@@ -423,6 +435,7 @@ footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padd
       <div><span>Avec pénalités</span><b id="r-total">—</b></div>
       <div><span>Note</span><b id="r-note">—</b></div>
     </div>
+    <p class="check" id="run-tip" hidden></p>
   </div>
   <div class="panel">
     <h3>Temps par atelier</h3>
@@ -520,6 +533,33 @@ footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padd
   <div class="stations" id="stations"></div>
 </section>
 
+<!-- =================== COACH =================== -->
+<section class="view" id="v-coach" data-view="coach" hidden>
+  <h2>Coach</h2>
+  <p class="note">Des conseils calculés à partir de tes résultats, de tes tests et du temps qui reste avant le concours. Avec le coach IA (à activer dans Réglages), tu peux aussi lui poser tes questions.</p>
+  <div class="panel">
+    <div class="row between"><h3>Tes priorités du moment</h3><span class="note" id="coach-phase"></span></div>
+    <ul class="steps" id="recos"></ul>
+  </div>
+  <div class="panel" id="ai-panel">
+    <div class="row between"><h3>Le coach IA</h3><span class="note" id="ai-state"></span></div>
+    <div id="ai-off" class="col" hidden>
+      <p class="note">Le coach IA n'est pas encore branché sur le site. En attendant, les priorités ci-dessus sont calculées à partir de tes résultats.</p>
+    </div>
+    <div id="ai-on" class="col" hidden>
+      <button type="button" class="btn" id="ai-plan">Mes conseils pour cette semaine</button>
+      <div id="ai-plan-out" class="col"></div>
+      <div class="chat" id="chat-log" aria-live="polite"></div>
+      <div class="chips" id="chat-sugg"></div>
+      <form class="row" id="chat-form">
+        <input type="text" id="chat-in" placeholder="Pose ta question au coach…" autocomplete="off" style="flex:1 1 200px;font:inherit;font-size:.95rem;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)">
+        <button type="submit" class="ghost small">Envoyer</button>
+      </form>
+      <p class="note" style="font-size:.8rem">Le coach IA peut se tromper : les règles officielles sont dans l'onglet Ateliers. En cas de douleur, demande l'avis d'un médecin.</p>
+    </div>
+  </div>
+</section>
+
 <!-- =================== PROGRÈS =================== -->
 <section class="view" id="v-progres" data-view="progres" hidden>
   <h2>Progrès</h2>
@@ -580,6 +620,7 @@ footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padd
     <button type="button" data-tab="parcours"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M10 2h4"/></svg>Parcours</button>
     <button type="button" data-tab="luc"><svg viewBox="0 0 24 24"><path d="M4 18h16M6 18V8M18 18V8M6 8l6 5 6-5"/></svg>Luc Léger</button>
     <button type="button" data-tab="ateliers"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="7" height="7" rx="1.5"/><rect x="14" y="4" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Ateliers</button>
+    <button type="button" data-tab="coach"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/></svg>Coach</button>
     <button type="button" data-tab="progres"><svg viewBox="0 0 24 24"><path d="M4 19h16"/><path d="M5 15l4-5 4 3 6-7"/></svg>Progrès</button>
   </div>
 </nav>
@@ -797,7 +838,7 @@ const palTxt = (p, s) => `palier ${p}${s ? " + " + s + " s" : ""}`;
 const palBig = (p, s) => `Palier ${p}${s ? " + " + s + " s" : ""}`;
 
 /* ======================= NAVIGATION ======================= */
-const VIEWS = ["accueil", "parcours", "luc", "ateliers", "progres"];
+const VIEWS = ["accueil", "parcours", "luc", "ateliers", "coach", "progres"];
 function show(v, noScroll){
   if (!VIEWS.includes(v)) v = "accueil";
   document.querySelectorAll(".view").forEach(el => el.hidden = el.dataset.view !== v);
@@ -805,6 +846,7 @@ function show(v, noScroll){
   try { history.replaceState(null, "", "#" + v); } catch(e){}
   if (!noScroll) window.scrollTo(0, 0);
   if (v === "progres") renderProg();
+  if (v === "coach"){ renderRecos(); renderChat(); }
 }
 document.querySelectorAll("[data-tab]").forEach(b => b.addEventListener("click", () => show(b.dataset.tab)));
 document.addEventListener("click", e => { const g = e.target.closest("[data-goto]"); if (g){ show(g.dataset.goto); if (g.dataset.mode) setMode(g.dataset.mode); } });
@@ -1039,6 +1081,7 @@ function renderHome(){
   $("score-avg").innerHTML = (nP != null && nL != null) ? `<b style="color:var(--ink);font-size:1.05rem">Note de sport estimée : ${fr(Math.round((nP + nL) / 2 * 100) / 100)}/20</b> (moyenne de tes deux dernières notes)` : "";
 }
 $("exam-date").addEventListener("change", e => saveExam(e.target.value));
+let PHASES = [];
 function renderPhases(){
   const exam = new Date((S.exam || "2027-03-29") + "T12:00:00"), day = 86400000, now = new Date();
   const add = (d, n) => new Date(d.getTime() + n * day);
@@ -1061,6 +1104,7 @@ function renderPhases(){
      p:"Deux fois moins d'entraînement pour arriver en forme : un parcours, une course courte. Repos complet les 2 jours avant.",
      o:"Arriver reposée et confiante."}
   ];
+  PHASES = P;
   const fd = d => d.toLocaleDateString("fr-FR", {day:"numeric", month:"short"});
   $("phases").innerHTML = P.map(ph => {
     const cls = now > ph.b ? "past" : (now >= ph.a && now <= ph.b) ? "now" : "";
@@ -1166,6 +1210,7 @@ async function press(){
     if (splits.length === TIMED.length){
       cancelAnimationFrame(raf); dropWake(); state = "done"; elGo.textContent = "Nouvel essai"; penSel = 10;
       lastBody = bodyNow(); showResult(lastBody); renderChrono();
+      coachAfterRun(lastBody);
       lastId = await addDoc("essais", lastBody); return;
     }
     setStatus(); renderChrono(); return;
@@ -1173,7 +1218,7 @@ async function press(){
   if (state === "done") reset();
 }
 function applyDone(){ lastBody = bodyNow(); showResult(lastBody); if (!lastId) return; clearTimeout(penTimer); penTimer = setTimeout(() => setDoc("essais", lastId, lastBody), 900); }
-function reset(){ cancelAnimationFrame(raf); dropWake(); state = "idle"; splits = []; pens = []; sacKo = false; lastId = null; lastBody = null; elTime.textContent = "0:00.0"; $("result").hidden = true; setStatus(); renderChrono(); }
+function reset(){ cancelAnimationFrame(raf); dropWake(); state = "idle"; splits = []; pens = []; sacKo = false; lastId = null; lastBody = null; elTime.textContent = "0:00.0"; $("result").hidden = true; $("run-tip").hidden = true; setStatus(); renderChrono(); }
 $("cur").addEventListener("click", e => {
   const sac = e.target.closest("[data-sac]");
   if (sac){ sacKo = !sacKo; renderChrono(); if (state === "done") applyDone(); return; }
@@ -1448,6 +1493,158 @@ function renderMesures(){
   }).join("");
 }
 
+/* ======================= COACH ======================= */
+const AI_DEFAULT = "openai/gpt-oss-120b", AI_BACKUP = "qwen/qwen3.8-27b";
+const COACH_URL = window.PARCOURS_COACH_URL || null;
+const aiOn = () => !!COACH_URL;
+const daysLeft = () => S.exam ? Math.ceil((new Date(S.exam + "T08:00:00") - new Date()) / 86400000) : null;
+const curPhase = () => { const now = new Date(); return PHASES.find(p => now >= p.a && now <= p.b) || null; };
+const sortedBy = arr => arr.slice().sort((a, b) => a.at - b.at);
+function lastMes(type){ const l = sortedBy(S.mesures.filter(x => x.type === type)); return l.length ? l[l.length - 1].value : null; }
+
+// Recommandations calculées (sans IA)
+function recos(){
+  const R = [], essais = sortedBy(S.essais), luc = sortedBy(S.luc), dl = daysLeft();
+  const last = essais[essais.length - 1], lastL = luc[luc.length - 1];
+  if (dl != null && dl <= 9 && dl >= 0) R.push({t:"Dernière ligne droite", d:`Plus que ${dl} jours : entraîne-toi deux fois moins, un parcours et une course courte, puis repos complet les 2 jours avant.`});
+  if (!essais.length) R.push({t:"Fais ton premier parcours chronométré", d:"Il te donnera ton point de départ, atelier par atelier.", go:"parcours", btn:"Chrono"});
+  if (!luc.length) R.push({t:"Fais ton premier Luc Léger complet", d:"Départ au palier 1 avec les bips de l'appli, pour connaître ton niveau.", go:"luc", btn:"Luc Léger"});
+  if (last){
+    const sec = Math.floor(last.total / 1000);
+    if (sec > 109) R.push({t:"Priorité : passer sous 1 min 49", d:`Ton dernier parcours : ${fmt(last.total)}. Au-dessus de 1 min 49, la note est sous 7/20 (éliminatoire sans bonus d'âge).`, go:"parcours", btn:"Chrono"});
+    else if (sec > 70) R.push({t:`Gagner ${sec - 70} s sur le parcours`, d:`Ton dernier parcours : ${fmt(last.total)}. L'objectif est 1 min 10 (14,5/20).`});
+    else R.push({t:"Parcours dans l'objectif", d:`${fmt(last.total)} : garde ce niveau et vise zéro pénalité.`});
+    // ateliers pénalisés sur les 3 derniers essais
+    const cnt = {}; essais.slice(-3).forEach(e => (e.penBy || []).forEach(p => cnt[p.n] = (cnt[p.n] || 0) + 1));
+    Object.entries(cnt).sort((a, b) => b[1] - a[1]).slice(0, 2).forEach(([n, c]) => {
+      const s = byN(Number(n));
+      R.push({t:`Atelier ${n} · ${s.short} : ${c} pénalité${c > 1 ? "s" : ""} récente${c > 1 ? "s" : ""}`, d:`Au club : ${s.club.ex} (${s.club.vol}). Rappel : réussi si ${s.ok}`, go:"ateliers", mode:"club", btn:"Voir l'atelier"});
+    });
+    // atelier qui a le plus reculé, ou le plus loin de son record
+    if (essais.length > 1 && last.splits){
+      const best = bestsFrom(essais);
+      let wi = -1, wd = 0;
+      last.splits.forEach((v, i) => { const d = v - best[i]; if (d > wd){ wd = d; wi = i; } });
+      if (wi >= 0 && wd >= 1500){ const s = TIMED[wi]; R.push({t:`${s.short} : ${fr((wd / 1000).toFixed(1))} s de plus que ton record`, d:`Au dernier parcours, c'est l'atelier où tu as perdu le plus de temps. ${s.tip}`}); }
+    }
+  }
+  if (lastL){
+    const v = lastL.palier + lastL.sec / 60;
+    if (v < 4.25) R.push({t:"Luc Léger : priorité au palier 4 + 15 s", d:`Ton dernier test : ${palTxt(lastL.palier, lastL.sec)}, sous le minimum. 2 footings et 1 fractionné par semaine.`, go:"luc", btn:"Luc Léger"});
+    else if (v < LUC_TARGET) R.push({t:`Luc Léger : encore ${fr((LUC_TARGET - v).toFixed(1))} palier${LUC_TARGET - v >= 2 ? "s" : ""} jusqu'au palier ${LUC_TARGET}`, d:`Ton dernier test : ${palTxt(lastL.palier, lastL.sec)} (${fr(withBonus(lucBase(lastL.palier, lastL.sec)))}/20). Garde un fractionné par semaine.`});
+    const days = Math.floor((Date.now() - lastL.at) / 86400000);
+    if (days > 21) R.push({t:"Refais un Luc Léger complet", d:`Le dernier date de ${days} jours : un test toutes les 2 à 3 semaines montre tes progrès.`, go:"luc", btn:"Luc Léger"});
+  }
+  const susp = lastMes("suspension"), pomp = lastMes("pompes"), pout = lastMes("poutre");
+  if (susp != null && susp < 15) R.push({t:"Suspension : pas encore 15 s", d:`Dernier test : ${fr(susp)} s. Si tu choisis la suspension au concours et que tu lâches, c'est +20 s. Chaque jour : 3 fois le plus longtemps possible à la barre.`});
+  else if (susp != null && susp < 30) R.push({t:"Suspension : vise 30 s", d:`Dernier test : ${fr(susp)} s. 30 s te donnent de la marge le jour J.`});
+  if (pomp != null && pomp < 3) R.push({t:"Pompes : priorité", d:`Dernier test : ${fr(pomp)}. Il en faut 3 bien faites. Commence mains sur un caisson, descends lentement en 3 s.`});
+  if (pout != null && pout < 100) R.push({t:`Poutre : tu es à ${fr(pout)} cm`, d:"Suis le plan vertige (vue Club) : passe au palier suivant seulement quand 10 traversées sont faciles.", go:"ateliers", mode:"club", btn:"Plan vertige"});
+  if (susp == null && pomp == null && pout == null) R.push({t:"Note tes premiers tests", d:"Suspension, pompes, hauteur de poutre : dans Progrès › Tests à côté. Le coach s'en sert pour te conseiller.", go:"progres", btn:"Progrès"});
+  if (last){ const days = Math.floor((Date.now() - last.at) / 86400000); if (days > 10) R.push({t:`${days} jours sans parcours complet`, d:"Un parcours complet par semaine à Fitness Park garde les enchaînements en mémoire.", go:"parcours", btn:"Chrono"}); }
+  const ph = curPhase();
+  if (ph) R.push({t:`Étape « ${ph.t.replace(/^\d+ · /, "")} »`, d:ph.p});
+  return R;
+}
+function recoHTML(r){ return `<li><div><div class="s-t">${esc(r.t)}</div><div class="s-d">${esc(r.d)}</div></div>${r.go ? `<button type="button" class="ghost tiny s-a" data-goto="${r.go}" ${r.mode ? `data-mode="${r.mode}"` : ""}>${r.btn}</button>` : ""}</li>`; }
+function renderRecos(){
+  const R = recos();
+  $("recos").innerHTML = R.map(recoHTML).join("");
+  $("home-recos").innerHTML = R.slice(0, 2).map(recoHTML).join("");
+  const ph = curPhase(); $("coach-phase").textContent = ph ? ph.t : "";
+  const on = aiOn();
+  $("ai-on").hidden = !on; $("ai-off").hidden = on;
+  $("ai-state").textContent = on ? "activé" : "pas activé";
+}
+
+// Ce que l'IA sait (résumé de toutes les données)
+function contextText(){
+  const essais = sortedBy(S.essais).slice(-8), luc = sortedBy(S.luc).slice(-6), dl = daysLeft(), ph = curPhase();
+  const best = bestsFrom(S.essais);
+  const e = essais.map(x => `- ${dayTxt(x.at)} (${x.lieu}) : ${fmt(x.total)} pénalités comprises, note ${noteTxt(x.note)}/20, pénalités : ${(x.penBy || []).map(p => `atelier ${p.n} +${p.s}s`).join(", ") || "aucune"}, temps par atelier : ${(x.splits || []).map((v, i) => `${TIMED[i].short} ${(v / 1000).toFixed(1)}s`).join(", ")}`).join("\n") || "- aucun";
+  const l = luc.map(x => `- ${dayTxt(x.at)} : ${palTxt(x.palier, x.sec)} (${fr(withBonus(lucBase(x.palier, x.sec)))}/20)`).join("\n") || "- aucun";
+  const m = Object.keys(MES).map(k => { const v = sortedBy(S.mesures.filter(x => x.type === k)).slice(-4).map(x => `${dayTxt(x.at)} ${x.value}${MES[k].unit ? " " + MES[k].unit : ""}`).join(", "); return `- ${MES[k].label} : ${v || "pas encore testé"}`; }).join("\n");
+  return `Aujourd'hui : ${new Date().toLocaleDateString("fr-FR", {weekday:"long", day:"numeric", month:"long", year:"numeric"})}.
+Épreuves sportives : ${S.examLabel || S.exam || "date inconnue"}${dl != null ? `, dans ${dl} jours` : ""}. Étape du plan : ${ph ? ph.t + " — " + ph.p + " Objectif : " + ph.o : "inconnue"}.
+Bonus d'âge (30-40 ans) : ${ageOn() ? "oui, +1 point" : "non"}.
+Parcours (derniers essais) :\n${e}
+Meilleurs temps par atelier : ${best.map((v, i) => `${TIMED[i].short} ${v == null ? "-" : (v / 1000).toFixed(1) + "s"}`).join(", ")}
+Luc Léger :\n${l}
+Tests :\n${m}
+Recommandations déjà calculées par l'appli :\n${recos().map(r => "- " + r.t + " : " + r.d).join("\n")}`;
+}
+const RULES = `Règles officielles (descriptif 2025, femmes) :
+- Note de sport = moyenne de 2 notes sur 20 : parcours d'habileté motrice (PHM) et Luc Léger. Sous 7/20 à l'une : éliminée. +1 point si 30-40 ans.
+- PHM : sac 25 kg sur 20 m hors chrono, puis chrono 15 s après la pose du sac. Ateliers : pompes x3 (buste au plot, coudes verrouillés), 3 haies 60 cm à 4 m, poutre 5 m à 1 m de haut sans les mains (pas de tapis à la sortie), multibonds cerceaux 70 cm, 10 appuis alternés banc 50 cm (semelle sur le banc), 2 barrières mousse 1,20 m à 2,20 m, échelle horizontale 2 m (ou suspension 15 s), ramper 3 m sous 50 cm, slalom 45 m (1er cône par la droite). Pénalités : +10 s par atelier raté, +20 s suspension non tenue, +5 s par plot. Atelier pas tenté ou abandon = 0. Dixièmes non comptés.
+- Barème PHM femmes : 0:50=20, 1:00=17,5, 1:10=14,5, 1:20=11,5, 1:30=10, 1:40=9, 1:49=7, 2:07=0.
+- Luc Léger : navette 20 m, départ 8 km/h, +0,5 km/h par palier d'1 min environ. Femmes : palier 4+15 s = 7/20, palier 6 = 10,5, palier 8 = 14,5, palier 10 = 18,5, palier 10+45 s = 20.
+- Elle s'entraîne à Fitness Park Lille (parcours recréé dans la zone fonctionnelle), dans un club de gymnastique (exercices seule sur les agrès) et en course. Le vrai parcours existe au lycée professionnel sécurité de Saint-Quentin. Elle peut avoir le vertige sur la poutre (plan par paliers de hauteur avec tapis).`;
+function systemPrompt(){
+  return `Tu es le coach sportif d'une candidate au concours de gardien de la paix (police nationale), qui prépare les épreuves sportives. Tu la tutoies, en français simple, chaleureux et motivant, sans jargon : si tu utilises un mot technique, explique-le en quelques mots. Réponses courtes et concrètes (séances, durées, répétitions, quel atelier, où).
+Appuie-toi UNIQUEMENT sur ses données ci-dessous et sur les règles officielles ; n'invente pas de chiffres. Si une donnée manque, dis-lui quel test faire.
+Ne parle jamais de poids, de régime ou d'apparence. En cas de douleur, blessure, malaise ou vrai vertige : pas de diagnostic, conseille le repos et un médecin.
+${RULES}
+
+SES DONNÉES :
+${contextText()}`;
+}
+async function askGroq(messages, maxTokens){
+  const call = async model => {
+    const max = model.startsWith("openai/gpt-oss") ? maxTokens + 400 : maxTokens;
+    const res = await fetch(COACH_URL, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({model, messages, max_tokens: max})});
+    if (!res.ok){ const err = new Error("Erreur " + res.status); err.status = res.status; throw err; }
+    const j = await res.json();
+    return (j.choices?.[0]?.message?.content || "").replace(/<think>[\s\S]*?<\/think>/g, "").trim();
+  };
+  if (!navigator.onLine) throw new Error("Pas de réseau : le coach IA a besoin d'internet. Les priorités ci-dessus marchent sans.");
+  try { return await call(AI_DEFAULT); }
+  catch(e){
+    if (e.status === 429) throw new Error("Le coach a reçu beaucoup de questions : réessaie dans quelques minutes.");
+    try { return await call(AI_BACKUP); } catch(e2){ throw new Error("Le coach ne répond pas pour le moment. Réessaie plus tard."); }
+  }
+}
+function mdLite(t){ return esc(t).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/^#+\s*/gm, "").replace(/^\s*[-•]\s+/gm, "• ").replace(/\n/g, "<br>"); }
+$("ai-plan").addEventListener("click", async () => {
+  const out = $("ai-plan-out"), b = $("ai-plan");
+  b.disabled = true; out.innerHTML = `<p class="note">Le coach regarde tes résultats…</p>`;
+  try {
+    const t = await askGroq([{role: "system", content: systemPrompt()}, {role: "user", content: "Donne-moi 3 à 5 conseils pour cette semaine, du plus important au moins important. Pour chacun : un titre court en gras, puis 1 ou 2 phrases concrètes (quoi faire, combien, où). Termine par une phrase d'encouragement."}], 700);
+    out.innerHTML = `<div class="ai-box">${mdLite(t)}</div>`;
+    lsSet("phm-ai-plan", {at: Date.now(), t});
+  } catch(e){ out.innerHTML = `<p class="sync warn">${esc(e.message || "Le coach ne répond pas. Vérifie le réseau.")}</p>`; }
+  b.disabled = false;
+});
+let chat = lsGet("phm-chat", []), chatBusy = false;
+function renderChat(){
+  $("chat-log").innerHTML = chat.length ? chat.map(m => `<div class="msg ${m.role === "user" ? "me" : "bot"}">${m.role === "user" ? esc(m.content) : mdLite(m.content)}</div>`).join("") : `<div class="msg bot">Salut ! Pose-moi une question sur ta préparation : un atelier, ta course, ta semaine…</div>`;
+  $("chat-log").scrollTop = $("chat-log").scrollHeight;
+  $("chat-sugg").innerHTML = ["Que travailler cette semaine ?", "J'ai peur sur la poutre", "Comment gagner du temps au slalom ?", "Je suis fatiguée aujourd'hui", "Comment progresser au Luc Léger ?"].map(s => `<button type="button" class="chip" data-ask="${esc(s)}">${esc(s)}</button>`).join("");
+}
+async function sendChat(text){
+  text = text.trim(); if (!text || chatBusy) return;
+  chatBusy = true; chat.push({role: "user", content: text}); renderChat();
+  $("chat-log").insertAdjacentHTML("beforeend", `<div class="msg bot" id="typing">…</div>`);
+  try {
+    const t = await askGroq([{role: "system", content: systemPrompt()}, ...chat.slice(-12).map(m => ({role: m.role, content: m.content}))], 450);
+    chat.push({role: "assistant", content: t || "…"});
+  } catch(e){ chat.push({role: "assistant", content: e.message || "Je n'arrive pas à répondre (réseau ?)."}); }
+  chat = chat.slice(-40); lsSet("phm-chat", chat); chatBusy = false; renderChat();
+}
+$("chat-form").addEventListener("submit", e => { e.preventDefault(); const v = $("chat-in").value; $("chat-in").value = ""; sendChat(v); });
+$("chat-sugg").addEventListener("click", e => { const b = e.target.closest("[data-ask]"); if (b) sendChat(b.dataset.ask); });
+// conseil juste après un parcours
+async function coachAfterRun(b){
+  const el = $("run-tip"); if (!el) return;
+  const pen = (b.penBy || []).map(p => byN(p.n).short);
+  let tip = pen.length ? `Pénalités sur : ${[...new Set(pen)].join(", ")}. Travaille ${pen.length > 1 ? "ces ateliers" : "cet atelier"} au club cette semaine.` : "Aucune pénalité, bravo : c'est là qu'on gagne le plus de temps.";
+  el.hidden = false; el.innerHTML = `<b>Le coach :</b> ${esc(tip)}`;
+  if (!aiOn()) return;
+  try {
+    const t = await askGroq([{role: "system", content: systemPrompt()}, {role: "user", content: `Je viens de finir un parcours en ${fmt(b.total)} (pénalités : ${(b.penBy || []).map(p => `atelier ${p.n} +${p.s}s`).join(", ") || "aucune"}). Réagis en 2 phrases maximum : un point positif et le point à travailler en priorité.`}], 160);
+    if (t) el.innerHTML = `<b>Le coach :</b> ${mdLite(t)}`;
+  } catch(e){}
+}
+
 /* ======================= INSTALLATION ======================= */
 (function(){
   const standalone = matchMedia("(display-mode: standalone)").matches || navigator.standalone;
@@ -1462,7 +1659,7 @@ function renderMesures(){
 })();
 
 /* ======================= DÉMARRAGE ======================= */
-function renderAll(){ renderHome(); renderSplits(); if (!$("v-progres").hidden) renderProg(); }
+function renderAll(){ renderHome(); renderSplits(); renderRecos(); if (!$("v-progres").hidden) renderProg(); }
 setStatus(); renderChrono(); renderSeance(); renderLucBareme(); renderAteliers(); renderAll();
 show((location.hash || "#accueil").slice(1), true);
 initStore();

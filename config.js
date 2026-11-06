@@ -2,3 +2,7 @@
 // l'appli enregistre alors tout sur le téléphone.
 // Une fois le projet Firebase créé, coller ici l'objet « firebaseConfig » donné par Firebase.
 window.PARCOURS_FIREBASE = null;
+
+// Coach IA : adresse du relais Cloudflare (dossier coach-relais/), qui garde la clé Groq secrète.
+// null = coach IA pas encore branché (les recommandations calculées marchent quand même).
+window.PARCOURS_COACH_URL = null;

@@ -36,3 +36,16 @@ Seuls les téléphones qui ont le lien avec ce code les voient.
 
 ## Sources
 Descriptif officiel des épreuves sportives 2025 (police nationale) et arrêté du 5 mars 2025.
+
+## Coach IA (Groq, clé gardée sur Cloudflare)
+La clé Groq n'est jamais dans l'appli (le dépôt est public) : elle est gardée par un petit relais Cloudflare, dossier `coach-relais/`.
+Dans un terminal :
+```
+cd ~/parcours/coach-relais
+npx wrangler login
+npx wrangler deploy
+npx wrangler secret put GROQ_API_KEY
+```
+`deploy` affiche l'adresse du relais (https://parcours-coach.<ton-sous-domaine>.workers.dev) : la mettre dans `config.js` (`PARCOURS_COACH_URL`).
+Le relais n'accepte que les demandes venant de https://remvan5917.github.io et limite à 40 questions par 10 minutes.
+Sans relais, l'onglet Coach donne quand même des priorités calculées à partir des résultats.
