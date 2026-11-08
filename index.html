@@ -716,6 +716,10 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--accent)}
 .weeknav .wk-today{grid-column:1/-1;justify-self:center;margin-top:4px}
 #mode-seg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));flex-wrap:nowrap}
 #mode-seg button{min-width:0;padding-inline:4px;font-size:.84rem;white-space:normal;line-height:1.2}
+#gcal .gflash{display:block;white-space:normal;border-radius:12px;padding:8px 12px;margin:0 0 8px;line-height:1.4}
+#gcal .gbtns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+#gcal .gbtns button{width:100%;min-width:0;margin:0}
+#gcal p{overflow-wrap:anywhere}
 </style>
 </head>
 <body>
@@ -2643,14 +2647,14 @@ async function renderGcal(force){
 }
 function paintGcal(){
   const g = gcalState && !gcalState.offline ? gcalState : null, el2 = $("gcal"); if (!el2) return;
-  const head = `<p><b>Google Agenda</b></p>` + (gcalFlash ? `<p class="verdict ${/connecté/.test(gcalFlash) ? "ok" : "slow"}" style="display:inline-block;margin:0 0 6px">${gcalFlash}</p>` : "");
+  const head = `<p><b>Google Agenda</b></p>` + (gcalFlash ? `<p class="verdict gflash ${/connecté/.test(gcalFlash) ? "ok" : "slow"}">${gcalFlash}</p>` : "");
   if (!gcalState){ el2.innerHTML = head + `<p class="note">Vérification…</p>`; return; }
   if (!g){ el2.innerHTML = head + `<p class="note">Pas de réseau pour le moment.</p>`; return; }
   if (!g.configured){ el2.innerHTML = head + `<p class="note">La connexion à Google Agenda arrive très bientôt.</p>`; return; }
   if (g.connected && !g.revoked){
     const when = g.synced ? new Date(g.synced).toLocaleString("fr-FR", {day: "numeric", month: "short", hour: "2-digit", minute: "2-digit"}) : "";
     el2.innerHTML = head + `<p class="note"><b style="color:var(--ok)">Connecté.</b> Tes séances sont dans l'agenda « Athéna · entraînement » de ton compte Google, avec un rappel avant chacune. Elles se mettent à jour toutes seules.${when ? ` Dernière mise à jour : ${when}.` : ""}${g.pending ? " Quelques séances sont encore en cours d'envoi." : ""}</p>
-      <div class="row"><button type="button" class="ghost small" id="gcal-sync">Mettre à jour maintenant</button><button type="button" class="ghost small" id="gcal-off">Déconnecter</button></div>`;
+      <div class="gbtns"><button type="button" class="ghost small" id="gcal-sync">Mettre à jour</button><button type="button" class="ghost small" id="gcal-off">Déconnecter</button></div>`;
     return;
   }
   el2.innerHTML = head + `<p class="note">${g.revoked ? "L'accès à ton Google Agenda a été retiré. Reconnecte-le pour continuer à recevoir tes séances." : "Tes séances arrivent directement dans ton Google Agenda, avec un rappel avant chacune, et se mettent à jour toutes seules."}</p>
@@ -2669,7 +2673,7 @@ document.addEventListener("click", async e => {
     const u = new URL(location.href), g = u.searchParams.get("google"); if (!g) return;
     u.searchParams.delete("google"); history.replaceState(null, "", u.pathname + u.hash);
     const msg = {ok: "Google Agenda est connecté : tes séances arrivent dans l'agenda « Athéna · entraînement ».", refus: "Connexion à Google Agenda annulée.", erreur: "La connexion à Google Agenda n'a pas abouti. Réessaie depuis Plan › Agenda."}[g];
-    if (msg){ gcalFlash = msg; setTimeout(() => { show("plan"); renderGcal(true); const a = $("agenda-panel"); if (a) a.scrollIntoView({block: "start"}); }, 800); }
+    if (msg){ gcalFlash = msg; setTimeout(() => { gcalFlash = ""; paintGcal(); }, 12000); setTimeout(() => { show("plan"); renderGcal(true); const a = $("agenda-panel"); if (a) a.scrollIntoView({block: "start"}); }, 800); }
   } catch(e){}
 })();
 $("alarm-min").addEventListener("change", () => { lsSet("phm-alarm", Number($("alarm-min").value)); syncAgenda(); });

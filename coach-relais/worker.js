@@ -102,7 +102,6 @@ async function gBatch(token, ops){
     const txt = await r.text(), st = {};
     for (const m of txt.matchAll(/Content-ID:\s*<response-it(\d+)>[\s\S]*?HTTP\/1\.1 (\d{3})/gi)) st[m[1]] = Number(m[2]);
     part.forEach((o, j) => res.push(st[j] || (r.ok ? 0 : r.status)));
-    if (i + 50 < ops.length) await new Promise(z => setTimeout(z, 1200));
   }
   return res;
 }
@@ -143,14 +142,23 @@ async function gSync(env, team, force){
     if (o.kind === "upd" && (code === 404 || code === 410)) return {...o, kind: "ins", method: "POST", path: calP, body: {id: o.id, ...o.body}};
     return "fail";
   };
+  // envoi par paquets de 50, progression enregistrée après chaque paquet : si le relais est coupé,
+  // la mise à jour automatique (toutes les 15 min) reprend là où il s'est arrêté
+  const save = () => env.GKV.put("g:" + team, JSON.stringify(st));
+  if (ops.length){ st.pending = true; await save(); }
   let todo = ops, fails = 0;
   for (let round = 0; round < 2 && todo.length; round++){
-    const codes = await gBatch(token, todo), next = [];
-    todo.forEach((o, i) => { const x = apply(o, codes[i]); if (x === "fail") fails++; else if (x) next.push(x); });
+    const next = [];
+    for (let i = 0; i < todo.length; i += 50){
+      const chunk = todo.slice(i, i + 50), codes = await gBatch(token, chunk);
+      chunk.forEach((o, j) => { const x = apply(o, codes[j]); if (x === "fail") fails++; else if (x) next.push(x); });
+      await save();
+      if (i + 50 < todo.length) await new Promise(z => setTimeout(z, 800));
+    }
     todo = next;
   }
   st.lastAt = at; st.pending = fails + todo.length > 0; st.synced = Date.now();
-  await env.GKV.put("g:" + team, JSON.stringify(st));
+  await save();
   return {connected: true, changed: ops.length, pending: st.pending};
 }
 async function gOff(env, team){
