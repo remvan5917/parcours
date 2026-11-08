@@ -2412,6 +2412,8 @@ function weekType(d){
 const dow = d => ((new Date(d).getDay() + 6) % 7) + 1;
 // annulations ponctuelles (club fermé un jour férié…) : plan.annul = {"AAAA-MM-JJ": ["gym", …]}
 function slotsOn(d){ const p = plan(), w = weekType(d), off = ((p.annul || {})[ymd(d)]) || []; return ((p[w] || {})[dow(d)] || []).filter(s => !off.includes(s.t)).sort((a, b) => (a.h || "").localeCompare(b.h || "")); }
+// téléphone pas encore relié à l'espace partagé (réinstallation, autre navigateur…) : on le dit au lieu de « remplis ton planning »
+const notLinked = () => !!FB && !team;
 const planEmpty = () => { const p = plan(); return !["A", "B"].some(w => Object.values(p[w] || {}).some(l => l && l.length)); };
 // palier du plan vertige d'après la dernière hauteur notée
 function poutrePalier(){
@@ -2709,7 +2711,7 @@ document.addEventListener("click", async e => {
 $("alarm-min").addEventListener("change", () => { lsSet("phm-alarm", Number($("alarm-min").value)); syncAgenda(); });
 function renderAgendaLinks(){
   const el = $("gcal-links"); if (!el) return;
-  if (planEmpty()){ el.innerHTML = `<li><div class="s-d">Remplis d'abord ton planning.</div></li>`; return; }
+  if (planEmpty()){ el.innerHTML = `<li><div class="s-d">${notLinked() ? "Relie d'abord ce téléphone à votre espace (Réglages › Partage)." : "Remplis d'abord ton planning."}</div></li>`; return; }
   const url = location.origin + location.pathname;
   el.innerHTML = agendaSlots().map(({s, w, first, exam}) => {
     const T = TYPES[s.t] || {l: s.t}, [hh, mm] = (s.h || "18:00").split(":").map(Number), dur = s.t.startsWith("course") ? 60 : 90;
@@ -2816,6 +2818,7 @@ function renderToday(){
   const title = isToday ? "Aujourd'hui" : d.toLocaleDateString("fr-FR", {weekday: "long", day: "numeric", month: "long"}).replace(/^./, c => c.toUpperCase());
   const head = `<div class="today-head"><h2>${title}</h2><span class="note">Semaine ${weekType(d)} · bloc ${m.n}${m.deload ? " · semaine allégée" : ""}</span></div>`;
   if (planEmpty()){
+    if (notLinked()){ el.innerHTML = head + `<div class="sess"><span class="ic daily">${ICONS.daily}</span><div><h3>Ce téléphone n'est pas relié à votre espace</h3><p class="what">Ton planning et tes séances sont enregistrés en ligne. Copie le lien de partage reçu, puis touche « Relier » : tout revient tout de suite.</p><div class="acts"><button type="button" class="btn" data-goto="reglages" data-anchor="share">Relier</button></div></div></div>`; return; }
     el.innerHTML = head + `<div class="sess"><span class="ic daily">${ICONS.daily}</span><div><h3>Ton planning est vide</h3><p class="what">Indique tes séances habituelles (semaine A et semaine B) : l'appli te dira ensuite chaque jour quoi faire, où, et combien de temps.</p><div class="acts"><button type="button" class="btn" data-goto="plan" data-anchor="planning-panel">Remplir mon planning</button></div></div></div>`;
     return;
   }
@@ -2891,7 +2894,7 @@ function renderHello(){
   const p = Math.max(0, Math.min(1, (Date.now() - a) / (b - a))), C = 2 * Math.PI * 50;
   const nWeeks = Math.max(1, Math.round((m.B - m.A) / (7 * 86400000)));
   const nx = planEmpty() ? null : nextSession();
-  const nxTxt = planEmpty() ? `<button type="button" class="link" style="color:#FFB07F" data-goto="plan" data-anchor="planning-panel">Remplis ton planning ›</button>`
+  const nxTxt = planEmpty() ? (notLinked() ? `<button type="button" class="link" style="color:#FFB07F" data-goto="reglages" data-anchor="share">Relie ce téléphone à votre espace ›</button>` : `<button type="button" class="link" style="color:#FFB07F" data-goto="plan" data-anchor="planning-panel">Remplis ton planning ›</button>`)
     : nx ? `<b>${nx.i === 0 ? "Aujourd'hui" : nx.i === 1 ? "Demain" : DAYS[dow(nx.day)].replace(/^./, c => c.toUpperCase())}${nx.s.h ? " · " + fmtH(nx.s.h) : ""}</b><span class="nx-t">${esc(slotTitle(nx.s, nx.day))}</span>` : "Rien de prévu cette semaine";
   $("hero-main").innerHTML = `<div class="kick">${now.toLocaleDateString("fr-FR", {weekday: "long", day: "numeric", month: "long"})}</div>
     <h1>${h < 12 ? "Bonjour" : h < 18 ? "Bon après-midi" : "Bonsoir"}</h1>
@@ -2928,11 +2931,11 @@ function renderSetup(){
   const el = $("setup"); if (!el) return;
   const steps = [
     {ok: lsGet("phm-age2", null) != null, t: "Indique ton âge", d: "Pour calculer tes notes avec le bon bonus.", go: "reglages", b: "Régler"},
-    {ok: !planEmpty(), t: "Remplis ton planning A / B", d: "Tes séances habituelles, avec l'heure.", go: "plan", b: "Remplir"},
+    {ok: !planEmpty(), hide: notLinked(), t: "Remplis ton planning A / B", d: "Tes séances habituelles, avec l'heure.", go: "plan", b: "Remplir"},
     {ok: !!(team && FB), t: "Relie ce téléphone à votre espace", d: "Avec le lien de partage reçu : planning, résultats et agenda.", go: "reglages", b: "Relier"},
     {ok: !!lsGet("phm-agenda-ok", false), t: "Abonne ton agenda", d: "Tes séances et les rappels arrivent tout seuls.", go: "plan", b: "Abonner", tick: true},
     {ok: S.essais.length > 0 && S.luc.length > 0, t: "Fais tes tests de départ", d: "Un parcours chronométré et un Luc Léger complet.", go: "parcours", b: "Commencer"}
-  ];
+  ].filter(st => !st.hide);
   const left = steps.filter(s => !s.ok).length;
   if (!left || lsGet("phm-setup-hide", false)){ el.hidden = true; return; }
   el.hidden = false;
@@ -3076,7 +3079,7 @@ function renderCalDay(){
   const items = I.sl.map(s => { const T = TYPES[s.t] || {ic: "daily"}, x = session(s.t, d, s.h); return `<div class="it"><i class="${T.ic}"></i><div><b>${s.h ? fmtH(s.h) + " · " : ""}${esc(slotTitle(s))}</b>${s.t !== "ensemble" && isDone(d, s) ? ` <span class="verdict ok">fait</span>` : ""}<div class="note">${stripTags(x.L[0] || "")}</div></div></div>`; }).join("");
   const objs = I.obj.map(o => `<div class="it"><i style="background:var(--warn);border-radius:2px;transform:rotate(45deg)"></i><div><b>Échéance</b><div class="note">${esc(o.label)}${o.ok ? " · atteint" : ""}</div></div></div>`).join("");
   const exam = I.exam ? `<div class="it"><i style="background:var(--cone)"></i><div><b>Épreuves sportives</b><div class="note">Le grand jour ♥</div></div></div>` : "";
-  el.innerHTML = `<div class="calday">${head}${items || (I.inRange ? `<p class="note">${planEmpty() ? "Remplis ton planning pour voir tes séances." : "Rien de prévu : repos."}</p>` : `<p class="note">En dehors du programme.</p>`)}${objs}${exam}
+  el.innerHTML = `<div class="calday">${head}${items || (I.inRange ? `<p class="note">${planEmpty() ? (notLinked() ? "Ce téléphone n'est pas relié à votre espace : Réglages › Partage entre téléphones › « Coller et rejoindre »." : "Remplis ton planning pour voir tes séances.") : "Rien de prévu : repos."}</p>` : `<p class="note">En dehors du programme.</p>`)}${objs}${exam}
     ${I.inRange && !planEmpty() ? `<button type="button" class="ghost small" data-open-day="${calSel}" style="align-self:flex-start">Ouvrir ce jour dans Aujourd'hui</button>` : ""}</div>`;
 }
 $("cal-prev").addEventListener("click", () => { calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth() - 1, 1, 12); renderCal(); });
