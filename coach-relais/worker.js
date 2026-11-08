@@ -40,7 +40,7 @@ async function agenda(team){
 // « Athéna · entraînement » et y écrit les séances (avec rappels), puis le tient à jour
 // tout seul (toutes les 15 min, et juste après chaque changement dans l'appli).
 // Secrets Cloudflare : GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET. Stockage : KV « GKV ».
-const G_SCOPE = "openid email https://www.googleapis.com/auth/calendar.app.created";
+const G_SCOPE = "https://www.googleapis.com/auth/calendar.app.created"; // une seule autorisation : pas de case à cocher chez Google
 const G_CALLBACK = "https://parcours-coach.remyvancoppenolle.workers.dev/google/callback";
 const APP_URL = "https://remvan5917.github.io/parcours/index.html";
 const CAL_API = "https://www.googleapis.com/calendar/v3";
@@ -62,39 +62,41 @@ async function gToken(env, refresh){
   const d = await r.json().catch(() => ({}));
   return r.ok ? d.access_token : (d.error === "invalid_grant" ? "REVOKED" : null);
 }
-async function gStart(env, team){
+async function gStart(env, team, nom){
   if (!env.GOOGLE_CLIENT_ID || !env.GOOGLE_CLIENT_SECRET || !env.GKV) return new Response("La connexion Google n'est pas encore configurée.", {status: 503, headers: {"Content-Type": "text/plain; charset=utf-8"}});
   if (!TEAM_RE.test(team || "")) return back("erreur");
-  const exp = Date.now() + 15 * 60000, state = `${team}.${exp}.${await sign(env, team + "." + exp)}`;
+  const n = b64url(new TextEncoder().encode(String(nom || "").trim().slice(0, 30)));
+  const exp = Date.now() + 15 * 60000, state = `${team}.${exp}.${n}.${await sign(env, team + "." + exp + "." + n)}`;
   const u = new URL("https://accounts.google.com/o/oauth2/v2/auth");
   Object.entries({client_id: env.GOOGLE_CLIENT_ID, redirect_uri: G_CALLBACK, response_type: "code", scope: G_SCOPE, access_type: "offline", prompt: "consent select_account", state}).forEach(([k, v]) => u.searchParams.set(k, v));
   return Response.redirect(u.toString(), 302);
 }
 async function gCallback(env, url, ctx){
-  const [team, exp, sig] = (url.searchParams.get("state") || "").split(".");
-  if (!TEAM_RE.test(team || "") || !(Number(exp) > Date.now()) || sig !== await sign(env, team + "." + exp)) return back("erreur");
+  const [team, exp, n, sig] = (url.searchParams.get("state") || "").split(".");
+  if (!TEAM_RE.test(team || "") || !(Number(exp) > Date.now()) || sig !== await sign(env, team + "." + exp + "." + n)) return back("erreur");
+  let nom = ""; try { nom = new TextDecoder().decode(Uint8Array.from(atob((n || "").replace(/-/g, "+").replace(/_/g, "/")), c => c.charCodeAt(0))); } catch (e) {}
   if (url.searchParams.get("error") || !url.searchParams.get("code")) return back("refus");
   const r = await fetch("https://oauth2.googleapis.com/token", {method: "POST", headers: {"Content-Type": "application/x-www-form-urlencoded"},
     body: new URLSearchParams({code: url.searchParams.get("code"), client_id: env.GOOGLE_CLIENT_ID, client_secret: env.GOOGLE_CLIENT_SECRET, redirect_uri: G_CALLBACK, grant_type: "authorization_code"})});
   const t = await r.json().catch(() => ({}));
   if (!r.ok || !t.refresh_token) return back("erreur");
-  if (!String(t.scope || "").includes("calendar.app.created")) return back("refus");
-  // compte Google : identifiant stable (sub) + e-mail pour l'affichage, lus dans le jeton d'identité reçu directement de Google
-  let who = {};
-  try { who = JSON.parse(atob(String(t.id_token || "").split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))); } catch (e) {}
-  const acc = who.sub ? (await evId("compte", who.sub)).slice(3, 15) : "x" + crypto.randomUUID().slice(0, 11);
-  const key = `g:${team}:${acc}`, H = {Authorization: "Bearer " + t.access_token, "Content-Type": "application/json"};
+  if (!String(t.scope || "").includes("calendar.app.created")) return back("case");
+  const H = {Authorization: "Bearer " + t.access_token, "Content-Type": "application/json"};
   const canUse = async c => c && (await fetch(`${CAL_API}/calendars/${encodeURIComponent(c)}`, {headers: H})).ok;
-  let cal = null, map = {};
-  const mine = JSON.parse(await env.GKV.get(key) || "null"), legacy = JSON.parse(await env.GKV.get("g:" + team) || "null");
-  if (mine && await canUse(mine.cal)){ cal = mine.cal; map = mine.map || {}; }
-  else if (legacy && await canUse(legacy.cal)){ cal = legacy.cal; map = legacy.map || {}; await env.GKV.delete("g:" + team); } // même compte qu'avant : on reprend son agenda
+  // même compte déjà connecté ? (son agenda Athéna lui est accessible) → on le reprend, sinon nouvel agenda
+  let key = null, cal = null, map = {}, prev = null;
+  for (const k of await teamKeys(env, team)){
+    const st = JSON.parse(await env.GKV.get(k) || "null");
+    if (st && await canUse(st.cal)){ prev = st; cal = st.cal; map = st.map || {}; key = k.split(":").length === 3 ? k : null; if (!key){ await env.GKV.delete(k); } break; }
+  }
+  if (!key) key = `g:${team}:${[...crypto.getRandomValues(new Uint8Array(6))].map(b => b.toString(16).padStart(2, "0")).join("")}`;
   if (!cal){
     const c = await fetch(`${CAL_API}/calendars`, {method: "POST", headers: H, body: JSON.stringify({summary: "Athéna · entraînement", description: "Séances préparées par Athéna. Mis à jour automatiquement : modifie ton planning dans l'appli, pas ici.", timeZone: "Europe/Paris"})});
     if (!c.ok) return back("erreur");
     cal = (await c.json()).id;
   }
-  await env.GKV.put(key, JSON.stringify({refresh: t.refresh_token, cal, map, email: who.email || "", lastAt: 0, pending: true, at: Date.now()}));
+  const label = nom || (prev && (prev.label || prev.email)) || "";
+  await env.GKV.put(key, JSON.stringify({refresh: t.refresh_token, cal, map, label, lastAt: 0, pending: true, at: Date.now()}));
   ctx.waitUntil(gSyncKey(env, key, team, true));
   return back("ok");
 }
@@ -180,7 +182,7 @@ async function gStatus(env, team){
   const accounts = [];
   for (const k of await teamKeys(env, team)){
     const st = JSON.parse(await env.GKV.get(k) || "null"); if (!st) continue;
-    accounts.push({id: k.split(":")[2] || "", email: st.email || "", synced: st.synced || null, pending: !!st.pending, revoked: !!st.revoked});
+    accounts.push({id: k.split(":")[2] || "", email: st.label || st.email || "", synced: st.synced || null, pending: !!st.pending, revoked: !!st.revoked});
   }
   return {configured: true, connected: accounts.length > 0, accounts};
 }
@@ -210,7 +212,7 @@ export default {
     if (req.method === "GET"){
       const m = url.pathname.match(/^\/agenda\/([a-z0-9]{20,40})\.ics$/);
       if (m) return agenda(m[1]);
-      if (url.pathname === "/google/start") return gStart(env, url.searchParams.get("equipe"));
+      if (url.pathname === "/google/start") return gStart(env, url.searchParams.get("equipe"), url.searchParams.get("nom"));
       if (url.pathname === "/google/callback") return gCallback(env, url, ctx);
       return new Response("Relais du coach Parcours.", { status: 404 });
     }

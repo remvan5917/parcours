@@ -1,5 +1,5 @@
 // Garde l'appli disponible sans réseau (au gymnase, au stade…).
-const CACHE = 'parcours-v63';
+const CACHE = 'parcours-v64';
 const FILES = ['./', 'index.html', 'config.js', 'manifest.webmanifest', 'icons/athena.svg', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png', 'icons/apple-touch-icon.png'];
 const FIXED = /fonts\.gstatic\.com|fonts\.googleapis\.com|www\.gstatic\.com\/firebasejs/;
 

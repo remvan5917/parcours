@@ -2671,19 +2671,26 @@ function paintGcal(){
   if (!gcalState){ el2.innerHTML = head + `<p class="note">Vérification…</p>`; return; }
   if (!g){ el2.innerHTML = head + `<p class="note">Pas de réseau pour le moment.</p>`; return; }
   if (!g.configured){ el2.innerHTML = head + `<p class="note">La connexion à Google Agenda arrive très bientôt.</p>`; return; }
-  const accs = g.accounts || [], help = `<p class="note" style="font-size:.82rem">Choisis le compte Google puis « Continuer ». Si Google affiche « Cette appli n'a pas été validée », touche « Paramètres avancés », puis « Accéder à Athéna ». L'appli ne voit que l'agenda qu'elle crée, rien d'autre.</p>`;
+  const accs = g.accounts || [], help = `<p class="note" style="font-size:.82rem">Choisis le compte Google puis « Continuer ». Si Google affiche « Cette appli n'a pas été validée », touche « Paramètres avancés », puis « Accéder à Athéna », puis « Continuer ». L'adresse affichée sur cet écran est celle du contact de l'appli, c'est normal. L'appli ne voit que l'agenda qu'elle crée, rien d'autre.</p>`;
   const link = `${AGENDA_BASE}/google/start?equipe=${team}`;
   if (accs.length){
     const fmt = t => t ? new Date(t).toLocaleString("fr-FR", {day: "numeric", month: "short", hour: "2-digit", minute: "2-digit"}) : "";
     el2.innerHTML = head + `<p class="note">Les séances sont dans l'agenda « Athéna · entraînement » de chaque compte connecté, avec un rappel avant chacune. Tout se met à jour tout seul.</p>
       <ul class="gaccs">${accs.map(a => `<li><div><b>${esc(a.email || "Compte Google")}</b><span class="note">${a.revoked ? "accès retiré : reconnecte ce compte" : a.pending ? "envoi en cours…" : a.synced ? "à jour · " + fmt(a.synced) : "connecté"}</span></div><button type="button" class="ghost tiny gcal-off" data-acc="${esc(a.id)}" data-mail="${esc(a.email || "ce compte")}">Retirer</button></li>`).join("")}</ul>
-      <div class="gbtns"><a class="ghost small" href="${link}">Ajouter un compte</a><button type="button" class="ghost small" id="gcal-sync">Mettre à jour</button></div>` + help;
+      <div class="gbtns"><button type="button" class="ghost small" id="gcal-add">Ajouter un compte</button><button type="button" class="ghost small" id="gcal-sync">Mettre à jour</button></div>` + help;
     return;
   }
   el2.innerHTML = head + `<p class="note">Tes séances arrivent directement dans ton Google Agenda, avec un rappel avant chacune, et se mettent à jour toutes seules. Vous pouvez connecter vos deux comptes.</p>
-    <a class="btn" style="text-decoration:none;display:inline-block;padding:11px 16px;border-radius:12px;align-self:flex-start" href="${link}">Connecter Google Agenda</a>` + help;
+    <button type="button" class="btn" id="gcal-add">Connecter Google Agenda</button>` + help;
 }
 document.addEventListener("click", async e => {
+  const add = e.target.closest("#gcal-add");
+  if (add){
+    const nom = prompt("Prénom de la personne qui connecte son Google Agenda :", "");
+    if (nom === null) return;
+    location.href = `${AGENDA_BASE}/google/start?equipe=${team}&nom=${encodeURIComponent(nom.trim().slice(0, 30))}`;
+    return;
+  }
   const b = e.target.closest("#gcal-sync, .gcal-off"); if (!b) return;
   const off = b.classList.contains("gcal-off");
   if (off && !confirm(`Retirer ${b.dataset.mail} ? L'agenda « Athéna · entraînement » sera supprimé de ce compte Google.`)) return;
@@ -2695,7 +2702,7 @@ document.addEventListener("click", async e => {
   try {
     const u = new URL(location.href), g = u.searchParams.get("google"); if (!g) return;
     u.searchParams.delete("google"); history.replaceState(null, "", u.pathname + u.hash);
-    const msg = {ok: "Google Agenda est connecté : tes séances arrivent dans l'agenda « Athéna · entraînement ».", refus: "Connexion à Google Agenda annulée.", erreur: "La connexion à Google Agenda n'a pas abouti. Réessaie depuis Plan › Agenda."}[g];
+    const msg = {ok: "Google Agenda est connecté : tes séances arrivent dans l'agenda « Athéna · entraînement ».", refus: "Connexion annulée par Google (« Annuler » ou retour). Recommence avec « Ajouter un compte » et va jusqu'à « Continuer ».", case: "Google n'a pas donné l'accès à l'agenda : recommence et accepte l'accès à l'agenda Athéna.", erreur: "La connexion à Google Agenda n'a pas abouti. Réessaie depuis Plan › Agenda."}[g];
     if (msg){ gcalFlash = msg; setTimeout(() => { gcalFlash = ""; paintGcal(); }, 12000); setTimeout(() => { show("plan"); renderGcal(true); const a = $("agenda-panel"); if (a) a.scrollIntoView({block: "start"}); }, 800); }
   } catch(e){}
 })();
