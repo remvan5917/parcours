@@ -2404,7 +2404,8 @@ function weekType(d){
   return ((diff % 2) + 2) % 2 === 0 ? "A" : "B";
 }
 const dow = d => ((new Date(d).getDay() + 6) % 7) + 1;
-function slotsOn(d){ const p = plan(), w = weekType(d); return ((p[w] || {})[dow(d)] || []).slice().sort((a, b) => (a.h || "").localeCompare(b.h || "")); }
+// annulations ponctuelles (club fermé un jour férié…) : plan.annul = {"AAAA-MM-JJ": ["gym", …]}
+function slotsOn(d){ const p = plan(), w = weekType(d), off = ((p.annul || {})[ymd(d)]) || []; return ((p[w] || {})[dow(d)] || []).filter(s => !off.includes(s.t)).sort((a, b) => (a.h || "").localeCompare(b.h || "")); }
 const planEmpty = () => { const p = plan(); return !["A", "B"].some(w => Object.values(p[w] || {}).some(l => l && l.length)); };
 // palier du plan vertige d'après la dernière hauteur notée
 function poutrePalier(){
