@@ -3,17 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Parcours d'habileté motrice</title>
-<meta name="description" content="Préparation aux épreuves sportives du concours de gardien de la paix : parcours chronométré, Luc Léger, ateliers et progression.">
+<title>Athéna</title>
+<meta name="description" content="Athéna, ta coach pour les épreuves sportives du concours de police : parcours, Luc Léger, programme et progrès.">
 <meta name="theme-color" content="#2B1A4C">
 <script>try{var t=JSON.parse(localStorage.getItem("phm-theme"));if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="icons/icon-192.png">
+<link rel="icon" href="icons/athena.svg" type="image/svg+xml">
+<link rel="alternate icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Parcours">
+<meta name="apple-mobile-web-app-title" content="Athéna">
 <style>
 :root{padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;-webkit-text-size-adjust:100%}
@@ -587,13 +588,25 @@ nav.tabs button[aria-current="page"],.trainnav button[aria-current="true"],.chip
 .setup{background:linear-gradient(160deg,var(--mat-soft),var(--surface));border-color:color-mix(in srgb,var(--mat) 30%,transparent)}
 .mcell{border-radius:12px}
 
+/* ---------- Athéna ---------- */
+.athena{display:block;width:100%;height:100%;overflow:visible}
+.athena .ath-eyes{transform-box:fill-box;transform-origin:center;animation:blink 5.5s infinite}
+@keyframes blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.12)}}
+.hero-ava{position:absolute;top:14px;right:14px;width:62px;height:66px;filter:drop-shadow(0 8px 14px rgba(0,0,0,.35));animation:float 4s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.ath-head{display:flex;align-items:center;gap:14px}
+.ath-ava{width:64px;height:68px;flex:0 0 64px;filter:drop-shadow(0 8px 14px rgba(60,25,100,.35))}
+.ath-head h3{font-size:1.6rem}
+.about{background:linear-gradient(160deg,var(--mat-soft),var(--surface) 70%)}
+.msg.bot{position:relative}
+@media (prefers-reduced-motion:reduce){.athena .ath-eyes,.hero-ava{animation:none}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
 <header class="topbar">
   <button type="button" class="icon-btn" id="top-back" aria-label="Retour" hidden><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
-  <span class="brand" id="top-title">Parcours</span>
+  <span class="brand" id="top-title">Athéna</span>
   <button type="button" class="count-chip" id="topcount" data-goto="reglages" aria-label="Jours avant les épreuves"></button>
   <button type="button" class="icon-btn" data-goto="reglages" aria-label="Réglages"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
   <button type="button" class="inst-chip" data-install aria-label="Installer l'appli"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Installer</button>
@@ -602,7 +615,7 @@ nav.tabs button[aria-current="page"],.trainnav button[aria-current="true"],.chip
 
 <!-- =================== AUJOURD'HUI =================== -->
 <section class="view" id="v-accueil" data-view="accueil">
-  <section class="hero-card" id="hero"><div id="hero-main"></div><p class="love" id="love"></p></section>
+  <section class="hero-card" id="hero"><span class="hero-ava" data-athena></span><div id="hero-main"></div><p class="love" id="love"></p></section>
   <p class="sync" id="sync" hidden></p>
   <div class="install-zone">
     <div class="panel install-help" id="install-help" hidden></div>
@@ -624,7 +637,7 @@ nav.tabs button[aria-current="page"],.trainnav button[aria-current="true"],.chip
       <ul class="steps" id="home-obj"></ul>
     </div>
     <div class="panel mini">
-      <div class="row between"><span class="kicker">Le coach</span><button type="button" class="link" data-goto="coach">Rapport</button></div>
+      <div class="row between"><span class="kicker">Athéna te conseille</span><button type="button" class="link" data-goto="coach">Rapport</button></div>
       <p class="note" id="home-week"></p>
       <ul class="steps" id="home-recos"></ul>
     </div>
@@ -635,6 +648,11 @@ nav.tabs button[aria-current="page"],.trainnav button[aria-current="true"],.chip
 <!-- =================== RÉGLAGES =================== -->
 <section class="view" id="v-reglages" data-view="reglages" hidden>
   <h2>Réglages</h2>
+  <div class="panel about">
+    <div class="ath-head"><span class="ath-ava" data-athena></span><div><h3>Athéna</h3><p class="note">Force &amp; stratégie</p></div></div>
+    <p>Athéna, c'est ta coach. Comme la déesse grecque de la sagesse et de la stratégie, protectrice de la cité, elle t'aide à préparer le concours avec méthode : chaque jour quoi faire, comment progresser, et jusqu'où tu es arrivée.</p>
+    <p>Elle grandira avec toi : ce n'est que le début.</p>
+  </div>
   <div class="panel">
     <h3>Toi</h3>
     <div class="row"><label for="opt-age" class="note" style="color:var(--ink)">Ton âge au 1er janvier de l'année des épreuves</label>
@@ -672,7 +690,7 @@ nav.tabs button[aria-current="page"],.trainnav button[aria-current="true"],.chip
       <p><b>Aujourd'hui</b> : ta semaine, la séance du jour avec un bouton pour la lancer, et la case « Fait » à cocher.</p>
       <p><b>S'entraîner</b> : le chrono du parcours, le Luc Léger avec les bips, le minuteur de fractionné et tes tests (suspension, pompes, poutre, course).</p>
       <p><b>Progrès</b> : tes notes, tes objectifs datés, tes courbes et l'historique.</p>
-      <p><b>Coach</b> : le rapport et les recommandations de la semaine, et un coach IA à qui poser tes questions.</p>
+      <p><b>Athéna</b> : ta coach. Le rapport et les recommandations de la semaine, et une discussion pour lui poser tes questions.</p>
       <p><b>Plan</b> : le programme bloc par bloc, ton planning semaine A / semaine B, ton agenda, les lieux et le guide des 10 ateliers.</p>
     </div>
   </details>
@@ -945,8 +963,9 @@ nav.tabs button[aria-current="page"],.trainnav button[aria-current="true"],.chip
 
 <!-- =================== COACH =================== -->
 <section class="view" id="v-coach" data-view="coach" hidden>
-  <h2>Coach</h2>
-  <p class="note">Chaque semaine : ton bilan chiffré et les recommandations du coach, gardés en archive (flèches pour revoir les semaines passées). En dessous, tes priorités du moment et le coach IA pour poser tes questions.</p>
+  <h2>Athéna</h2>
+  <div class="ath-head"><span class="ath-ava" data-athena></span><div><h3>Athéna</h3><p class="note">Ta coach · Force &amp; stratégie</p></div></div>
+  <p class="note">Chaque semaine, Athéna fait ton bilan et te donne ses recommandations, gardés en archive (flèches pour revoir les semaines passées). En dessous, tes priorités du moment et la discussion avec elle.</p>
   <div class="panel" id="rapport" style="border-top:4px solid var(--mat)">
     <div class="row between">
       <h3>Rapport de la semaine</h3>
@@ -964,9 +983,9 @@ nav.tabs button[aria-current="page"],.trainnav button[aria-current="true"],.chip
     <ul class="steps" id="recos"></ul>
   </div>
   <div class="panel" id="ai-panel">
-    <div class="row between"><h3>Le coach IA</h3><span class="note" id="ai-state"></span></div>
+    <div class="row between"><h3>Parle avec Athéna</h3><span class="note" id="ai-state"></span></div>
     <div id="ai-off" class="col" hidden>
-      <p class="note">Le coach IA n'est pas encore branché sur le site. En attendant, les priorités ci-dessus sont calculées à partir de tes résultats.</p>
+      <p class="note">Athéna ne peut pas encore discuter sur ce site. En attendant, les priorités ci-dessus sont calculées à partir de tes résultats.</p>
     </div>
     <div id="ai-on" class="col" hidden>
       <div class="chat" id="chat-log" aria-live="polite"></div>
@@ -975,7 +994,7 @@ nav.tabs button[aria-current="page"],.trainnav button[aria-current="true"],.chip
         <input type="text" id="chat-in" placeholder="Pose ta question au coach…" autocomplete="off" style="flex:1 1 200px;font:inherit;font-size:.95rem;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)">
         <button type="submit" class="ghost small">Envoyer</button>
       </form>
-      <p class="note" style="font-size:.8rem">Le coach IA peut se tromper : les règles officielles sont dans l'onglet Ateliers. En cas de douleur, demande l'avis d'un médecin.</p>
+      <p class="note" style="font-size:.8rem">Athéna peut se tromper : les règles officielles sont dans le guide des ateliers (onglet Plan). En cas de douleur, demande l'avis d'un médecin.</p>
     </div>
   </div>
 </section>
@@ -1036,7 +1055,7 @@ nav.tabs button[aria-current="page"],.trainnav button[aria-current="true"],.chip
     <button type="button" data-tab="accueil"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>Aujourd'hui</button>
     <button type="button" data-tab="train"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M10 2h4"/></svg>S'entraîner</button>
     <button type="button" data-tab="progres"><svg viewBox="0 0 24 24"><path d="M4 19h16"/><path d="M5 15l4-5 4 3 6-7"/></svg>Progrès</button>
-    <button type="button" data-tab="coach"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/></svg>Coach</button>
+    <button type="button" data-tab="coach"><svg viewBox="0 0 24 24"><path d="M6 4l2.5 3.2C9.6 6.8 10.8 6.6 12 6.6s2.4.2 3.5.6L18 4c.6 2 .4 3.6-.3 4.8.8 1.2 1.3 2.6 1.3 4.2 0 4.2-3.1 7-7 7s-7-2.8-7-7c0-1.6.5-3 1.3-4.2C5.6 7.6 5.4 6 6 4z"/><circle cx="9.3" cy="12.4" r="1.6"/><circle cx="14.7" cy="12.4" r="1.6"/><path d="M11.3 15.6l.7 1 .7-1"/></svg>Athéna</button>
     <button type="button" data-tab="plan"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Plan</button>
   </div>
 </nav>
@@ -2055,7 +2074,7 @@ const RULES = `Règles officielles (descriptif 2025, femmes) :
 - Sa semaine habituelle est dans son planning A/B (ci-dessous dans ses données, s'il est rempli) ; à défaut : 2 Freeletics, 2 gymnastique, 3 courses de 5 km, 2 krav maga, 1 jujitsu (10 séances). On ne rajoute pas de séances. La gym, le krav maga et le jujitsu ne se modifient JAMAIS (ne propose pas de les changer). On transforme seulement : 1 course devient fractionné, 1 Freeletics devient le parcours complet à Fitness Park. En plus : 10 min par jour de suspension et pompes, et si possible 10-15 min de poutre avant ou après un cours de gym. Au moins 1 jour de repos. Pas de pause pendant les fêtes. Premiers tests chronométrés (parcours + Luc Léger) la semaine du 9 novembre 2026.
 - Elle s'entraîne à Fitness Park Lille (parcours recréé dans la zone fonctionnelle), dans un club de gymnastique (exercices seule sur les agrès) et en course. Le vrai parcours existe au lycée professionnel sécurité de Saint-Quentin. Elle peut avoir le vertige sur la poutre. La poutre du concours est à 1 m de haut, sans tapis à la sortie. Le plan vertige de l'appli (ne pas en inventer un autre) : palier 1 au sol (ligne de 5 m puis poutre posée au sol) ; palier 2 poutre basse 30 à 50 cm avec tapis ; palier 3 60 à 80 cm avec tapis épais, d'abord main tenue puis contact sur l'épaule puis seule ; palier 4 1 m avec gros tapis empilés ; palier 5 1 m sans les tapis surélevés ; palier 6 dans le parcours, essoufflée. On passe au palier suivant après 10 traversées d'affilée sans les mains, sans s'arrêter, avec une appréhension de 3 sur 10 ou moins. Conseils : regarder un point au bout de la poutre à hauteur des yeux, longue expiration avant de monter, petits pas réguliers, bras écartés, s'entraîner à sauter volontairement sur le tapis, demander une parade au coach du club.`;
 function systemPrompt(){
-  return `Tu es le coach sportif d'une candidate au concours de gardien de la paix (police nationale), qui prépare les épreuves sportives. Tu la tutoies, en français simple, chaleureux et motivant, sans jargon : si tu utilises un mot technique, explique-le en quelques mots. Réponses courtes et concrètes (séances, durées, répétitions, quel atelier, où). FORMAT : jamais de tableau, jamais de titre, pas d'emoji numéroté ; des phrases courtes ou une liste simple avec des tirets. En discussion, 120 mots au maximum.
+  return `Tu es Athéna, une petite coach robot en forme de chouette (l'emblème de la déesse de la sagesse et de la stratégie), créée par Rémy pour sa compagne. Tu l'accompagnes dans sa préparation aux épreuves sportives du concours de gardien de la paix (police nationale). Tu parles à la première personne, avec chaleur et précision. Tu la tutoies, en français simple, chaleureux et motivant, sans jargon : si tu utilises un mot technique, explique-le en quelques mots. Réponses courtes et concrètes (séances, durées, répétitions, quel atelier, où). FORMAT : jamais de tableau, jamais de titre, pas d'emoji numéroté ; des phrases courtes ou une liste simple avec des tirets. En discussion, 120 mots au maximum.
 Appuie-toi UNIQUEMENT sur ses données ci-dessous et sur les règles officielles ; n'invente pas de chiffres. Si une donnée manque, dis-lui quel test faire.
 Chaque conseil doit être réaliste et faisable dans sa semaine : où (Fitness Park, club de gym, dehors), combien de fois, combien de répétitions. Ne donne JAMAIS de jour de la semaine (lundi, mardi…) ni d'horaire : elle a son propre planning et ses cours en club ; parle de « une fois dans la semaine », « à une de tes courses », « avant ou après un cours de gym ». Pour le fractionné, la partie rapide se court à la vitesse de son palier visé (ou un peu plus), jamais plus lentement que son dernier palier atteint. Le lycée de Saint-Quentin est loin : seulement pour un passage de temps en temps sur le vrai parcours, pas pour courir. Ne répète pas deux fois le même conseil.
 Ne parle jamais de poids, de régime ou d'apparence. En cas de douleur, blessure, malaise ou vrai vertige : pas de diagnostic, conseille le repos et un médecin.
@@ -2072,10 +2091,10 @@ async function askGroq(messages, maxTokens){
     const j = await res.json();
     return (j.choices?.[0]?.message?.content || "").replace(/<think>[\s\S]*?<\/think>/g, "").trim();
   };
-  if (!navigator.onLine) throw new Error("Pas de réseau : le coach IA a besoin d'internet. Les priorités ci-dessus marchent sans.");
+  if (!navigator.onLine) throw new Error("Pas de réseau : Athéna a besoin d'internet pour discuter. Les priorités ci-dessus marchent sans.");
   try { return await call(AI_DEFAULT); }
   catch(e){
-    if (e.status === 429) throw new Error("Le coach a reçu beaucoup de questions : réessaie dans quelques minutes.");
+    if (e.status === 429) throw new Error("Athéna a reçu beaucoup de questions : réessaie dans quelques minutes.");
     try { return await call(AI_BACKUP); } catch(e2){ throw new Error("Le coach ne répond pas pour le moment. Réessaie plus tard."); }
   }
 }
@@ -2150,7 +2169,7 @@ $("wk-next").addEventListener("click", () => { if (wkOffset < 0){ wkOffset++; re
 document.addEventListener("click", e => { if (e.target.id === "wk-gen") genWeek(true); });
 let chat = lsGet("phm-chat", []), chatBusy = false;
 function renderChat(){
-  $("chat-log").innerHTML = chat.length ? chat.map(m => `<div class="msg ${m.role === "user" ? "me" : "bot"}">${m.role === "user" ? esc(m.content) : mdLite(m.content)}</div>`).join("") : `<div class="msg bot">Salut ! Pose-moi une question sur ta préparation : un atelier, ta course, ta semaine…</div>`;
+  $("chat-log").innerHTML = chat.length ? chat.map(m => `<div class="msg ${m.role === "user" ? "me" : "bot"}">${m.role === "user" ? esc(m.content) : mdLite(m.content)}</div>`).join("") : `<div class="msg bot">Salut, moi c'est Athéna, ta coach. Pose-moi une question sur ta préparation : un atelier, ta course, ta semaine…</div>`;
   $("chat-log").scrollTop = $("chat-log").scrollHeight;
   $("chat-sugg").innerHTML = ["Explique-moi mes recommandations de la semaine", "J'ai peur sur la poutre", "Comment gagner du temps au slalom ?", "Je suis fatiguée aujourd'hui", "Comment progresser au Luc Léger ?"].map(s => `<button type="button" class="chip" data-ask="${esc(s)}">${esc(s)}</button>`).join("");
 }
@@ -2436,7 +2455,7 @@ function agendaSlots(){
 function icsText(){
   const alarm = Number($("alarm-min").value) || 30, url = location.origin + location.pathname;
   const esc2 = t => String(t).replace(/[\;,]/g, m => "\\" + m).replace(/\n/g, "\\n");
-  const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Parcours//FR", "CALSCALE:GREGORIAN", "X-WR-CALNAME:Entraînement concours"];
+  const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Athena//FR", "CALSCALE:GREGORIAN", "X-WR-CALNAME:Athéna · entraînement"];
   agendaSlots().forEach(({s, w, first, exam}, i) => {
     const T = TYPES[s.t] || {l: s.t}, end = new Date(parseDay(ymd(first)).getTime());
     const [hh, mm] = (s.h || "18:00").split(":").map(Number), dur = s.t.startsWith("course") ? 60 : 90;
@@ -2537,14 +2556,14 @@ function renderPlanAll(){ renderToday(); renderObjectifs(); renderPlanning(); re
 
 /* ======================= REFONTE : navigation, aujourd'hui, minuteur ======================= */
 const TRAIN = ["parcours", "luc", "frac", "tests"];
-const TITLES = {accueil: "Parcours", parcours: "S'entraîner", luc: "S'entraîner", frac: "S'entraîner", tests: "S'entraîner", progres: "Progrès", coach: "Coach", plan: "Ton plan", ateliers: "Les 10 ateliers", reglages: "Réglages"};
+const TITLES = {accueil: "Athéna", parcours: "S'entraîner", luc: "S'entraîner", frac: "S'entraîner", tests: "S'entraîner", progres: "Progrès", coach: "Athéna", plan: "Ton plan", ateliers: "Les 10 ateliers", reglages: "Réglages"};
 const TRAIN_LABELS = {parcours: "Parcours", luc: "Luc Léger", frac: "Fractionné", tests: "Tests"};
 let prevView = "accueil";
 function renderTrainNav(v){
   document.querySelectorAll(".trainnav").forEach(n => n.innerHTML = TRAIN.map(k => `<button type="button" data-goto="${k}" aria-current="${k === v}">${TRAIN_LABELS[k]}</button>`).join(""));
 }
 function chrome(v){
-  $("top-title").textContent = TITLES[v] || "Parcours";
+  $("top-title").textContent = TITLES[v] || "Athéna";
   const sub = v === "ateliers" || v === "reglages";
   $("top-back").hidden = !sub;
   if (TRAIN.includes(v)){ lsSet("phm-train", v); renderTrainNav(v); }
@@ -2654,7 +2673,7 @@ function renderHello(){
   const nx = planEmpty() ? null : nextSession();
   const nxTxt = planEmpty() ? `<button type="button" class="link" style="color:#FFB07F" data-goto="plan" data-anchor="planning-panel">Remplis ton planning ›</button>`
     : nx ? `<b>${nx.i === 0 ? "Aujourd'hui" : nx.i === 1 ? "Demain" : DAYS[dow(nx.day)].replace(/^./, c => c.toUpperCase())} ${nx.s.h ? nx.s.h.replace(":", " h ") : ""}</b> · ${esc(slotTitle(nx.s))}` : "Rien de prévu cette semaine";
-  $("hero-main").innerHTML = `<div class="kick">${now.toLocaleDateString("fr-FR", {weekday: "long", day: "numeric", month: "long"})}</div>
+  $("hero-main").innerHTML = `<div class="kick">Athéna · ${now.toLocaleDateString("fr-FR", {weekday: "long", day: "numeric", month: "long"})}</div>
     <h1>${h < 12 ? "Bonjour" : h < 18 ? "Bon après-midi" : "Bonsoir"}</h1>
     <div class="hero-grid">
       <div class="ring" role="img" aria-label="${Math.round(p * 100)} % du programme réalisé, ${dl != null ? dl + " jours avant le concours" : ""}">
@@ -2846,6 +2865,19 @@ document.addEventListener("click", e => {
 function renderCalAll(){ renderFrise(); renderCal(); if ($("leg-love")) $("leg-love").textContent = typeLabel("ensemble"); }
 
 
+/* ======================= ATHÉNA (avatar) ======================= */
+const ATHENA_SVG = `<svg class="athena" viewBox="96 96 320 340" aria-hidden="true"><defs>
+  <linearGradient id="ah" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#E7D8F1"/></linearGradient>
+  <linearGradient id="av" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#26173F"/><stop offset="1" stop-color="#3E2569"/></linearGradient>
+  <radialGradient id="ae" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#FFE6D4"/><stop offset=".55" stop-color="#FF9C8E"/><stop offset="1" stop-color="#E8507F"/></radialGradient>
+  <linearGradient id="ab" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFB08E"/><stop offset="1" stop-color="#EC5B85"/></linearGradient></defs>
+  <path d="M256 128 C306 128 342 140 362 160 L404 112 C406 150 398 182 384 204 C392 224 394 246 394 270 C394 356 336 410 256 410 C176 410 118 356 118 270 C118 246 120 224 128 204 C114 182 106 150 108 112 L150 160 C170 140 206 128 256 128 Z" fill="url(#ah)"/>
+  <circle cx="205" cy="246" r="62" fill="url(#av)"/><circle cx="307" cy="246" r="62" fill="url(#av)"/>
+  <g class="ath-eyes"><circle cx="205" cy="246" r="33" fill="url(#ae)"/><circle cx="307" cy="246" r="33" fill="url(#ae)"/><circle cx="194" cy="234" r="9" fill="#fff" opacity=".92"/><circle cx="296" cy="234" r="9" fill="#fff" opacity=".92"/></g>
+  <path d="M238 300 Q256 290 274 300 L262 334 Q256 344 250 334 Z" fill="url(#ab)"/>
+  <path d="M214 362 q14 10 28 0 M242 368 q14 10 28 0 M270 362 q14 10 28 0" fill="none" stroke="#D6C2E6" stroke-width="7" stroke-linecap="round"/></svg>`;
+function renderAthena(){ document.querySelectorAll("[data-athena]").forEach(el => { if (!el.dataset.done){ el.innerHTML = ATHENA_SVG; el.dataset.done = "1"; } }); }
+
 /* ======================= INSTALLATION ======================= */
 let deferredInstall = null;
 const isStandalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
@@ -2859,13 +2891,13 @@ function androidSteps(){
   return `${now}<p><b>Avec Chrome</b> (le navigateur habituel sur Android) :</p>
     <ol><li>Ouvre ce site dans <b>Chrome</b>.</li><li>Touche les <b>3 points ⋮</b> en haut à droite.</li><li>Touche <b>Installer l'application</b> (ou <b>Ajouter à l'écran d'accueil</b>).</li><li>Confirme avec <b>Installer</b>.</li></ol>
     <p class="note">Avec <b>Samsung Internet</b> : menu <b>≡</b> en bas à droite › <b>Ajouter page à</b> › <b>Écran d'accueil</b>.</p>
-    <p class="note">L'icône « Parcours » apparaît sur ton écran d'accueil : ouvre toujours l'appli depuis cette icône.</p>`;
+    <p class="note">L'icône « Athéna » apparaît sur ton écran d'accueil : ouvre toujours l'appli depuis cette icône.</p>`;
 }
 function iosSteps(){
   return `<p><b>Avec Safari</b> :</p>
     <ol><li>Ouvre ce site dans <b>Safari</b>.</li><li>Touche le bouton <b>Partager</b> en bas de l'écran (le carré avec une flèche vers le haut).</li><li>Fais défiler et touche <b>Sur l'écran d'accueil</b>.</li><li>Touche <b>Ajouter</b> en haut à droite.</li></ol>
     <p class="note">Avec Chrome sur iPhone : bouton <b>Partager</b> dans la barre d'adresse › <b>Sur l'écran d'accueil</b>. Si tu ne le trouves pas, passe par Safari.</p>
-    <p class="note"><b>Important sur iPhone :</b> installe l'appli <b>avant</b> de saisir tes résultats, puis utilise toujours l'icône « Parcours » (ce qui est saisi dans le navigateur n'apparaît pas dans l'appli). Pour le partage, colle le lien dans l'appli : roue dentée en haut › Partage entre téléphones.</p>`;
+    <p class="note"><b>Important sur iPhone :</b> installe l'appli <b>avant</b> de saisir tes résultats, puis utilise toujours l'icône « Athéna » (ce qui est saisi dans le navigateur n'apparaît pas dans l'appli). Pour le partage, colle le lien dans l'appli : roue dentée en haut › Partage entre téléphones.</p>`;
 }
 function installSteps(){
   const tab = (k, l) => `<button type="button" data-itab="${k}" aria-pressed="${installTab === k}">${l}</button>`;
@@ -2909,7 +2941,7 @@ $("theme-seg").addEventListener("click", e => { const b = e.target.closest("[dat
 applyTheme(lsGet("phm-theme", "auto"));
 
 /* ======================= DÉMARRAGE ======================= */
-function renderAll(){ renderLove(); renderHome(); renderPlanAll(); renderHello(); renderTiles(); renderSetup(); renderSplits(); renderRecos(); renderWeek(); if (!$("v-progres").hidden) renderProg(); }
+function renderAll(){ renderAthena(); renderLove(); renderHome(); renderPlanAll(); renderHello(); renderTiles(); renderSetup(); renderSplits(); renderRecos(); renderWeek(); if (!$("v-progres").hidden) renderProg(); }
 setStatus(); renderChrono(); renderSeance(); renderLucBareme(); renderAteliers(); renderAll();
 show((location.hash || "#accueil").slice(1), true);
 initStore();

@@ -1,6 +1,6 @@
-# Parcours d'habileté motrice
+# Athéna
 
-Appli (PWA) de préparation aux épreuves sportives du concours de gardien de la paix :
+Athéna : coach (PWA) de préparation aux épreuves sportives du concours de gardien de la paix :
 chrono du parcours atelier par atelier, Luc Léger avec les bips, fiches des 10 ateliers
 (au concours, recréés à Fitness Park, exercices au club de gym), plan jusqu'au concours, progression.
 

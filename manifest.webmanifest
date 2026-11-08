@@ -1,7 +1,7 @@
 {
-  "name": "Parcours d'habileté motrice",
-  "short_name": "Parcours",
-  "description": "Préparation aux épreuves sportives du concours de gardien de la paix.",
+  "name": "Athéna",
+  "short_name": "Athéna",
+  "description": "Ta coach pour les épreuves sportives du concours de police : parcours, Luc Léger, programme et progrès.",
   "lang": "fr",
   "start_url": "./index.html",
   "scope": "./",
@@ -12,6 +12,7 @@
   "icons": [
     { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
     { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
-    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/athena.svg", "sizes": "any", "type": "image/svg+xml" }
   ]
 }

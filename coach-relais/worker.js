@@ -18,8 +18,8 @@ async function agenda(team){
   if (r.ok){ const d = await r.json(); try { data = JSON.parse(d.fields.json.stringValue); } catch (e) {} }
   const alarm = Math.min(240, Math.max(0, Number(data.alarm) || 30));
   const stamp = new Date().toISOString().replace(/[-:]/g, "").slice(0, 15) + "Z";
-  const L = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Parcours//Entrainement//FR", "CALSCALE:GREGORIAN", "METHOD:PUBLISH",
-    "X-WR-CALNAME:Entraînement concours", "X-WR-TIMEZONE:Europe/Paris", "REFRESH-INTERVAL;VALUE=DURATION:PT1H", "X-PUBLISHED-TTL:PT1H"];
+  const L = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Athena//Entrainement//FR", "CALSCALE:GREGORIAN", "METHOD:PUBLISH",
+    "X-WR-CALNAME:Athéna · entraînement", "X-WR-TIMEZONE:Europe/Paris", "REFRESH-INTERVAL;VALUE=DURATION:PT1H", "X-PUBLISHED-TTL:PT1H"];
   (Array.isArray(data.ev) ? data.ev : []).slice(0, 600).forEach((e, i) => {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(e.d) || !/^\d{2}:\d{2}$/.test(e.h)) return;
     const [hh, mm] = e.h.split(":").map(Number), dur = Math.min(240, Number(e.dur) || 60);
