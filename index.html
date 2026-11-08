@@ -1949,7 +1949,7 @@ const MOTS = [
   "« Le seul adversaire qu'on ait, c'est nous-même. » C'est toi qui l'as dit, et c'est vrai. <i>♥</i>",
   "« On ne s'élève pas au niveau de ses attentes, on retombe à son niveau d'entraînement. » Et ton entraînement est solide. <i>♥</i>",
   "Apprentie guerrière ? Plus pour très longtemps. <i>♥</i>",
-  "Une séance à la fois. Je suis là. <i>♥</i>",
+  "Une séance à la fois, et tu avances. <i>♥</i>",
   "Même les jours difficiles comptent. Surtout eux. <i>♥</i>",
   "Chaque séance te rapproche de ton uniforme. Je suis fier de toi. <i>♥</i>",
   "Un jour de repos, c'est aussi de l'entraînement. Prends soin de toi. <i>♥</i>",
@@ -2089,7 +2089,7 @@ function session(type, d, h){
     L.push("Ton cours, sans rien changer : c'est aussi du cardio et du gainage. Pense à bien boire.");
   } else if (type === "ensemble"){
     const matin = !h || Number(String(h).split(":")[0]) < 14;
-    const MATIN = ["Premier café ensemble ☕", "Bien dormi, la guerrière ?", "La journée commence bien ♥", "Réveil en douceur, je suis là", "Un bisou avant d'attaquer la journée", "Bonne journée, je pense à toi ♥"];
+    const MATIN = ["Premier café ensemble ☕", "Bien dormi, la guerrière ?", "La journée commence bien ♥", "Réveil en douceur ♥", "Un bisou avant d'attaquer la journée", "Bonne journée, je pense à toi ♥"];
     const SOIR = ["J'ai hâte de te retrouver ♥", "Ce soir, on souffle un peu", "Après l'effort, le réconfort", "Raconte-moi ta journée", "Ce soir, c'est nous deux ♥", "Repose-toi, tu l'as bien mérité"];
     const perso = (plan().mots || {})[matin ? "matin" : "soir"] || [];
     const pool = (matin ? MATIN : SOIR).concat(Array.isArray(perso) ? perso : []);
