@@ -325,12 +325,19 @@ footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padd
     <div class="panel install-help" id="install-help" hidden></div>
   </div>
 
+  <div class="panel" id="today" style="border-top:4px solid var(--cone)"></div>
+
   <div class="grid2">
     <div class="score phm" id="score-phm"></div>
     <div class="score luc" id="score-luc"></div>
   </div>
   <p class="note" id="score-avg" hidden></p>
   <p class="note">Ta note de sport est la moyenne de ces deux notes, coefficient 8 dans le concours. Sous 7/20 à l'une des deux, c'est éliminatoire. Les notes sont calculées à partir de ton dernier essai, avec le bonus d'âge réglé plus bas.</p>
+
+  <div class="panel">
+    <div class="row between"><h2>Tes prochains objectifs</h2><button type="button" class="ghost tiny" data-goto="plan">Tout le plan</button></div>
+    <ul class="steps" id="home-obj"></ul>
+  </div>
 
   <div class="panel" style="border-top:4px solid var(--run)">
     <div class="row between"><h2>Conseils du coach</h2><button type="button" class="ghost tiny" data-goto="coach">Rapport de la semaine</button></div>
@@ -343,45 +350,19 @@ footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padd
     <button type="button" data-goto="ateliers" data-mode="fp"><b>Plan réel et reconstitution</b><span>Le parcours officiel et sa copie à Fitness Park</span></button>
     <button type="button" data-goto="luc"><b>Luc Léger</b><span>Bips de la navette 20 m</span></button>
     <button type="button" data-goto="ateliers"><b>Ateliers</b><span>Concours, Fitness Park, club</span></button>
+    <button type="button" data-goto="plan"><b>Mon plan</b><span>Programme, planning A/B, lieux</span></button>
     <button type="button" data-goto="progres"><b>Progrès</b><span>Courbes et historique</span></button>
-  </div>
-
-  <div class="panel">
-    <div class="row between"><h2>Séance du jour</h2><span class="note" id="today-date"></span></div>
-    <div class="seg" id="seance-seg" role="group" aria-label="Lieu de la séance">
-      <button type="button" data-s="fp">Fitness Park</button>
-      <button type="button" data-s="club">Club de gym</button>
-      <button type="button" data-s="run">Course</button>
-    </div>
-    <ul class="steps" id="seance-steps"></ul>
-  </div>
-
-  <div class="panel">
-    <h2>Le plan jusqu'au concours</h2>
-    <p class="note">Les épreuves sportives sont prévues fin mars – début avril 2027. Le plan est découpé en étapes ; celle où tu es est entourée en orange. Les dates s'ajustent toutes seules quand la date exacte est saisie dans Réglages.</p>
-    <div class="phases" id="phases"></div>
-  </div>
-
-  <div class="panel">
-    <h2>Ta semaine, adaptée au concours</h2>
-    <p class="note">Tu fais déjà 10 séances par semaine. On n'en ajoute pas, et la gym, le krav maga et le jujitsu ne changent pas. On transforme seulement une course et une séance Freeletics pour qu'elles servent directement au parcours et au Luc Léger.</p>
-    <div class="week">
-      <div class="wk run"><b>3 courses de 5 km</b><p>Garde-en 2 en footing tranquille. La 3e devient un <b>fractionné</b> (30 s vite / 30 s en trottinant) : c'est elle qui fait progresser au Luc Léger.</p></div>
-      <div class="wk fp"><b>2 Freeletics</b><p>Une fois par semaine, remplace une séance Freeletics par le <b>parcours complet à Fitness Park</b> (3 parcours chronométrés). Garde l'autre telle quelle.</p></div>
-      <div class="wk club"><b>2 gym, 2 krav maga, 1 jujitsu</b><p>On ne change rien. Si c'est possible, 10 à 15 min sur la poutre avant ou après un cours de gym, pour avancer dans le plan vertige.</p></div>
-      <div class="wk daily"><b>Chaque jour, 10 min</b><p>Suspension à la barre, 3 × 5 pompes, mobilité des poignets.</p></div>
-      <div class="wk daily"><b>Au moins 1 jour de repos</b><p>Sans sport du tout. Si tu es fatiguée, enlève d'abord un footing, jamais le fractionné ou le parcours.</p></div>
-    </div>
   </div>
 
   <details class="more">
     <summary>Mode d'emploi de l'outil</summary>
     <div class="in">
       <p>L'appli sert à toi et à la personne qui te chronomètre. Tout ce qui est enregistré (temps, tests) reste sur le téléphone. Si le partage est activé (dans Réglages, en bas de l'accueil), c'est visible sur vos deux téléphones. Elle marche aussi sans réseau.</p>
-      <p><b>Accueil</b> : où tu en es, tes notes estimées, la séance à faire aujourd'hui et le plan jusqu'au concours.</p>
+      <p><b>Accueil</b> : ta séance du jour (quoi, où, combien de temps), tes prochains objectifs, tes notes estimées et les conseils du coach.</p>
       <p><b>Parcours</b> : le chronomètre du parcours. Il montre l'atelier en cours, ce qui le rend réussi et les pénalités possibles.</p>
       <p><b>Luc Léger</b> : le téléphone fait les bips de la course navette. Un bouton « Arrêt » donne ton palier et ta note.</p>
-      <p><b>Ateliers</b> : les 10 ateliers expliqués, avec trois vues : comme au concours, comment les recréer à Fitness Park, et quoi travailler au club de gym.</p>
+      <p><b>Plan</b> : le programme bloc par bloc, tes objectifs datés, ton planning semaine A / semaine B (modifiable), les rappels dans ton agenda et le matériel de chaque lieu.</p>
+      <p><b>Ateliers</b> (depuis l'accueil ou le plan) : les 10 ateliers expliqués, avec trois vues : comme au concours, comment les recréer à Fitness Park, et quoi travailler au club de gym.</p>
       <p><b>Coach</b> : tes priorités du moment, calculées à partir de tes résultats, et un coach IA à qui poser tes questions.</p>
       <p><b>Progrès</b> : tes courbes, atelier par atelier, et tout l'historique.</p>
     </div>
@@ -563,6 +544,57 @@ footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padd
   <div class="stations" id="stations"></div>
 </section>
 
+<!-- =================== PLAN =================== -->
+<section class="view" id="v-plan" data-view="plan" hidden>
+  <h2>Ton plan</h2>
+  <p class="note">Tout ton entraînement organisé jusqu'aux épreuves : le programme par blocs, tes objectifs datés, ton planning semaine A / semaine B, les rappels dans ton agenda et ce qu'on peut faire dans chaque lieu. Ensuite, l'onglet Accueil te dit chaque jour quoi faire.</p>
+
+  <div class="panel">
+    <h3>Le programme, bloc par bloc</h3>
+    <p class="note">Méthode de préparateur physique : des blocs de 4 semaines (3 semaines où la charge monte doucement, puis 1 semaine allégée avec des tests), environ 80 % de course facile et 20 % de course rapide, jamais plus de 10 % de volume en plus d'une semaine à l'autre, et un affûtage avant le jour J pour arriver en forme.</p>
+    <div class="phases" id="phases"></div>
+  </div>
+
+  <div class="panel">
+    <h3>Tes objectifs datés</h3>
+    <p class="note">Ils se cochent tout seuls à partir de tes résultats (chronos, Luc Léger, tests). Ils seront ajustés après tes tests de départ.</p>
+    <ul class="steps" id="objectifs"></ul>
+  </div>
+
+  <div class="panel" id="planning-panel">
+    <h3>Ton planning</h3>
+    <p class="note">Indique tes séances habituelles pour la semaine A et la semaine B, avec l'heure. L'appli en déduit la séance exacte de chaque jour. La gym, le krav maga et le jujitsu restent comme ils sont.</p>
+    <div class="row"><label for="plan-ref" class="note" style="color:var(--ink)">La semaine du 9 novembre est une semaine</label>
+      <select id="plan-ref"><option value="A">A</option><option value="B">B</option></select></div>
+    <div class="seg" id="plan-wk" role="group" aria-label="Semaine"><button type="button" data-wk="A">Semaine A</button><button type="button" data-wk="B">Semaine B</button></div>
+    <div id="planning"></div>
+    <div class="row">
+      <select id="slot-day" aria-label="Jour"><option value="1">Lundi</option><option value="2">Mardi</option><option value="3">Mercredi</option><option value="4">Jeudi</option><option value="5">Vendredi</option><option value="6">Samedi</option><option value="7">Dimanche</option></select>
+      <select id="slot-type" aria-label="Séance"></select>
+      <input type="time" id="slot-time" value="18:00" aria-label="Heure" style="font:inherit;font-size:.95rem;padding:6px 8px;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--ink)">
+      <button type="button" class="ghost small" id="slot-add">Ajouter</button>
+    </div>
+    <p class="note" style="font-size:.85rem">Exemple : lundi, « Course · endurance » à 17 h 15 puis « Gym » à 18 h. Une course avant la gym ? Mets-la juste avant.</p>
+  </div>
+
+  <div class="panel">
+    <h3>Rappels dans ton agenda</h3>
+    <p class="note">Ajoute toutes tes séances (semaines A et B) à l'agenda de ton téléphone, avec une alerte avant chacune, jusqu'aux épreuves. Le contenu exact de chaque séance est dans l'appli, onglet Accueil. Si ton planning change, refais-le.</p>
+    <div class="row"><label for="alarm-min" class="note" style="color:var(--ink)">Alerte</label>
+      <select id="alarm-min"><option value="15">15 min avant</option><option value="30" selected>30 min avant</option><option value="60">1 h avant</option><option value="120">2 h avant</option></select></div>
+    <div class="row"><button type="button" class="btn small" id="ics-go">Ajouter à mon agenda (iPhone, Samsung, Outlook)</button></div>
+    <details class="more"><summary>Sur Android avec Google Agenda</summary><div class="in"><p class="note">Google Agenda n'importe pas de fichier sur téléphone : touche chaque séance ci-dessous, puis « Enregistrer ». Elle se répète toutes les deux semaines.</p><ul class="steps" id="gcal-links"></ul></div></details>
+  </div>
+
+  <div class="panel">
+    <h3>Les lieux et leur matériel</h3>
+    <p class="note">Ce qu'il y a dans chaque lieu et ce qu'on peut y travailler. Coche ce que tu as vérifié sur place ; décoche ce qui manque, l'appli en tiendra compte.</p>
+    <div class="col" id="lieux"></div>
+  </div>
+
+  <button type="button" class="ghost" data-goto="ateliers">Voir les 10 ateliers en détail</button>
+</section>
+
 <!-- =================== COACH =================== -->
 <section class="view" id="v-coach" data-view="coach" hidden>
   <h2>Coach</h2>
@@ -632,6 +664,7 @@ footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padd
         <option value="suspension">Suspension à la barre (s)</option>
         <option value="pompes">Pompes réglementaires d'affilée</option>
         <option value="poutre">Poutre : hauteur maîtrisée (cm)</option>
+        <option value="course">Course sans t'arrêter (km)</option>
       </select>
       <input type="number" id="mes-val" min="0" step="0.5" required aria-label="Valeur" style="width:90px">
       <input type="date" id="mes-date" aria-label="Date">
@@ -659,7 +692,7 @@ footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padd
     <button type="button" data-tab="accueil"><svg viewBox="0 0 24 24"><path d="M3 11 12 4l9 7v9H3z"/><path d="M9 20v-6h6v6"/></svg>Accueil</button>
     <button type="button" data-tab="parcours"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M10 2h4"/></svg>Parcours</button>
     <button type="button" data-tab="luc"><svg viewBox="0 0 24 24"><path d="M4 18h16M6 18V8M18 18V8M6 8l6 5 6-5"/></svg>Luc Léger</button>
-    <button type="button" data-tab="ateliers"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="7" height="7" rx="1.5"/><rect x="14" y="4" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Ateliers</button>
+    <button type="button" data-tab="plan"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M7 14h4M7 17h7"/></svg>Plan</button>
     <button type="button" data-tab="coach"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/></svg>Coach</button>
     <button type="button" data-tab="progres"><svg viewBox="0 0 24 24"><path d="M4 19h16"/><path d="M5 15l4-5 4 3 6-7"/></svg>Progrès</button>
   </div>
@@ -878,15 +911,16 @@ const palTxt = (p, s) => `palier ${p}${s ? " + " + s + " s" : ""}`;
 const palBig = (p, s) => `Palier ${p}${s ? " + " + s + " s" : ""}`;
 
 /* ======================= NAVIGATION ======================= */
-const VIEWS = ["accueil", "parcours", "luc", "ateliers", "coach", "progres"];
+const VIEWS = ["accueil", "parcours", "luc", "ateliers", "plan", "coach", "progres"];
 function show(v, noScroll){
   if (!VIEWS.includes(v)) v = "accueil";
   document.querySelectorAll(".view").forEach(el => el.hidden = el.dataset.view !== v);
-  document.querySelectorAll("[data-tab]").forEach(b => b.setAttribute("aria-current", b.dataset.tab === v ? "page" : "false"));
+  document.querySelectorAll("[data-tab]").forEach(b => b.setAttribute("aria-current", (b.dataset.tab === v || (v === "ateliers" && b.dataset.tab === "plan")) ? "page" : "false"));
   try { history.replaceState(null, "", "#" + v); } catch(e){}
   if (!noScroll) window.scrollTo(0, 0);
   if (v === "progres") renderProg();
   if (v === "coach"){ renderRecos(); renderChat(); renderWeek(); genWeek(false); }
+  if (v === "plan") renderPlanAll();
 }
 document.querySelectorAll("[data-tab]").forEach(b => b.addEventListener("click", () => show(b.dataset.tab)));
 document.addEventListener("click", e => { const g = e.target.closest("[data-goto]"); if (g){ show(g.dataset.goto); if (g.dataset.mode) setMode(g.dataset.mode); } });
@@ -894,7 +928,7 @@ document.addEventListener("click", e => { const g = e.target.closest("[data-goto
 /* ======================= STOCKAGE =======================
    Toujours sur ce téléphone. Si le partage est activé (config.js + code d'équipe),
    aussi dans la base en ligne, visible sur tous les téléphones de l'équipe. */
-const S = { essais: [], mesures: [], luc: [], rapports: [], exam: null, examLabel: null };
+const S = { essais: [], mesures: [], luc: [], rapports: [], exam: null, examLabel: null, plan: null, lieux: null };
 const LKEY = {essais:"phm-essais-v3", mesures:"phm-mesures-v1", luc:"phm-luc-v1", rapports:"phm-rapports-v1"};
 const COLLS = ["essais", "mesures", "luc", "rapports"];
 const EXAM_DEFAULT = {date:"2027-03-29", label:"fin mars – début avril 2027"};
@@ -906,6 +940,7 @@ function setSync(msg, warn){ const el = $("sync"); el.textContent = msg; el.clas
 function loadLocal(){
   for (const k of COLLS) S[k] = lsGet(LKEY[k], []).filter(x => x && x.id).map(x => cleanItem(k, x));
   const ex = lsGet("phm-exam-obj", EXAM_DEFAULT); S.exam = ex.date; S.examLabel = ex.label;
+  S.plan = lsGet("phm-plan", null); S.lieux = lsGet("phm-lieux", null);
 }
 function writeErr(){ setSync("Enregistrement en ligne impossible pour le moment. Le résultat est gardé sur ce téléphone et partira dès que possible.", true); }
 // rejoindre une équipe avec un lien ?equipe=CODE
@@ -945,6 +980,14 @@ async function connectFirebase(){
       renderAll();
     }, () => setSync("Le partage ne répond pas. Les résultats restent sur ce téléphone.", true));
   }
+  F.onSnapshot(F.doc(db, "equipes", team, "reglages", "planning"), snap => {
+    if (snap.exists()){ S.plan = snap.data(); lsSet("phm-plan", S.plan); renderPlanAll(); }
+    else if (S.plan) F.setDoc(F.doc(db, "equipes", team, "reglages", "planning"), S.plan).catch(() => {});
+  }, () => {});
+  F.onSnapshot(F.doc(db, "equipes", team, "reglages", "lieux"), snap => {
+    if (snap.exists()){ S.lieux = snap.data(); lsSet("phm-lieux", S.lieux); renderLieux(); }
+    else if (S.lieux) F.setDoc(F.doc(db, "equipes", team, "reglages", "lieux"), S.lieux).catch(() => {});
+  }, () => {});
   F.onSnapshot(F.doc(db, "equipes", team, "reglages", "concours"), snap => {
     if (snap.exists()){ const d = snap.data(); S.exam = d.date || null; S.examLabel = d.label || null; lsSet("phm-exam-obj", {date: S.exam, label: S.examLabel}); renderHome(); }
   }, () => {});
@@ -963,7 +1006,7 @@ function cleanItem(k, x){
   const o = Object.assign({}, x);
   (NUMS[k] || []).forEach(f => { if (o[f] != null && typeof o[f] !== "boolean"){ const n = Number(o[f]); o[f] = isFinite(n) ? n : null; } });
   if (k === "essais"){ o.splits = Array.isArray(o.splits) ? o.splits.map(Number).filter(isFinite) : []; o.penBy = Array.isArray(o.penBy) ? o.penBy.map(p => ({n: Number(p.n), s: Number(p.s)})).filter(p => p.n >= 1 && p.n <= 10 && isFinite(p.s)) : []; o.lieu = String(o.lieu || ""); }
-  if (k === "mesures") o.type = ["suspension", "pompes", "poutre"].includes(o.type) ? o.type : "suspension";
+  if (k === "mesures") o.type = ["suspension", "pompes", "poutre", "course"].includes(o.type) ? o.type : "suspension";
   if (k === "rapports"){ o.conseils = String(o.conseils || ""); o.week = String(o.week || ""); }
   if (typeof o.id !== "string") o.id = String(o.id || newId());
   return o;
@@ -1092,6 +1135,7 @@ const todayKey = () => { const d = new Date(); return d.getFullYear() + "-" + St
 let seance = lsGet("phm-seance", "fp");
 let ticks = lsGet("phm-ticks", {});
 function renderSeance(){
+  if (!$("seance-steps")) return;
   document.querySelectorAll("#seance-seg [data-s]").forEach(b => b.setAttribute("aria-pressed", b.dataset.s === seance));
   const key = todayKey() + ":" + seance, done = ticks[key] || [];
   $("seance-steps").innerHTML = SEANCES[seance].map((s, i) => `<li class="${done.includes(i) ? "done" : ""}">
@@ -1099,15 +1143,15 @@ function renderSeance(){
     <div><div class="s-t">${s.t}</div><div class="s-d">${s.d}</div></div>
     ${s.go ? `<button type="button" class="ghost tiny s-a" data-goto="${s.go}" ${s.mode ? `data-mode="${s.mode}"` : ""}>${s.btn}</button>` : ""}</li>`).join("");
 }
-$("seance-seg").addEventListener("click", e => { const b = e.target.closest("[data-s]"); if (!b) return; seance = b.dataset.s; lsSet("phm-seance", seance); renderSeance(); });
-$("seance-steps").addEventListener("change", e => {
+$("seance-seg") && $("seance-seg").addEventListener("click", e => { const b = e.target.closest("[data-s]"); if (!b) return; seance = b.dataset.s; lsSet("phm-seance", seance); renderSeance(); });
+$("seance-steps") && $("seance-steps").addEventListener("change", e => {
   if (e.target.type !== "checkbox") return;
   const i = Number(e.target.id.slice(3)), key = todayKey() + ":" + seance;
   const set = new Set(ticks[key] || []); e.target.checked ? set.add(i) : set.delete(i);
   const keep = {}; Object.keys(ticks).filter(k => k.startsWith(todayKey())).forEach(k => keep[k] = ticks[k]);
   keep[key] = [...set]; ticks = keep; lsSet("phm-ticks", ticks); renderSeance();
 });
-$("today-date").textContent = new Date().toLocaleDateString("fr-FR", {weekday:"long", day:"numeric", month:"long"});
+if ($("today-date")) $("today-date").textContent = new Date().toLocaleDateString("fr-FR", {weekday:"long", day:"numeric", month:"long"});
 
 function scoreCard(el, kind){
   let main = "—", sub = "", note = null, extra = "";
@@ -1152,35 +1196,13 @@ function renderHome(){
 $("exam-date").addEventListener("change", e => saveExam(e.target.value));
 let PHASES = [];
 function renderPhases(){
-  const exam = new Date((S.exam || "2027-03-29") + "T12:00:00"), day = 86400000, now = new Date();
-  const add = (d, n) => new Date(d.getTime() + n * day);
-  const y = exam.getFullYear();
-    const specA = add(exam, -28), affA = add(exam, -9);
-  // fin de la semaine prochaine : premiers tests de référence
-  const startTests = new Date(2026, 10, 15, 23, 59);
-  const P = [
-    {t:"1 · Le point de départ", a: new Date(2026, 10, 6), b: startTests,
-     p:"La semaine prochaine, à Fitness Park : un parcours complet chronométré, puis au moins 30 min de repos, puis un Luc Léger complet (départ palier 1), comme le jour du concours. Note aussi tes tests : suspension, pompes, hauteur de poutre.",
-     o:"Avoir tes temps de référence : le coach s'en sert pour tout le reste."},
-    {t:"2 · Les bases", a: add(startTests, 0.01), b: new Date(y, 0, 3, 23, 59),
-     p:"Chaque atelier proprement (vues Club et Fitness Park), poutre : paliers 1 à 3 du plan vertige, suspension jusqu'à 30 s. Un parcours complet par semaine, un fractionné par semaine. Pas de pause pendant les fêtes : on garde le rythme, en s'adaptant aux horaires des salles.",
-     o:"Gagner du temps à chaque parcours et atteindre le palier 6 au Luc Léger."},
-    {t:"3 · Progresser", a: new Date(y, 0, 4), b: add(specA, -1),
-     p:"Un parcours complet chaque semaine à Fitness Park, un fractionné par semaine, poutre à 1 m. Un Luc Léger complet toutes les 3 semaines.",
-     o:"Fin de l'étape : parcours en moins de 1 min 15 et palier 7 au Luc Léger."},
-    {t:"4 · Comme au concours", a: specA, b: add(affA, -1),
-     p:"Passer sur le vrai parcours à Saint-Quentin, faire des parcours sans aucune pénalité, un Luc Léger complet.",
-     o:"Parcours entre 1 min et 1 min 10, palier 8 au Luc Léger."},
-    {t:"5 · Dernière ligne droite", a: affA, b: exam,
-     p:"Deux fois moins d'entraînement pour arriver en forme : un parcours, une course courte, krav maga et jujitsu en douceur. Repos complet les 2 jours avant.",
-     o:"Arriver reposée et confiante."}
-  ];
-  PHASES = P;
-  const fd = d => d.toLocaleDateString("fr-FR", {day:"numeric", month:"short"});
-  $("phases").innerHTML = P.map(ph => {
+  const now = new Date(), fd = d => d.toLocaleDateString("fr-FR", {day: "numeric", month: "short"});
+  PHASES = mesos().map(m => ({t: `${m.i} · ${m.n}`, a: new Date(new Date(m.A).setHours(0, 0, 0, 0)), b: new Date(new Date(m.B).setHours(23, 59, 59, 0)), p: m.but, o: (m.i >= 1 && m.i <= 4) ? "3 semaines de travail, puis 1 semaine allégée avec tests." : (m.i === 0 ? "Tests de départ." : "Volume réduit, intensité gardée.")}));
+  if (!$("phases")) return;
+  $("phases").innerHTML = PHASES.map(ph => {
     const cls = now > ph.b ? "past" : (now >= ph.a && now <= ph.b) ? "now" : "";
     return `<div class="ph ${cls}"><div class="row between"><b style="font-family:var(--display);font-size:1.2rem">${ph.t}</b>${cls === "now" ? `<span class="here">Tu es ici</span>` : ""}</div>
-      <span class="dates">du ${fd(ph.a)} au ${fd(ph.b)}</span><p>${ph.p}</p><p><b>Objectif :</b> ${ph.o}</p></div>`;
+      <span class="dates">du ${fd(ph.a)} au ${fd(ph.b)}</span><p>${ph.p}</p><p class="note">${ph.o}</p></div>`;
   }).join("");
 }
 $("opt-age").value = String(lsGet("phm-age2", lsGet("phm-age", true) ? 1 : 0));
@@ -1560,7 +1582,8 @@ $("hist-seg").addEventListener("click", e => { const b = e.target.closest("[data
 const MES = {
   suspension: {label:"Suspension à la barre", unit:"s", goal:"15 s requises · viser 30 s"},
   pompes: {label:"Pompes réglementaires d'affilée", unit:"", goal:"3 requises · viser 8"},
-  poutre: {label:"Poutre : hauteur maîtrisée", unit:"cm", goal:"10 traversées sans les mains · objectif 100 cm"}
+  poutre: {label:"Poutre : hauteur maîtrisée", unit:"cm", goal:"10 traversées sans les mains · objectif 100 cm"},
+  course: {label:"Course sans t'arrêter", unit:"km", goal:"objectif 10 km fin décembre"}
 };
 $("mes-date").value = todayKey();
 $("mes-form").addEventListener("submit", async e => {
@@ -1664,7 +1687,7 @@ Meilleurs temps par atelier : ${best.map((v, i) => `${TIMED[i].short} ${v == nul
 Luc Léger :\n${l}
 Tests :\n${m}
 Vitesses Luc Léger : palier 1 = 8 km/h, +0,5 km/h par palier (palier 5 = 10 km/h, palier 6 = 10,5, palier 8 = 11,5, palier 10 = 12,5).${luc.length ? ` Son dernier palier atteint correspond à ${fr(speedOf(luc[luc.length - 1].palier))} km/h.` : ""}
-Recommandations déjà calculées par l'appli :\n${recos().map(r => "- " + r.t + " : " + r.d).join("\n")}`;
+Bloc actuel : ${(() => { const m = mesoAt(new Date()); return m.n + (m.deload ? ' (semaine allégée + tests)' : ''); })()}.\nSon planning (semaine ${weekType(new Date())} en cours) : ${planEmpty() ? 'pas encore rempli' : ['A', 'B'].map(w => 'semaine ' + w + ' : ' + [1,2,3,4,5,6,7].map(d => ((plan()[w] || {})[d] || []).map(x => DAYS[d] + ' ' + (x.h || '') + ' ' + (TYPES[x.t] || {l: x.t}).l).join(', ')).filter(Boolean).join(' ; ')).join(' | ')}.\nObjectifs datés : ${objectifs().map(o => o.label + ' (avant le ' + o.due + ', ' + (o.ok ? 'atteint' : 'pas encore') + ')').join(' ; ')}.\nRecommandations déjà calculées par l'appli :\n${recos().map(r => "- " + r.t + " : " + r.d).join("\n")}`;
 }
 const RULES = `Règles officielles (descriptif 2025, femmes) :
 - Note de sport = moyenne de 2 notes sur 20 : parcours d'habileté motrice (PHM) et Luc Léger. Sous 7/20 à l'une : éliminée. +1 point si 30-40 ans.
@@ -1826,6 +1849,293 @@ const RECORD_MOTS = [
 ];
 const recordMot = () => RECORD_MOTS[Math.floor(Math.random() * RECORD_MOTS.length)];
 
+/* ======================= PROGRAMME (blocs, planning A/B, objectifs, lieux, agenda) ======================= */
+const DAYS = ["", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"];
+const TYPES = {
+  course_end: {l: "Course · endurance", ic: "run"},
+  course_frac: {l: "Course · fractionné", ic: "run"},
+  course_rec: {l: "Course · footing court", ic: "run"},
+  parcours: {l: "Parcours à Fitness Park", ic: "fp"},
+  luc: {l: "Navettes / Luc Léger", ic: "run"},
+  gym: {l: "Gym (club)", ic: "club"},
+  freeletics: {l: "Freeletics", ic: "fp"},
+  krav: {l: "Krav maga", ic: "club"},
+  jjb: {l: "Jujitsu", ic: "club"},
+  ensemble: {l: "Ensemble avec Rémy", ic: "daily"},
+  repos: {l: "Repos", ic: "daily"}
+};
+const ymd = d => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+const parseDay = s => new Date(s + "T12:00:00");
+function mesos(){
+  const exam = S.exam || "2027-03-29";
+  return [
+    {n: "Évaluation", a: "2026-11-09", b: "2026-11-15", but: "Faire tes tests de départ (parcours, Luc Léger, suspension, pompes, poutre) pour caler tout le plan sur ton niveau."},
+    {n: "Fondations", a: "2026-11-16", b: "2026-12-13", but: "Construire l'endurance de base et apprendre chaque atelier proprement, sans forcer. Poutre : paliers 1 à 3 du plan vertige."},
+    {n: "Développement 1", a: "2026-12-14", b: "2027-01-10", but: "Allonger la course jusqu'à 10 km et commencer la vitesse (fractionné court 30/30). Pas de pause pendant les fêtes."},
+    {n: "Développement 2", a: "2027-01-11", b: "2027-02-07", but: "Tenir plus longtemps vite (fractionné long) et enchaîner les ateliers fatiguée. Poutre à 1 m."},
+    {n: "Spécifique concours", a: "2027-02-08", b: "2027-03-07", but: "S'entraîner comme le jour J : parcours, 30 min de repos, Luc Léger. Objectif zéro pénalité ; passage sur le vrai parcours."},
+    {n: "Affûtage", a: "2027-03-08", b: exam, but: "Garder la vitesse, réduire le volume, arriver reposée. Repos complet les 2 jours avant."}
+  ].map((m, i) => Object.assign(m, {i, A: parseDay(m.a), B: parseDay(m.b)}));
+}
+function mesoAt(d){
+  const M = mesos(), t = new Date(d); t.setHours(12, 0, 0, 0);
+  const m = M.find(x => t >= x.A && t <= new Date(x.B.getTime() + 43200000)) || (t < M[0].A ? M[0] : M[M.length - 1]);
+  const wk = Math.max(0, Math.round((weekStart(t) - weekStart(m.A)) / (7 * 86400000)));
+  const deload = m.i >= 1 && m.i <= 4 && wk === 3;
+  return Object.assign({}, m, {wk, deload});
+}
+// planning A/B
+const PLAN_DEFAULT = {refA: "2026-11-09", A: {}, B: {}};
+function plan(){ return S.plan || PLAN_DEFAULT; }
+function weekType(d){
+  const p = plan(), diff = Math.round((weekStart(d) - weekStart(parseDay(p.refA))) / (7 * 86400000));
+  return ((diff % 2) + 2) % 2 === 0 ? "A" : "B";
+}
+const dow = d => ((new Date(d).getDay() + 6) % 7) + 1;
+function slotsOn(d){ const p = plan(), w = weekType(d); return ((p[w] || {})[dow(d)] || []).slice().sort((a, b) => (a.h || "").localeCompare(b.h || "")); }
+const planEmpty = () => { const p = plan(); return !["A", "B"].some(w => Object.values(p[w] || {}).some(l => l && l.length)); };
+// palier du plan vertige d'après la dernière hauteur notée
+function poutrePalier(){
+  const h = lastMes("poutre");
+  if (h == null || h <= 0) return {p: 1, t: "palier 1 : ligne au sol puis poutre posée au sol"};
+  if (h < 50) return {p: 2, t: "palier 2 : poutre basse (30 à 50 cm) avec tapis"};
+  if (h < 80) return {p: 3, t: "palier 3 : 60 à 80 cm avec tapis épais"};
+  if (h < 100) return {p: 4, t: "palier 4 : 1 m avec gros tapis empilés"};
+  return {p: 5, t: "palier 5 : 1 m sans les tapis surélevés"};
+}
+// contenu de chaque séance selon le bloc et la semaine
+function session(type, d){
+  const m = mesoAt(d), w = Math.min(m.wk, 3), L = [];
+  let lieu = "";
+  const warm = "Échauffement : 15 min de footing + 3 accélérations. Retour au calme : 10 min très lent.";
+  if (type === "course_end"){
+    const tab = [[30], [30, 35, 40, 25], [45, 50, 60, 30], [45, 45, 50, 30], [40, 40, 40, 25], [35, 30, 20]][m.i];
+    const min = tab[Math.min(m.wk, tab.length - 1)];
+    lieu = "Dehors (Citadelle, canal…) ou tapis de course s'il pleut";
+    if (m.i === 2 && m.wk === 2) L.push("Objectif du mois : <b>10 km sans t'arrêter</b>, allure facile. Note ta distance dans Progrès › Tests à côté.");
+    else L.push(`<b>${min} min</b> de course à allure facile : tu dois pouvoir parler en courant.`);
+    if (m.deload) L.push("Semaine allégée : on récupère pour progresser.");
+  } else if (type === "course_frac" || type === "luc"){
+    lieu = "Citadelle (mesure 20 m pour les navettes) ou tapis de course s'il pleut";
+    const test = m.i === 0 || m.deload;
+    if (test) L.push("<b>Test Luc Léger complet</b> avec l'appli (départ palier 1). Le résultat s'enregistre tout seul.");
+    else {
+      const F = [null,
+        ["6 × (1 min vite / 1 min lent)", "8 × (1 min vite / 1 min lent)", "10 × (1 min vite / 1 min lent)"],
+        ["2 séries de 8 × (30 s vite / 30 s trot), 3 min entre les séries", "2 × 10 × (30 s / 30 s)", "3 × 8 × (30 s / 30 s)"],
+        ["6 × (1 min 30 vite / 1 min lent)", "5 × (2 min vite / 1 min lent)", "4 × (3 min vite / 1 min 30 lent)"],
+        ["Navettes de 20 m avec l'appli au palier 8 : 3 × 2 min (2 min de repos), puis 8 × (30 s / 30 s)", "Navettes au palier 8 : 4 × 2 min, puis 10 × (30 s / 30 s)", "Navettes au palier 9 : 3 × 3 min, puis 8 × (30 s / 30 s)"],
+        ["2 × 8 × (30 s / 30 s) vite", "1 × 10 × (30 s / 30 s)", "6 × (30 s / 30 s) léger, au plus tard 4 jours avant les épreuves"]][m.i];
+      L.push(`<b>${F[Math.min(m.wk, F.length - 1)]}</b>`);
+      L.push("« Vite » = la vitesse de ton palier visé (palier 8 = 11,5 km/h), ou un peu plus. « Lent » = trot.");
+      L.push(warm);
+    }
+  } else if (type === "course_rec"){
+    lieu = "Dehors";
+    L.push(`<b>${m.i === 5 ? 20 : 25} min</b> très facile, puis 4 lignes droites de 80 m en accélérant.`);
+  } else if (type === "parcours"){
+    lieu = "Fitness Park Lille, zone cross-training (plan dans Ateliers › À Fitness Park)";
+    const P = [
+      ["<b>TEST de départ</b> : sac + parcours complet chronométré, 30 min de repos, puis Luc Léger complet."],
+      ["Technique : chaque atelier 2 fois au calme, puis 2 parcours chronométrés.", "Technique + 2 parcours chronométrés.", "3 parcours chronométrés, 4 min de repos entre.", "<b>Test</b> : 2 parcours chronométrés, on garde le meilleur."],
+      ["3 parcours chronométrés, 4 min de repos entre.", "3 parcours + 10 min sur ton atelier le plus lent.", "3 parcours chronométrés.", "<b>Test</b> : parcours chronométré + Luc Léger."],
+      ["Parcours, 2 min de repos, parcours (enchaîner fatiguée), 2 fois.", "Idem, en visant zéro pénalité.", "3 parcours + 10 min sur ton atelier le plus lent.", "<b>Test</b> : parcours chronométré + Luc Léger."],
+      ["<b>Simulation concours</b> : sac + parcours, 30 min de repos, Luc Léger complet.", "3 parcours sans aucune pénalité.", "<b>Simulation concours</b>.", "<b>Test</b> : parcours + Luc Léger."],
+      ["<b>Dernière simulation concours</b> (au moins 10 jours avant les épreuves).", "2 parcours tranquilles, technique.", "1 parcours léger, puis repos."]][m.i];
+    L.push(P[Math.min(m.wk, P.length - 1)]);
+    L.push("Chronomètre avec l'onglet Parcours.");
+  } else if (type === "gym"){
+    lieu = "Club de gymnastique";
+    L.push("Ton cours, sans rien changer.");
+    const pp = poutrePalier();
+    L.push(`Si c'est possible, avant ou après : <b>10 traversées de poutre</b>, ${pp.t}.`);
+    const s = lastMes("suspension"); if (s == null || s < 30) L.push("Et 3 suspensions à la barre, le plus longtemps possible.");
+  } else if (type === "freeletics"){
+    lieu = "Où tu fais d'habitude";
+    L.push(m.deload ? "Ta séance habituelle, en plus court (environ −30 %) : semaine allégée." : "Ta séance habituelle.");
+    L.push("Termine par 3 suspensions à la barre et 1 min de gainage.");
+  } else if (type === "krav" || type === "jjb"){
+    L.push("Ton cours, sans rien changer : c'est aussi du cardio et du gainage. Pense à bien boire.");
+  } else if (type === "ensemble"){
+    L.push("Avec Rémy : le bon moment pour chronométrer un parcours ou un Luc Léger.");
+  } else if (type === "repos"){
+    L.push("Repos complet. C'est pendant le repos que le corps progresse.");
+  }
+  return {lieu, L, m};
+}
+function slotHTML(s, d, compact){
+  const T = TYPES[s.t] || {l: s.t, ic: "daily"}, x = session(s.t, d);
+  return `<div class="wk ${T.ic}"><b>${s.h ? s.h.replace(":", " h ") + " · " : ""}${T.l}</b>${x.lieu ? `<p class="note" style="margin:0">${esc(x.lieu)}</p>` : ""}${compact ? "" : x.L.map(l => `<p>${l}</p>`).join("")}</div>`;
+}
+function renderToday(){
+  const el = $("today"); if (!el) return;
+  const now = new Date(), tomorrow = addDays(now, 1), m = mesoAt(now);
+  const head = `<div class="row between"><h2>Aujourd'hui</h2><span class="note">${now.toLocaleDateString("fr-FR", {weekday: "long", day: "numeric", month: "long"})} · semaine ${weekType(now)}</span></div>
+    <p class="note">Bloc <b style="color:var(--ink)">${m.n}</b>${m.deload ? " · semaine allégée + tests" : ""}</p>`;
+  if (planEmpty()){
+    el.innerHTML = head + `<p>Pour que l'appli te dise chaque jour quoi faire, remplis ton planning semaine A / semaine B (2 minutes).</p><button type="button" class="btn small" data-goto="plan">Remplir mon planning</button>`;
+    return;
+  }
+  const sl = slotsOn(now), sl2 = slotsOn(tomorrow);
+  const routine = sl.some(s => s.t === "repos") ? "" : `<div class="wk daily"><b>Routine 10 min (n'importe quand)</b><p>3 suspensions à la barre, 3 × 5 pompes, mobilité des poignets.</p></div>`;
+  el.innerHTML = head + `<div class="week">${sl.length ? sl.map(s => slotHTML(s, now)).join("") : `<div class="wk daily"><b>Pas de séance prévue</b><p>Repos, ou la routine 10 min si tu as envie.</p></div>`}${routine}</div>
+    <p class="note"><b style="color:var(--ink)">Demain :</b> ${sl2.length ? sl2.map(s => (s.h ? s.h.replace(":", " h ") + " " : "") + (TYPES[s.t] || {l: s.t}).l).join(" · ") : "rien de prévu"}</p>`;
+}
+// objectifs datés
+function bestPhm(){ return S.essais.length ? Math.min(...S.essais.map(e => e.total)) / 1000 : null; }
+function bestLuc(){ return S.luc.length ? Math.max(...S.luc.map(e => e.palier + e.sec / 60)) : null; }
+function bestMes(t){ const l = S.mesures.filter(x => x.type === t).map(x => x.value); return l.length ? Math.max(...l) : null; }
+function firstLuc(){ const l = sortedBy(S.luc); return l.length ? l[0].palier + l[0].sec / 60 : null; }
+function objectifs(){
+  const O = (due, label, ok, val) => ({due, label, ok: !!ok, val});
+  const ph = bestPhm(), lu = bestLuc(), f = firstLuc();
+  const mes = t => bestMes(t);
+  const fmtV = (v, u) => v == null ? "pas encore mesuré" : fr(Math.round(v * 10) / 10) + (u ? " " + u : "");
+  return [
+    O("2026-11-15", "Tests de départ faits (parcours, Luc Léger, au moins un test à côté)", S.essais.length && S.luc.length && S.mesures.length, ""),
+    O("2026-12-13", "Courir 8 km sans t'arrêter", mes("course") >= 8, fmtV(mes("course"), "km")),
+    O("2026-12-13", "Luc Léger : +1 palier par rapport à ton test de départ", f != null && lu != null && lu >= f + 1, lu != null ? palTxt(Math.floor(lu), Math.round((lu % 1) * 60)) : "pas encore testé"),
+    O("2026-12-13", "Suspension 20 s · 5 pompes · poutre à 60 cm", mes("suspension") >= 20 && mes("pompes") >= 5 && mes("poutre") >= 60, [fmtV(mes("suspension"), "s"), fmtV(mes("pompes"), "pompes"), fmtV(mes("poutre"), "cm")].join(" · ")),
+    O("2026-12-31", "Courir 10 km sans difficulté", mes("course") >= 10, fmtV(mes("course"), "km")),
+    O("2027-01-10", "Luc Léger palier 6 · parcours sous 1:30", lu >= 6 && ph != null && ph < 90, `${lu != null ? palTxt(Math.floor(lu), Math.round((lu % 1) * 60)) : "—"} · ${ph != null ? fmtS(Math.floor(ph)) : "—"}`),
+    O("2027-01-10", "Poutre à 80 cm sans les mains", mes("poutre") >= 80, fmtV(mes("poutre"), "cm")),
+    O("2027-02-07", "Luc Léger palier 7 · parcours sous 1:20", lu >= 7 && ph != null && ph < 80, `${lu != null ? palTxt(Math.floor(lu), Math.round((lu % 1) * 60)) : "—"} · ${ph != null ? fmtS(Math.floor(ph)) : "—"}`),
+    O("2027-02-07", "Poutre à 1 m · suspension 30 s · 8 pompes", mes("poutre") >= 100 && mes("suspension") >= 30 && mes("pompes") >= 8, [fmtV(mes("poutre"), "cm"), fmtV(mes("suspension"), "s"), fmtV(mes("pompes"), "pompes")].join(" · ")),
+    O("2027-03-07", "Luc Léger palier 7 + 30 s · parcours sous 1:12", lu >= 7.5 && ph != null && ph < 72, `${lu != null ? palTxt(Math.floor(lu), Math.round((lu % 1) * 60)) : "—"} · ${ph != null ? fmtS(Math.floor(ph)) : "—"}`),
+    O("2027-03-07", "Un parcours sans aucune pénalité · un passage sur le vrai parcours (Saint-Quentin)", S.essais.some(e => !e.pen) && S.essais.some(e => /Saint-Quentin/.test(e.lieu || "")), ""),
+    O(S.exam || "2027-03-29", "Jour J : Luc Léger palier 8 · parcours entre 1:00 et 1:10", lu >= 8 && ph != null && ph < 71, `${lu != null ? palTxt(Math.floor(lu), Math.round((lu % 1) * 60)) : "—"} · ${ph != null ? fmtS(Math.floor(ph)) : "—"}`)
+  ];
+}
+function objHTML(o){
+  const due = parseDay(o.due), late = !o.ok && new Date() > addDays(due, 1);
+  const tag = o.ok ? `<span class="verdict ok">atteint</span>` : late ? `<span class="verdict slow">en retard</span>` : `<span class="verdict fast">avant le ${due.toLocaleDateString("fr-FR", {day: "numeric", month: "short"})}</span>`;
+  return `<li class="${o.ok ? "done" : ""}"><div><div class="s-t">${esc(o.label)}</div>${o.val ? `<div class="s-d">Où tu en es : ${esc(o.val)}</div>` : ""}</div><span class="s-a">${tag}</span></li>`;
+}
+function renderObjectifs(){
+  const O = objectifs();
+  if ($("objectifs")) $("objectifs").innerHTML = O.map(objHTML).join("");
+  const next = O.filter(o => !o.ok).slice(0, 2);
+  if ($("home-obj")) $("home-obj").innerHTML = next.length ? next.map(objHTML).join("") : `<li><div class="s-t">Tous les objectifs sont atteints. Bravo !</div></li>`;
+}
+// éditeur de planning
+let planWk = "A";
+function savePlan(p){ S.plan = p; lsSet("phm-plan", p); if (FS) FS.setDoc(FS.doc(FS.db, "equipes", team, "reglages", "planning"), p).catch(writeErr); renderPlanning(); renderToday(); renderAgendaLinks(); }
+function renderPlanning(){
+  if (!$("planning")) return;
+  const p = plan();
+  $("plan-ref").value = weekType(parseDay("2026-11-09"));
+  document.querySelectorAll("#plan-wk [data-wk]").forEach(b => b.setAttribute("aria-pressed", b.dataset.wk === planWk));
+  const W = p[planWk] || {};
+  $("planning").innerHTML = `<ul class="steps">${[1, 2, 3, 4, 5, 6, 7].map(d => {
+    const l = (W[d] || []).slice().sort((a, b) => (a.h || "").localeCompare(b.h || ""));
+    return `<li><div style="flex:1"><div class="s-t" style="text-transform:capitalize">${DAYS[d]}</div><div class="chips" style="margin-top:4px">${l.length ? l.map((s, i) => `<span class="chip">${s.h ? esc(s.h) + " · " : ""}${esc((TYPES[s.t] || {l: s.t}).l)} <button type="button" class="ghost tiny" data-slot-del="${d}:${esc(s.t)}:${esc(s.h || "")}" aria-label="Retirer" style="padding:0 6px;margin-left:4px">×</button></span>`).join("") : `<span class="note">rien</span>`}</div></div></li>`;
+  }).join("")}</ul>`;
+}
+$("slot-type").innerHTML = Object.entries(TYPES).map(([k, t]) => `<option value="${k}">${t.l}</option>`).join("");
+$("plan-wk").addEventListener("click", e => { const b = e.target.closest("[data-wk]"); if (b){ planWk = b.dataset.wk; renderPlanning(); } });
+$("slot-add").addEventListener("click", () => {
+  const p = JSON.parse(JSON.stringify(plan())), d = $("slot-day").value;
+  p[planWk] = p[planWk] || {}; p[planWk][d] = p[planWk][d] || [];
+  p[planWk][d].push({t: $("slot-type").value, h: $("slot-time").value || ""});
+  savePlan(p);
+});
+$("planning").addEventListener("click", e => {
+  const b = e.target.closest("[data-slot-del]"); if (!b) return;
+  const [d, t, h] = b.dataset.slotDel.split(":").length > 3 ? (() => { const a = b.dataset.slotDel.split(":"); return [a[0], a[1], a.slice(2).join(":")]; })() : b.dataset.slotDel.split(":");
+  const p = JSON.parse(JSON.stringify(plan())), l = (p[planWk] || {})[d] || [];
+  const i = l.findIndex(s => s.t === t && (s.h || "") === h); if (i >= 0) l.splice(i, 1);
+  savePlan(p);
+});
+$("plan-ref").addEventListener("change", () => {
+  const p = JSON.parse(JSON.stringify(plan()));
+  p.refA = $("plan-ref").value === "A" ? "2026-11-09" : "2026-11-16";
+  savePlan(p);
+});
+// agenda
+const icsDate = (d, h) => ymd(d).replace(/-/g, "") + "T" + (h || "18:00").replace(":", "") + "00";
+function agendaSlots(){
+  const p = plan(), out = [], start = weekStart(Date.now()), exam = parseDay(S.exam || "2027-03-29");
+  ["A", "B"].forEach(w => Object.entries(p[w] || {}).forEach(([d, l]) => (l || []).forEach(s => {
+    if (s.t === "repos") return;
+    let first = addDays(start, Number(d) - 1);
+    if (weekType(first) !== w) first = addDays(first, 7);
+    if (first < new Date(new Date().setHours(0, 0, 0, 0))) first = addDays(first, 14);
+    out.push({s, w, first, exam});
+  })));
+  return out;
+}
+function icsText(){
+  const alarm = Number($("alarm-min").value) || 30, url = location.origin + location.pathname;
+  const esc2 = t => String(t).replace(/[\;,]/g, m => "\\" + m).replace(/\n/g, "\\n");
+  const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Parcours//FR", "CALSCALE:GREGORIAN", "X-WR-CALNAME:Entraînement concours"];
+  agendaSlots().forEach(({s, w, first, exam}, i) => {
+    const T = TYPES[s.t] || {l: s.t}, end = new Date(parseDay(ymd(first)).getTime());
+    const [hh, mm] = (s.h || "18:00").split(":").map(Number), dur = s.t.startsWith("course") ? 60 : 90;
+    const eh = new Date(2000, 0, 1, hh, mm + dur);
+    lines.push("BEGIN:VEVENT", `UID:parcours-${w}-${i}-${ymd(first)}@remvan5917.github.io`, `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, "").slice(0, 15)}Z`,
+      `DTSTART:${icsDate(first, s.h)}`, `DTEND:${ymd(first).replace(/-/g, "")}T${String(eh.getHours()).padStart(2, "0")}${String(eh.getMinutes()).padStart(2, "0")}00`,
+      `RRULE:FREQ=WEEKLY;INTERVAL=2;UNTIL=${ymd(exam).replace(/-/g, "")}T235959`,
+      `SUMMARY:${esc2(T.l + " (semaine " + w + ")")}`, `DESCRIPTION:${esc2("Le contenu exact de la séance est dans l'appli : " + url)}`,
+      "BEGIN:VALARM", "ACTION:DISPLAY", `DESCRIPTION:${esc2(T.l)}`, `TRIGGER:-PT${alarm}M`, "END:VALARM", "END:VEVENT");
+  });
+  lines.push("END:VCALENDAR");
+  return lines.join("\r\n");
+}
+$("ics-go").addEventListener("click", async () => {
+  if (planEmpty()){ setSync("Remplis d'abord ton planning ci-dessus.", true); return; }
+  const blob = new Blob([icsText()], {type: "text/calendar"}), file = new File([blob], "entrainement-concours.ics", {type: "text/calendar"});
+  if (IS_IOS){
+    try { if (navigator.canShare && navigator.canShare({files: [file]})){ await navigator.share({files: [file], title: "Entraînement concours"}); return; } } catch(e){ if (e && e.name === "AbortError") return; }
+    location.href = URL.createObjectURL(blob); return;
+  }
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "entrainement-concours.ics"; document.body.appendChild(a); a.click(); a.remove();
+  setSync("Fichier créé : ouvre-le (Téléchargements) pour l'ajouter à ton agenda.");
+});
+function renderAgendaLinks(){
+  const el = $("gcal-links"); if (!el) return;
+  if (planEmpty()){ el.innerHTML = `<li><div class="s-d">Remplis d'abord ton planning.</div></li>`; return; }
+  const url = location.origin + location.pathname;
+  el.innerHTML = agendaSlots().map(({s, w, first, exam}) => {
+    const T = TYPES[s.t] || {l: s.t}, [hh, mm] = (s.h || "18:00").split(":").map(Number), dur = s.t.startsWith("course") ? 60 : 90;
+    const eh = new Date(2000, 0, 1, hh, mm + dur), endS = ymd(first).replace(/-/g, "") + "T" + String(eh.getHours()).padStart(2, "0") + String(eh.getMinutes()).padStart(2, "0") + "00";
+    const href = "https://calendar.google.com/calendar/render?action=TEMPLATE&text=" + encodeURIComponent(T.l + " (semaine " + w + ")") + "&dates=" + icsDate(first, s.h) + "/" + endS + "&ctz=Europe/Paris&recur=" + encodeURIComponent("RRULE:FREQ=WEEKLY;INTERVAL=2;UNTIL=" + ymd(exam).replace(/-/g, "") + "T235959Z") + "&details=" + encodeURIComponent("Le contenu exact de la séance est dans l'appli : " + url);
+    return `<li><div><div class="s-t">${T.l}</div><div class="s-d">semaine ${w} · ${DAYS[dow(first)]} ${s.h ? s.h.replace(":", " h ") : ""}</div></div><a class="ghost tiny s-a" style="text-decoration:none;border:1px solid var(--line);border-radius:8px;padding:4px 10px;color:var(--ink)" href="${href}" target="_blank" rel="noopener">Ajouter</a></li>`;
+  }).join("");
+}
+// lieux
+const LIEUX_DATA = {
+  club: {n: "Club de gymnastique (salle de compétition)", src: "Salle de gymnastique de compétition : tout le matériel d'agrès.",
+    items: [["poutre", "Poutres basses et hautes (réglables)"], ["barres", "Barre fixe et barres asymétriques"], ["caisson", "Caissons / plinths réglables (jusqu'à 1,20 m)"], ["tapis", "Gros tapis de réception et tapis épais"], ["praticable", "Praticable (grand tapis de sol)"], ["cerceaux", "Cerceaux"], ["bancs", "Bancs et espaliers"]],
+    work: "Poutre (plan vertige), barrières à 1,20 m, échelle et suspension, haies basses, cerceaux, ramper, appuis sur caisson de 50 cm. Pendant tes cours on ne change rien : avant ou après, si c'est possible."},
+  fp: {n: "Fitness Park Lille (Le 31), zone cross-training", src: "D'après le site du club : kettlebells 4 à 24 kg, box jump, rameur, air bike, SkiErg, TRX, sled, wall balls, tapis de course. Zone cross-training incluse dans ton abonnement.",
+    items: [["rig", "Barres de traction (rig de la zone cross-training)"], ["box", "Caisses de saut (box jump)"], ["kb", "Kettlebells (jusqu'à 24 kg)"], ["sandbag", "Sac lesté / sandbag 25 kg"], ["tapisol", "Tapis de sol"], ["tapiscourse", "Tapis de course"], ["espace", "Espace libre d'environ 15 m"]],
+    work: "Le parcours complet reconstitué (sauf la poutre à 1 m), le fractionné sur tapis de course s'il pleut, la suspension, les pompes, le gainage."},
+  citadelle: {n: "Citadelle de Lille (parcours sportif, 47 allée du Train de Loos)", src: "D'après les sites de street workout : barres de traction, barres parallèles, échelle horizontale, barres basses.",
+    items: [["traction", "Barres de traction"], ["echelle", "Échelle horizontale (comme l'atelier 8)"], ["paralleles", "Barres parallèles"], ["basses", "Barres basses (pompes)"], ["allees", "Grandes allées pour courir"], ["navette", "Endroit plat pour mesurer 20 m (navettes)"]],
+    work: "Footing, fractionné, Luc Léger (20 m mesurés), échelle horizontale, suspension, pompes."},
+  stquentin: {n: "Lycée professionnel sécurité de Saint-Quentin", src: "Le vrai parcours de police, grâce à une ancienne collègue.",
+    items: [["parcours", "Le parcours officiel complet"]],
+    work: "Un passage de temps en temps (bloc Spécifique) pour comparer avec tes temps de Fitness Park."}
+};
+function saveLieux(o){ S.lieux = o; lsSet("phm-lieux", o); if (FS) FS.setDoc(FS.doc(FS.db, "equipes", team, "reglages", "lieux"), o).catch(writeErr); renderLieux(); }
+function renderLieux(){
+  const el = $("lieux"); if (!el) return;
+  const st = S.lieux || {};
+  el.innerHTML = Object.entries(LIEUX_DATA).map(([k, L]) => `<details class="more"><summary>${L.n}</summary><div class="in">
+    <p class="note">${L.src}</p>
+    <ul class="steps">${L.items.map(([ik, il]) => { const v = (st[k] || {})[ik]; return `<li class="${v === false ? "done" : ""}"><input type="checkbox" data-lieu="${k}:${ik}" ${v === true ? "checked" : ""} aria-label="Vérifié : ${esc(il)}"><div><div class="s-t">${il}</div><div class="s-d">${v === true ? "vérifié sur place" : v === false ? "absent" : "à vérifier sur place"}</div></div>${v !== false ? `<button type="button" class="ghost tiny s-a" data-lieu-no="${k}:${ik}">Absent</button>` : `<button type="button" class="ghost tiny s-a" data-lieu-reset="${k}:${ik}">Remettre</button>`}</li>`; }).join("")}</ul>
+    <p><b>On y travaille :</b> ${L.work}</p></div></details>`).join("");
+}
+$("lieux").addEventListener("change", e => { const c = e.target.closest("[data-lieu]"); if (!c) return; const [k, ik] = c.dataset.lieu.split(":"); const o = JSON.parse(JSON.stringify(S.lieux || {})); o[k] = o[k] || {}; o[k][ik] = c.checked ? true : undefined; saveLieux(o); });
+$("lieux").addEventListener("click", e => {
+  const n = e.target.closest("[data-lieu-no],[data-lieu-reset]"); if (!n) return;
+  const [k, ik] = (n.dataset.lieuNo || n.dataset.lieuReset).split(":"); const o = JSON.parse(JSON.stringify(S.lieux || {})); o[k] = o[k] || {};
+  if (n.dataset.lieuNo) o[k][ik] = false; else delete o[k][ik];
+  const open = n.closest("details"); saveLieux(o); if (open){ const d = [...$("lieux").querySelectorAll("details")].find(x => x.querySelector("summary").textContent === open.querySelector("summary").textContent); if (d) d.open = true; }
+});
+function renderPlanAll(){ renderToday(); renderObjectifs(); renderPlanning(); renderAgendaLinks(); renderLieux(); }
+
+
 /* ======================= INSTALLATION ======================= */
 let deferredInstall = null;
 const isStandalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
@@ -1889,7 +2199,7 @@ $("theme-seg").addEventListener("click", e => { const b = e.target.closest("[dat
 applyTheme(lsGet("phm-theme", "auto"));
 
 /* ======================= DÉMARRAGE ======================= */
-function renderAll(){ renderLove(); renderHome(); renderSplits(); renderRecos(); renderWeek(); if (!$("v-progres").hidden) renderProg(); }
+function renderAll(){ renderLove(); renderHome(); renderPlanAll(); renderSplits(); renderRecos(); renderWeek(); if (!$("v-progres").hidden) renderProg(); }
 setStatus(); renderChrono(); renderSeance(); renderLucBareme(); renderAteliers(); renderAll();
 show((location.hash || "#accueil").slice(1), true);
 initStore();
