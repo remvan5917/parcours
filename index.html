@@ -2245,6 +2245,8 @@ const TYPES = {
   repos: {l: "Repos", ic: "daily"}
 };
 // nom personnalisé d'un type de séance (gardé dans le planning privé, pas dans le code public)
+// prénom affiché à côté du logo (gardé dans le planning privé, pas dans le code public)
+const prenom = () => ((plan().labels || {}).prenom) || "";
 const typeLabel = t => ((plan().labels || {})[t]) || (TYPES[t] || {l: t}).l;
 const ymd = d => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
 const parseDay = s => new Date(s + "T12:00:00");
@@ -2564,7 +2566,7 @@ function renderTrainNav(v){
   document.querySelectorAll(".trainnav").forEach(n => n.innerHTML = TRAIN.map(k => `<button type="button" data-goto="${k}" aria-current="${k === v}">${TRAIN_LABELS[k]}</button>`).join(""));
 }
 function chrome(v){
-  $("top-title").textContent = TITLES[v] || "Athéna";
+  $("top-title").textContent = v === "accueil" ? (prenom() || "Athéna") : (TITLES[v] || "Athéna");
   const sub = v === "ateliers" || v === "reglages";
   $("top-back").hidden = !sub;
   document.querySelector(".topbar").classList.toggle("sub", sub);
@@ -2668,6 +2670,7 @@ function nextSession(){
   return null;
 }
 function renderHello(){
+  if (!$("v-accueil").hidden) $("top-title").textContent = prenom() || "Athéna";
   const now = new Date(), h = now.getHours(), dl = daysLeft(), m = mesoAt(now);
   $("topcount").textContent = dl != null && dl >= 0 ? (dl === 0 ? "Jour J" : "J−" + dl) : "";
   const a = parseDay("2026-11-09").getTime(), b = parseDay(S.exam || "2027-03-29").getTime();
