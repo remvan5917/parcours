@@ -377,6 +377,9 @@ footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padd
 .frise .flags i{position:absolute;top:0;width:10px;height:10px;transform:translateX(-50%) rotate(45deg);background:var(--warn);border-radius:2px}
 .frise .flags i.ok{background:var(--ok)} .frise .flags i.jj{background:var(--cone);width:14px;height:14px}
 .frise .ends{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted)}
+.mcell.b1{box-shadow:inset 0 -3px 0 var(--run)} .mcell.b2{box-shadow:inset 0 -3px 0 var(--mat)} .mcell.b3{box-shadow:inset 0 -3px 0 var(--gym)} .mcell.b4{box-shadow:inset 0 -3px 0 var(--cone)} .mcell.b5{box-shadow:inset 0 -3px 0 var(--warn)}
+.mcell.today{outline:2px solid var(--ink);outline-offset:-2px}
+.bb1{border-bottom:3px solid var(--run)} .bb2{border-bottom:3px solid var(--mat)} .bb3{border-bottom:3px solid var(--gym)} .bb4{border-bottom:3px solid var(--cone)} .bb5{border-bottom:3px solid var(--warn)}
 .b0{background:var(--floor)} .b1{background:var(--run-soft)} .b2{background:var(--mat-soft)} .b3{background:var(--gym-soft)} .b4{background:var(--cone-soft)} .b5{background:var(--warn-soft)}
 .calnav{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .calnav h4{font-size:1.3rem;letter-spacing:0;text-transform:capitalize;font-weight:700;color:var(--ink)}
@@ -390,7 +393,7 @@ footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padd
 .mcell .pts i.run{background:var(--run)} .mcell .pts i.fp{background:var(--cone)} .mcell .pts i.club{background:var(--gym)} .mcell .pts i.daily{background:var(--mat)} .mcell .pts i.love{background:#E0567F}
 .mcell .pts i.ok{outline:2px solid var(--ok);outline-offset:1px}
 .mcell.past{opacity:.55}
-.mcell.today{box-shadow:0 0 0 2px var(--ink) inset}
+
 .mcell[aria-selected="true"]{border-color:var(--mat);box-shadow:0 0 0 2px var(--mat) inset}
 .mcell .tag{position:absolute;top:2px;right:3px;font-size:.62rem;font-weight:800;line-height:1}
 .mcell .tag.t{color:var(--cone)} .mcell .tag.o{color:var(--warn)} .mcell .tag.j{color:#fff;background:var(--cone);border-radius:4px;padding:1px 3px}
@@ -713,7 +716,7 @@ footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padd
     <div class="calnav"><button type="button" class="icon-btn" id="cal-prev" aria-label="Mois précédent"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><h4 id="cal-title"></h4><button type="button" class="icon-btn" id="cal-next" aria-label="Mois suivant"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button></div>
     <div class="mcal" id="mcal"></div>
     <div class="legend2">
-      <span><i class="sq b1"></i>Fondations</span><span><i class="sq b2"></i>Dév. 1</span><span><i class="sq b3"></i>Dév. 2</span><span><i class="sq b4"></i>Spécifique</span><span><i class="sq b5"></i>Affûtage</span>
+      <span><i class="sq" style="background:var(--run)"></i>Fondations</span><span><i class="sq" style="background:var(--mat)"></i>Dév. 1</span><span><i class="sq" style="background:var(--gym)"></i>Dév. 2</span><span><i class="sq" style="background:var(--cone)"></i>Spécifique</span><span><i class="sq" style="background:var(--warn)"></i>Affûtage</span>
       <span><i style="background:var(--run)"></i>Course</span><span><i style="background:var(--cone)"></i>Parcours / Freeletics</span><span><i style="background:var(--gym)"></i>Club</span><span><i style="background:#E0567F"></i><span id="leg-love">Moments à deux</span></span>
       <span><b style="color:var(--cone)">T</b> test</span><span><b style="color:var(--warn)">◆</b> échéance</span>
     </div>
@@ -2549,7 +2552,8 @@ function renderFrise(){
   const el = $("frise"); if (!el) return;
   const M = mesos(), a = calStart().getTime(), b = calEnd().getTime() + 86400000, span = b - a;
   const pos = t => Math.max(0, Math.min(100, (t - a) / span * 100));
-  const bars = M.map(m => { const w = (Math.min(b, m.B.getTime() + 86400000) - Math.max(a, m.A.getTime())) / span * 100; return `<span class="b${m.i}" style="width:${w}%" title="${m.n}">${w > 9 ? m.n : ""}</span>`; }).join("");
+  const SHORT = ["Éval.", "Fondations", "Dév. 1", "Dév. 2", "Spécifique", "Affûtage"];
+  const bars = M.map(m => { const w = (Math.min(b, m.B.getTime() + 86400000) - Math.max(a, m.A.getTime())) / span * 100; return `<span class="b${m.i} bb${m.i}" style="width:${w}%" title="${m.n}">${w > 7 ? SHORT[m.i] : ""}</span>`; }).join("");
   const now = Date.now(), O = objectifs();
   const flags = O.map((o, i) => `<i class="${i === O.length - 1 ? "jj" : o.ok ? "ok" : ""}" style="left:${pos(parseDay(o.due).getTime())}%" title="${esc(o.label)}"></i>`).join("");
   el.innerHTML = `<div class="bars">${bars}</div>${now >= a && now <= b ? `<span class="now" style="left:${pos(now)}%"></span>` : ""}<div class="flags">${flags}</div>
@@ -2559,7 +2563,7 @@ function dayInfo(d){
   const inRange = d >= calStart() && d <= calEnd();
   const m = inRange ? mesoAt(d) : null;
   const sl = inRange && !planEmpty() ? slotsOn(d).filter(s => s.t !== "repos") : [];
-  const test = sl.some(s => /Test|TEST|Simulation/i.test(session(s.t, d, s.h).L.join(" ")));
+  const test = sl.some(s => /^<b>(Test|TEST|Simulation|Dernière simulation)/.test(session(s.t, d, s.h).L[0] || ""));
   const obj = objectifs().filter(o => o.due === ymd(d));
   const exam = ymd(d) === ymd(calEnd());
   return {inRange, m, sl, test, obj, exam};
