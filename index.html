@@ -720,6 +720,12 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--accent)}
 #gcal .gbtns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
 #gcal .gbtns button{width:100%;min-width:0;margin:0}
 #gcal p{overflow-wrap:anywhere}
+#gcal .gaccs{list-style:none;margin:8px 0;padding:0;display:flex;flex-direction:column;gap:8px}
+#gcal .gaccs li{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+#gcal .gaccs li>div{min-width:0;display:flex;flex-direction:column}
+#gcal .gaccs b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#gcal .gaccs .note{margin:0;font-size:.8rem}
+#gcal .gbtns a{display:flex;align-items:center;justify-content:center;text-decoration:none;color:var(--ink);border:1px solid var(--line);border-radius:10px}
 </style>
 </head>
 <body>
@@ -2651,21 +2657,24 @@ function paintGcal(){
   if (!gcalState){ el2.innerHTML = head + `<p class="note">Vérification…</p>`; return; }
   if (!g){ el2.innerHTML = head + `<p class="note">Pas de réseau pour le moment.</p>`; return; }
   if (!g.configured){ el2.innerHTML = head + `<p class="note">La connexion à Google Agenda arrive très bientôt.</p>`; return; }
-  if (g.connected && !g.revoked){
-    const when = g.synced ? new Date(g.synced).toLocaleString("fr-FR", {day: "numeric", month: "short", hour: "2-digit", minute: "2-digit"}) : "";
-    el2.innerHTML = head + `<p class="note"><b style="color:var(--ok)">Connecté.</b> Tes séances sont dans l'agenda « Athéna · entraînement » de ton compte Google, avec un rappel avant chacune. Elles se mettent à jour toutes seules.${when ? ` Dernière mise à jour : ${when}.` : ""}${g.pending ? " Quelques séances sont encore en cours d'envoi." : ""}</p>
-      <div class="gbtns"><button type="button" class="ghost small" id="gcal-sync">Mettre à jour</button><button type="button" class="ghost small" id="gcal-off">Déconnecter</button></div>`;
+  const accs = g.accounts || [], help = `<p class="note" style="font-size:.82rem">Choisis le compte Google puis « Continuer ». Si Google affiche « Cette appli n'a pas été validée », touche « Paramètres avancés », puis « Accéder à Athéna ». L'appli ne voit que l'agenda qu'elle crée, rien d'autre.</p>`;
+  const link = `${AGENDA_BASE}/google/start?equipe=${team}`;
+  if (accs.length){
+    const fmt = t => t ? new Date(t).toLocaleString("fr-FR", {day: "numeric", month: "short", hour: "2-digit", minute: "2-digit"}) : "";
+    el2.innerHTML = head + `<p class="note">Les séances sont dans l'agenda « Athéna · entraînement » de chaque compte connecté, avec un rappel avant chacune. Tout se met à jour tout seul.</p>
+      <ul class="gaccs">${accs.map(a => `<li><div><b>${esc(a.email || "Compte Google")}</b><span class="note">${a.revoked ? "accès retiré : reconnecte ce compte" : a.pending ? "envoi en cours…" : a.synced ? "à jour · " + fmt(a.synced) : "connecté"}</span></div><button type="button" class="ghost tiny gcal-off" data-acc="${esc(a.id)}" data-mail="${esc(a.email || "ce compte")}">Retirer</button></li>`).join("")}</ul>
+      <div class="gbtns"><a class="ghost small" href="${link}">+ Ajouter un compte</a><button type="button" class="ghost small" id="gcal-sync">Mettre à jour</button></div>` + help;
     return;
   }
-  el2.innerHTML = head + `<p class="note">${g.revoked ? "L'accès à ton Google Agenda a été retiré. Reconnecte-le pour continuer à recevoir tes séances." : "Tes séances arrivent directement dans ton Google Agenda, avec un rappel avant chacune, et se mettent à jour toutes seules."}</p>
-    <a class="btn" style="text-decoration:none;display:inline-block;padding:11px 16px;border-radius:12px;align-self:flex-start" href="${AGENDA_BASE}/google/start?equipe=${team}">Connecter Google Agenda</a>
-    <p class="note" style="font-size:.82rem">Choisis ton compte Google puis « Continuer ». Si Google affiche « Cette appli n'a pas été validée », touche « Paramètres avancés », puis « Accéder à Athéna ». L'appli ne voit que l'agenda qu'elle crée, rien d'autre.</p>`;
+  el2.innerHTML = head + `<p class="note">Tes séances arrivent directement dans ton Google Agenda, avec un rappel avant chacune, et se mettent à jour toutes seules. Vous pouvez connecter vos deux comptes.</p>
+    <a class="btn" style="text-decoration:none;display:inline-block;padding:11px 16px;border-radius:12px;align-self:flex-start" href="${link}">Connecter Google Agenda</a>` + help;
 }
 document.addEventListener("click", async e => {
-  const b = e.target.closest("#gcal-sync, #gcal-off"); if (!b) return;
-  if (b.id === "gcal-off" && !confirm("Déconnecter Google Agenda ? L'agenda « Athéna · entraînement » sera retiré de ton compte Google.")) return;
-  b.disabled = true; b.textContent = b.id === "gcal-off" ? "Déconnexion…" : "Mise à jour…";
-  try { await gcalCall(b.id === "gcal-off" ? "off" : "sync", {force: true}); } catch(err){}
+  const b = e.target.closest("#gcal-sync, .gcal-off"); if (!b) return;
+  const off = b.classList.contains("gcal-off");
+  if (off && !confirm(`Retirer ${b.dataset.mail} ? L'agenda « Athéna · entraînement » sera supprimé de ce compte Google.`)) return;
+  b.disabled = true; b.textContent = off ? "Retrait…" : "Mise à jour…";
+  try { await (off ? gcalCall("off", {compte: b.dataset.acc}) : gcalCall("sync", {force: true})); } catch(err){}
   gcalFlash = ""; renderGcal(true);
 });
 (function(){

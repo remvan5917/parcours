@@ -40,7 +40,7 @@ async function agenda(team){
 // « Athéna · entraînement » et y écrit les séances (avec rappels), puis le tient à jour
 // tout seul (toutes les 15 min, et juste après chaque changement dans l'appli).
 // Secrets Cloudflare : GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET. Stockage : KV « GKV ».
-const G_SCOPE = "https://www.googleapis.com/auth/calendar.app.created";
+const G_SCOPE = "openid email https://www.googleapis.com/auth/calendar.app.created";
 const G_CALLBACK = "https://parcours-coach.remyvancoppenolle.workers.dev/google/callback";
 const APP_URL = "https://remvan5917.github.io/parcours/index.html";
 const CAL_API = "https://www.googleapis.com/calendar/v3";
@@ -67,7 +67,7 @@ async function gStart(env, team){
   if (!TEAM_RE.test(team || "")) return back("erreur");
   const exp = Date.now() + 15 * 60000, state = `${team}.${exp}.${await sign(env, team + "." + exp)}`;
   const u = new URL("https://accounts.google.com/o/oauth2/v2/auth");
-  Object.entries({client_id: env.GOOGLE_CLIENT_ID, redirect_uri: G_CALLBACK, response_type: "code", scope: G_SCOPE, access_type: "offline", prompt: "consent", state}).forEach(([k, v]) => u.searchParams.set(k, v));
+  Object.entries({client_id: env.GOOGLE_CLIENT_ID, redirect_uri: G_CALLBACK, response_type: "code", scope: G_SCOPE, access_type: "offline", prompt: "consent select_account", state}).forEach(([k, v]) => u.searchParams.set(k, v));
   return Response.redirect(u.toString(), 302);
 }
 async function gCallback(env, url, ctx){
@@ -79,17 +79,23 @@ async function gCallback(env, url, ctx){
   const t = await r.json().catch(() => ({}));
   if (!r.ok || !t.refresh_token) return back("erreur");
   if (!String(t.scope || "").includes("calendar.app.created")) return back("refus");
-  const H = {Authorization: "Bearer " + t.access_token, "Content-Type": "application/json"};
-  const old = JSON.parse(await env.GKV.get("g:" + team) || "null");
+  // compte Google : identifiant stable (sub) + e-mail pour l'affichage, lus dans le jeton d'identité reçu directement de Google
+  let who = {};
+  try { who = JSON.parse(atob(String(t.id_token || "").split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))); } catch (e) {}
+  const acc = who.sub ? (await evId("compte", who.sub)).slice(3, 15) : "x" + crypto.randomUUID().slice(0, 11);
+  const key = `g:${team}:${acc}`, H = {Authorization: "Bearer " + t.access_token, "Content-Type": "application/json"};
+  const canUse = async c => c && (await fetch(`${CAL_API}/calendars/${encodeURIComponent(c)}`, {headers: H})).ok;
   let cal = null, map = {};
-  if (old && old.cal){ const c = await fetch(`${CAL_API}/calendars/${encodeURIComponent(old.cal)}`, {headers: H}); if (c.ok){ cal = old.cal; map = old.map || {}; } }
+  const mine = JSON.parse(await env.GKV.get(key) || "null"), legacy = JSON.parse(await env.GKV.get("g:" + team) || "null");
+  if (mine && await canUse(mine.cal)){ cal = mine.cal; map = mine.map || {}; }
+  else if (legacy && await canUse(legacy.cal)){ cal = legacy.cal; map = legacy.map || {}; await env.GKV.delete("g:" + team); } // même compte qu'avant : on reprend son agenda
   if (!cal){
     const c = await fetch(`${CAL_API}/calendars`, {method: "POST", headers: H, body: JSON.stringify({summary: "Athéna · entraînement", description: "Séances préparées par Athéna. Mis à jour automatiquement : modifie ton planning dans l'appli, pas ici.", timeZone: "Europe/Paris"})});
     if (!c.ok) return back("erreur");
     cal = (await c.json()).id;
   }
-  await env.GKV.put("g:" + team, JSON.stringify({refresh: t.refresh_token, cal, map, lastAt: 0, at: Date.now()}));
-  ctx.waitUntil(gSync(env, team, true));
+  await env.GKV.put(key, JSON.stringify({refresh: t.refresh_token, cal, map, email: who.email || "", lastAt: 0, pending: true, at: Date.now()}));
+  ctx.waitUntil(gSyncKey(env, key, team, true));
   return back("ok");
 }
 async function gBatch(token, ops){
@@ -105,8 +111,8 @@ async function gBatch(token, ops){
   }
   return res;
 }
-async function gSync(env, team, force){
-  const st = JSON.parse(await env.GKV.get("g:" + team) || "null");
+async function gSyncKey(env, k, team, force){
+  const st = JSON.parse(await env.GKV.get(k) || "null");
   if (!st || st.revoked) return {connected: !!st, revoked: !!(st && st.revoked)};
   const r = await fetch(`https://firestore.googleapis.com/v1/projects/${FB_PROJECT}/databases/(default)/documents/equipes/${team}/reglages/agenda?key=${FB_WEB_KEY}`);
   if (!r.ok) return {connected: true, error: "agenda introuvable"};
@@ -114,7 +120,7 @@ async function gSync(env, team, force){
   if (!force && at && st.lastAt === at && !st.pending) return {connected: true, upToDate: true};
   let data = {alarm: 30, ev: []}; try { data = JSON.parse(doc.fields.json.stringValue); } catch (e) {}
   const token = await gToken(env, st.refresh);
-  if (token === "REVOKED"){ st.revoked = true; await env.GKV.put("g:" + team, JSON.stringify(st)); return {connected: true, revoked: true}; }
+  if (token === "REVOKED"){ st.revoked = true; await env.GKV.put(k, JSON.stringify(st)); return {connected: true, revoked: true}; }
   if (!token) return {connected: true, error: "jeton"};
   const alarm = Math.min(240, Math.max(0, Number(data.alarm) || 30)), want = {};
   for (const e of (Array.isArray(data.ev) ? data.ev : []).slice(0, 600)){
@@ -144,7 +150,7 @@ async function gSync(env, team, force){
   };
   // envoi par paquets de 50, progression enregistrée après chaque paquet : si le relais est coupé,
   // la mise à jour automatique (toutes les 15 min) reprend là où il s'est arrêté
-  const save = () => env.GKV.put("g:" + team, JSON.stringify(st));
+  const save = () => env.GKV.put(k, JSON.stringify(st));
   if (ops.length){ st.pending = true; await save(); }
   let todo = ops, fails = 0;
   for (let round = 0; round < 2 && todo.length; round++){
@@ -161,23 +167,43 @@ async function gSync(env, team, force){
   await save();
   return {connected: true, changed: ops.length, pending: st.pending};
 }
-async function gOff(env, team){
-  const st = JSON.parse(await env.GKV.get("g:" + team) || "null");
-  if (!st) return {connected: false};
-  const token = st.revoked ? null : await gToken(env, st.refresh);
-  if (token && token !== "REVOKED"){
-    await fetch(`${CAL_API}/calendars/${encodeURIComponent(st.cal)}`, {method: "DELETE", headers: {Authorization: "Bearer " + token}});
-    await fetch("https://oauth2.googleapis.com/revoke?token=" + encodeURIComponent(st.refresh), {method: "POST"});
+async function teamKeys(env, team){
+  const list = await env.GKV.list({prefix: "g:" + team});
+  return list.keys.map(x => x.name).filter(n => n === "g:" + team || n.startsWith(`g:${team}:`));
+}
+async function gSync(env, team, force){
+  const out = [];
+  for (const k of await teamKeys(env, team)) out.push(await gSyncKey(env, k, team, force).catch(() => ({error: "échec"})));
+  return {accounts: out.length, changed: out.reduce((n, x) => n + (x.changed || 0), 0), pending: out.some(x => x.pending)};
+}
+async function gStatus(env, team){
+  const accounts = [];
+  for (const k of await teamKeys(env, team)){
+    const st = JSON.parse(await env.GKV.get(k) || "null"); if (!st) continue;
+    accounts.push({id: k.split(":")[2] || "", email: st.email || "", synced: st.synced || null, pending: !!st.pending, revoked: !!st.revoked});
   }
-  await env.GKV.delete("g:" + team);
-  return {connected: false};
+  return {configured: true, connected: accounts.length > 0, accounts};
+}
+async function gOff(env, team, id){
+  const k = id ? `g:${team}:${id}` : "g:" + team;
+  if (!/^[a-z0-9-]{0,16}$/.test(id || "")) return {error: "compte invalide"};
+  const st = JSON.parse(await env.GKV.get(k) || "null");
+  if (st){
+    const token = st.revoked ? null : await gToken(env, st.refresh);
+    if (token && token !== "REVOKED"){
+      await fetch(`${CAL_API}/calendars/${encodeURIComponent(st.cal)}`, {method: "DELETE", headers: {Authorization: "Bearer " + token}});
+      await fetch("https://oauth2.googleapis.com/revoke?token=" + encodeURIComponent(st.refresh), {method: "POST"});
+    }
+    await env.GKV.delete(k);
+  }
+  return gStatus(env, team);
 }
 
 export default {
   async scheduled(event, env, ctx) {
     if (!env.GKV || !env.GOOGLE_CLIENT_ID) return;
     const list = await env.GKV.list({prefix: "g:"});
-    for (const k of list.keys) ctx.waitUntil(gSync(env, k.name.slice(2), false).catch(() => {}));
+    for (const k of list.keys) ctx.waitUntil(gSyncKey(env, k.name, k.name.slice(2).split(":")[0], false).catch(() => {}));
   },
   async fetch(req, env, ctx) {
     const url = new URL(req.url);
@@ -203,8 +229,8 @@ export default {
       const team = String(b.equipe || "");
       if (!TEAM_RE.test(team)) return json({ error: { message: "code invalide" } }, 400, cors);
       if (url.pathname === "/google/sync") return json(await gSync(env, team, !!b.force), 200, cors);
-      if (url.pathname === "/google/off") return json(await gOff(env, team), 200, cors);
-      if (url.pathname === "/google/status"){ const st = JSON.parse(await env.GKV.get("g:" + team) || "null"); return json({ configured: true, connected: !!st, revoked: !!(st && st.revoked), synced: st && st.synced, pending: !!(st && st.pending) }, 200, cors); }
+      if (url.pathname === "/google/off") return json(await gOff(env, team, String(b.compte || "")), 200, cors);
+      if (url.pathname === "/google/status") return json(await gStatus(env, team), 200, cors);
       return json({ error: { message: "inconnu" } }, 404, cors);
     }
     if (!env.GROQ_API_KEY) return json({ error: { message: "clé Groq absente du relais" } }, 500, cors);
