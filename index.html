@@ -333,6 +333,7 @@ footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padd
 .sess{display:grid;grid-template-columns:44px minmax(0,1fr);gap:12px;align-items:start;padding:12px;border-radius:16px;background:var(--floor)}
 .sess .ic{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--display);font-weight:700;font-size:.95rem}
 .sess .ic.love{background:#E0567F}
+.duo-badge{position:absolute;right:-6px;bottom:-6px;width:20px;height:20px;border-radius:50%;background:#E0567F;color:#fff;font-style:normal;font-size:.72rem;display:flex;align-items:center;justify-content:center;border:2px solid var(--surface)}
 .sess .ic.run{background:var(--run)} .sess .ic.fp{background:var(--cone)} .sess .ic.club{background:var(--gym)} .sess .ic.daily{background:var(--mat)}
 .sess .ic svg{width:22px;height:22px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .sess h3{font-size:1.2rem}
@@ -852,6 +853,7 @@ body{padding-block-end:calc(110px + env(safe-area-inset-bottom,0px))}
     <div class="row">
       <select id="slot-day" aria-label="Jour"><option value="1">Lundi</option><option value="2">Mardi</option><option value="3">Mercredi</option><option value="4">Jeudi</option><option value="5">Vendredi</option><option value="6">Samedi</option><option value="7">Dimanche</option></select>
       <select id="slot-type" aria-label="Séance"></select>
+      <label class="note" style="color:var(--ink);display:inline-flex;gap:6px;align-items:center"><input type="checkbox" id="slot-duo"> à deux ♥</label>
       <input type="time" id="slot-time" value="18:00" aria-label="Heure" style="font:inherit;font-size:.95rem;padding:6px 8px;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--ink)">
       <button type="button" class="ghost small" id="slot-add">Ajouter</button>
     </div>
@@ -2152,6 +2154,7 @@ const TYPES = {
   course_rec: {l: "Course · footing court", ic: "run"},
   parcours: {l: "Parcours à Fitness Park", ic: "fp"},
   luc: {l: "Navettes / Luc Léger", ic: "run"},
+  renfo: {l: "Renfo léger", ic: "daily"},
   gym: {l: "Gym (club)", ic: "club"},
   freeletics: {l: "Freeletics", ic: "fp"},
   krav: {l: "Krav maga", ic: "club"},
@@ -2233,6 +2236,10 @@ function session(type, d, h){
       L.push(`« Vite » = environ <b>${fr(speedOf(tp))} km/h</b> (la vitesse du palier ${tp}${lv == null ? ", à ajuster après ton premier Luc Léger" : ", deux paliers au-dessus de ton meilleur test"}). « Lent » = trot.`);
       L.push("Échauffement : 15 min de footing + 3 accélérations. Retour au calme : 10 min très lent.");
     }
+  } else if (type === "renfo"){
+    lieu = "Maison ou Citadelle (barres)";
+    L.push("<b>20 min</b> : 3 tours de 30 s de planche, 5 pompes bien faites et une suspension à la barre le plus longtemps possible. Puis mobilité des poignets.");
+    L.push("Léger : c'est juste avant le jujitsu, on garde de l'énergie.");
   } else if (type === "course_rec"){
     lieu = "Dehors";
     L.push(`<b>${m.i === 5 ? 20 : 25} min</b> très facile, puis 4 lignes droites de 80 m en accélérant.`);
@@ -2323,7 +2330,7 @@ function renderPlanning(){
   const W = p[planWk] || {};
   $("planning").innerHTML = `<ul class="steps">${[1, 2, 3, 4, 5, 6, 7].map(d => {
     const l = (W[d] || []).slice().sort((a, b) => (a.h || "").localeCompare(b.h || ""));
-    return `<li><div style="flex:1"><div class="s-t" style="text-transform:capitalize">${DAYS[d]}</div><div class="chips" style="margin-top:4px">${l.length ? l.map((s, i) => `<span class="chip">${s.h ? esc(s.h) + " · " : ""}${esc(typeLabel(s.t))} <button type="button" class="ghost tiny" data-slot-del="${d}:${esc(s.t)}:${esc(s.h || "")}" aria-label="Retirer" style="padding:0 6px;margin-left:4px">×</button></span>`).join("") : `<span class="note">rien</span>`}</div></div></li>`;
+    return `<li><div style="flex:1"><div class="s-t" style="text-transform:capitalize">${DAYS[d]}</div><div class="chips" style="margin-top:4px">${l.length ? l.map((s, i) => `<span class="chip">${s.h ? esc(s.h) + " · " : ""}${s.duo ? "♥ " : ""}${esc(typeLabel(s.t))} <button type="button" class="ghost tiny" data-slot-del="${d}:${esc(s.t)}:${esc(s.h || "")}" aria-label="Retirer" style="padding:0 6px;margin-left:4px">×</button></span>`).join("") : `<span class="note">rien</span>`}</div></div></li>`;
   }).join("")}</ul>`;
 }
 $("slot-type").innerHTML = Object.entries(TYPES).map(([k, t]) => `<option value="${k}">${t.l}</option>`).join("");
@@ -2331,7 +2338,7 @@ $("plan-wk").addEventListener("click", e => { const b = e.target.closest("[data-
 $("slot-add").addEventListener("click", () => {
   const p = JSON.parse(JSON.stringify(plan())), d = $("slot-day").value;
   p[planWk] = p[planWk] || {}; p[planWk][d] = p[planWk][d] || [];
-  p[planWk][d].push({t: $("slot-type").value, h: $("slot-time").value || ""});
+  p[planWk][d].push(Object.assign({t: $("slot-type").value, h: $("slot-time").value || ""}, $("slot-duo").checked ? {duo: true} : {}));
   savePlan(p);
 });
 $("planning").addEventListener("click", e => {
@@ -2386,7 +2393,7 @@ function agendaEvents(){
     slotsOn(d).forEach(s => {
       if (s.t === "repos") return;
       const x = session(s.t, d, s.h), m = x.m;
-      out.push({d: ymd(d), h: s.h || "18:00", dur: s.t.startsWith("course") ? 60 : 90, t: typeLabel(s.t),
+      out.push({d: ymd(d), h: s.h || "18:00", dur: s.t.startsWith("course") ? 60 : 90, t: slotTitle(s),
         desc: [`Bloc ${m.n}${m.deload ? " (semaine allégée + tests)" : ""} · semaine ${weekType(d)}`, x.lieu ? "Lieu : " + x.lieu : "", ...x.L.map(stripTags), "", "Détails et chrono : " + location.origin + location.pathname].filter((l, i) => l || i > 0).join("\n")});
     });
   }
@@ -2480,6 +2487,7 @@ $("top-back").addEventListener("click", () => show(prevView && prevView !== "reg
 /* ---- séances faites ---- */
 function saveFait(o){ S.fait = o; lsSet("phm-fait", o); if (FS) FS.setDoc(FS.doc(FS.db, "equipes", team, "reglages", "fait"), o).catch(writeErr); }
 const slotKey = s => s.t + "@" + (s.h || "");
+const slotTitle = s => (s.duo ? typeLabel("ensemble") + " · " : "") + typeLabel(s.t);
 const isDone = (d, s) => !!((S.fait || {})[ymd(d)] || {})[slotKey(s)];
 function weekCount(d){
   const st = weekStart(d || Date.now()); let plan_ = 0, done = 0;
@@ -2524,8 +2532,8 @@ function renderToday(){
   const cards = sl.map(s => {
     const T = TYPES[s.t] || {l: s.t, ic: "daily"}, x = session(s.t, d, s.h), a = actionFor(s, d, x), done = isDone(d, s);
     const main = x.L[0] || "", more = x.L.slice(1);
-    return `<div class="sess${done ? " done" : ""}"><span class="ic ${T.ic}">${ICONS[T.ic] || ICONS.daily}</span><div>
-      <h3>${esc(typeLabel(s.t))}</h3><div class="when">${s.h ? s.h.replace(":", " h ") : "Quand tu veux"}${x.lieu ? " · " + esc(x.lieu) : ""}</div>
+    return `<div class="sess${done ? " done" : ""}"><span class="ic ${T.ic}" style="position:relative">${ICONS[T.ic] || ICONS.daily}${s.duo ? `<em class="duo-badge">♥</em>` : ""}</span><div>
+      <h3>${esc(slotTitle(s))}</h3><div class="when">${s.h ? s.h.replace(":", " h ") : "Quand tu veux"}${x.lieu ? " · " + esc(x.lieu) : ""}</div>
       <p class="what">${main}</p>
       ${more.length ? `<details><summary>Détails</summary>${more.map(l => `<p>${l}</p>`).join("")}</details>` : ""}
       ${s.t === "repos" || s.t === "ensemble" ? "" : `<div class="acts">${a ? `<button type="button" class="btn" data-goto="${a.go}"${a.mode ? ` data-mode="${a.mode}"` : ""}>${a.l}</button>` : ""}<button type="button" class="ghost done-btn" data-done="${ymd(d)}|${esc(slotKey(s))}" aria-pressed="${done}">${done ? "Fait ✓" : "Fait"}</button></div>`}
@@ -2578,7 +2586,7 @@ function renderHello(){
   const nWeeks = Math.max(1, Math.round((m.B - m.A) / (7 * 86400000)));
   const nx = planEmpty() ? null : nextSession();
   const nxTxt = planEmpty() ? `<button type="button" class="link" style="color:#FFB07F" data-goto="plan" data-anchor="planning-panel">Remplis ton planning ›</button>`
-    : nx ? `<b>${nx.i === 0 ? "Aujourd'hui" : nx.i === 1 ? "Demain" : DAYS[dow(nx.day)].replace(/^./, c => c.toUpperCase())} ${nx.s.h ? nx.s.h.replace(":", " h ") : ""}</b> · ${esc(typeLabel(nx.s.t))}` : "Rien de prévu cette semaine";
+    : nx ? `<b>${nx.i === 0 ? "Aujourd'hui" : nx.i === 1 ? "Demain" : DAYS[dow(nx.day)].replace(/^./, c => c.toUpperCase())} ${nx.s.h ? nx.s.h.replace(":", " h ") : ""}</b> · ${esc(slotTitle(nx.s))}` : "Rien de prévu cette semaine";
   $("hero-main").innerHTML = `<div class="kick">${now.toLocaleDateString("fr-FR", {weekday: "long", day: "numeric", month: "long"})}</div>
     <h1>${h < 12 ? "Bonjour" : h < 18 ? "Bon après-midi" : "Bonsoir"}</h1>
     <div class="hero-grid">
@@ -2756,7 +2764,7 @@ function renderCalDay(){
   if (!calSel){ el.innerHTML = `<p class="note">Touche un jour pour voir ses séances.</p>`; return; }
   const d = parseDay(calSel), I = dayInfo(d);
   const head = `<div class="row between"><b style="font-family:var(--display);font-size:1.15rem;text-transform:capitalize">${d.toLocaleDateString("fr-FR", {weekday: "long", day: "numeric", month: "long"})}</b><span class="note">${I.m ? "Bloc " + I.m.n + (I.m.deload ? " · semaine allégée" : "") + " · semaine " + weekType(d) : ""}</span></div>`;
-  const items = I.sl.map(s => { const T = TYPES[s.t] || {ic: "daily"}, x = session(s.t, d, s.h); return `<div class="it"><i class="${T.ic}"></i><div><b>${s.h ? s.h.replace(":", " h ") + " · " : ""}${esc(typeLabel(s.t))}</b>${s.t !== "ensemble" && isDone(d, s) ? ` <span class="verdict ok">fait</span>` : ""}<div class="note">${stripTags(x.L[0] || "")}</div></div></div>`; }).join("");
+  const items = I.sl.map(s => { const T = TYPES[s.t] || {ic: "daily"}, x = session(s.t, d, s.h); return `<div class="it"><i class="${T.ic}"></i><div><b>${s.h ? s.h.replace(":", " h ") + " · " : ""}${esc(slotTitle(s))}</b>${s.t !== "ensemble" && isDone(d, s) ? ` <span class="verdict ok">fait</span>` : ""}<div class="note">${stripTags(x.L[0] || "")}</div></div></div>`; }).join("");
   const objs = I.obj.map(o => `<div class="it"><i style="background:var(--warn);border-radius:2px;transform:rotate(45deg)"></i><div><b>Échéance</b><div class="note">${esc(o.label)}${o.ok ? " · atteint" : ""}</div></div></div>`).join("");
   const exam = I.exam ? `<div class="it"><i style="background:var(--cone)"></i><div><b>Épreuves sportives</b><div class="note">Le grand jour ♥</div></div></div>` : "";
   el.innerHTML = `<div class="calday">${head}${items || (I.inRange ? `<p class="note">${planEmpty() ? "Remplis ton planning pour voir tes séances." : "Rien de prévu : repos."}</p>` : `<p class="note">En dehors du programme.</p>`)}${objs}${exam}
