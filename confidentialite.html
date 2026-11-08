@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Athéna · Confidentialité</title>
+<link rel="icon" href="icons/athena.svg" type="image/svg+xml">
+<style>
+:root{--ground:#F6F5F3;--ink:#1A1A1D;--muted:#5F5E66;--line:#E3E1DD;--accent:#D9694F}
+@media (prefers-color-scheme:dark){:root{--ground:#0E0E11;--ink:#F2F1EE;--muted:#A3A1AA;--line:#2A2930;--accent:#F08A6C}}
+body{margin:0;background:var(--ground);color:var(--ink);font:16px/1.6 -apple-system,system-ui,"Segoe UI",Roboto,sans-serif}
+main{max-width:720px;margin:0 auto;padding:32px 16px 64px}
+h1{font-size:1.8rem;line-height:1.2;margin:0 0 6px}h2{font-size:1.15rem;margin:28px 0 6px}
+p,li{color:var(--muted)}b{color:var(--ink)}a{color:var(--accent)}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:24px}.top img{width:44px;height:44px;border-radius:11px}
+</style>
+</head>
+<body>
+<main>
+<div class="top"><img src="icons/athena.svg" alt=""><b>Athéna</b></div>
+<h1>Règles de confidentialité</h1>
+<p>Dernière mise à jour : 8 novembre 2026</p>
+
+<p>Athéna est une application privée d'entraînement pour les épreuves sportives du concours de gardien de la paix. Elle est utilisée par un très petit groupe de personnes et n'affiche aucune publicité.</p>
+
+<h2>Données enregistrées</h2>
+<ul>
+<li><b>Sur le téléphone</b> : les résultats d'entraînement (chronos, tests, paliers), le planning des séances et les réglages.</li>
+<li><b>Dans l'espace partagé</b> (si le partage entre téléphones est activé) : les mêmes données, rangées sous un code secret connu seulement des personnes qui partagent l'espace. Elles sont hébergées par Google Firebase (Union européenne).</li>
+</ul>
+
+<h2>Google Agenda</h2>
+<p>Si tu connectes ton Google Agenda, Athéna demande uniquement l'autorisation de <b>créer son propre agenda</b> (« Athéna · entraînement ») et d'y gérer les séances. Elle <b>ne peut ni lire ni modifier tes autres agendas</b> ou rendez-vous.</p>
+<ul>
+<li>Le jeton d'accès Google est conservé de façon chiffrée sur le serveur de l'application (Cloudflare) et sert seulement à mettre à jour cet agenda.</li>
+<li>Les données obtenues via les API Google ne sont ni vendues, ni partagées, ni utilisées à d'autres fins que l'affichage de tes séances. L'utilisation respecte les <a href="https://developers.google.com/terms/api-services-user-data-policy">règles relatives aux données utilisateur des services d'API Google</a>, y compris les exigences d'utilisation limitée.</li>
+<li>Tu peux déconnecter Google Agenda à tout moment depuis l'application (Plan › Agenda › Déconnecter) : l'agenda Athéna est alors supprimé et l'accès retiré. Tu peux aussi retirer l'accès depuis <a href="https://myaccount.google.com/permissions">ton compte Google</a>.</li>
+</ul>
+
+<h2>Questions du coach</h2>
+<p>Les questions posées au coach sont transmises à un service de génération de texte pour obtenir la réponse. Elles ne sont pas conservées par l'application.</p>
+
+<h2>Suppression</h2>
+<p>Pour effacer tes données : Réglages › arrêter le partage, puis supprime l'application de ton téléphone. Pour supprimer aussi l'espace partagé, écris à l'adresse ci-dessous.</p>
+
+<h2>Contact</h2>
+<p>remyvancoppenolle@gmail.com</p>
+</main>
+</body>
+</html>
