@@ -2315,7 +2315,7 @@ const ICONS = {
 let selDay = null;
 function actionFor(s, d, x){
   const test = /Test Luc Léger complet/.test(x.L.join(" "));
-  if (s.t === "course_frac" || s.t === "luc") return test ? {l: "Lancer le Luc Léger", go: "luc"} : {l: "Lancer le minuteur", go: "frac"};
+  if (s.t === "course_frac" || s.t === "luc") return test ? {l: "Lancer le Luc Léger", go: "luc"} : x.timer ? {l: "Lancer le minuteur", go: "frac"} : null;
   if (s.t === "parcours") return {l: "Lancer le chrono", go: "parcours"};
   if (s.t === "course_end") return {l: "Noter ma distance", go: "tests"};
   if (s.t === "gym") return {l: "Plan vertige", go: "ateliers", mode: "club"};
@@ -2403,15 +2403,13 @@ document.addEventListener("click", e => {
 
 /* ---- minuteur de fractionné ---- */
 const FR = {state: "idle", steps: [], i: 0, t0: 0, stepStart: 0, raf: null, lastBeep: -1};
-function fracToday(){
-  const now = new Date(), sl = slotsOn(now).find(s => s.t === "course_frac");
-  return (session("course_frac", now).timer) || {sets: 1, reps: 8, work: 30, rest: 30, setRest: 0};
-}
-function frSettings(){ return lsGet("phm-fr-custom", null) || fracToday(); }
+function fracToday(){ return session("course_frac", new Date()).timer; }
+function frSettings(){ return lsGet("phm-fr-custom", null) || fracToday() || {sets: 1, reps: 8, work: 30, rest: 30, setRest: 0}; }
 function frFill(){
   const t = frSettings();
   $("fr-sets").value = t.sets || 1; $("fr-reps").value = t.reps; $("fr-work").value = t.work; $("fr-rest").value = t.rest; $("fr-setrest").value = t.setRest || 0;
-  $("fr-presc").innerHTML = `${lsGet("phm-fr-custom", null) ? "Ta séance modifiée" : "Séance du programme"} : <b style="color:var(--ink)">${fmtTimer(t)}</b>`;
+  const lab = lsGet("phm-fr-custom", null) ? "Ta séance modifiée" : fracToday() ? "Séance du programme cette semaine" : "Pas de fractionné au programme cette semaine. Séance libre";
+  $("fr-presc").innerHTML = `${lab} : <b style="color:var(--ink)">${fmtTimer(t)}</b>`;
 }
 function fmtTimer(t){
   const sec = s => s >= 60 ? (s % 60 ? `${Math.floor(s / 60)} min ${s % 60}` : `${s / 60} min`) : `${s} s`;
