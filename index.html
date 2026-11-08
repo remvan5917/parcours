@@ -726,6 +726,8 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--accent)}
 #gcal .gaccs b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #gcal .gaccs .note{margin:0;font-size:.8rem}
 #gcal .gbtns a{display:flex;align-items:center;justify-content:center;text-decoration:none;color:var(--ink);border:1px solid var(--line);border-radius:10px}
+#gcal .gbtns a,#gcal .gbtns button{font-size:.88rem;white-space:nowrap;padding:9px 6px;min-height:42px}
+#gcal .gbtns+.note{margin-top:10px}
 </style>
 </head>
 <body>
@@ -2663,7 +2665,7 @@ function paintGcal(){
     const fmt = t => t ? new Date(t).toLocaleString("fr-FR", {day: "numeric", month: "short", hour: "2-digit", minute: "2-digit"}) : "";
     el2.innerHTML = head + `<p class="note">Les séances sont dans l'agenda « Athéna · entraînement » de chaque compte connecté, avec un rappel avant chacune. Tout se met à jour tout seul.</p>
       <ul class="gaccs">${accs.map(a => `<li><div><b>${esc(a.email || "Compte Google")}</b><span class="note">${a.revoked ? "accès retiré : reconnecte ce compte" : a.pending ? "envoi en cours…" : a.synced ? "à jour · " + fmt(a.synced) : "connecté"}</span></div><button type="button" class="ghost tiny gcal-off" data-acc="${esc(a.id)}" data-mail="${esc(a.email || "ce compte")}">Retirer</button></li>`).join("")}</ul>
-      <div class="gbtns"><a class="ghost small" href="${link}">+ Ajouter un compte</a><button type="button" class="ghost small" id="gcal-sync">Mettre à jour</button></div>` + help;
+      <div class="gbtns"><a class="ghost small" href="${link}">Ajouter un compte</a><button type="button" class="ghost small" id="gcal-sync">Mettre à jour</button></div>` + help;
     return;
   }
   el2.innerHTML = head + `<p class="note">Tes séances arrivent directement dans ton Google Agenda, avec un rappel avant chacune, et se mettent à jour toutes seules. Vous pouvez connecter vos deux comptes.</p>
