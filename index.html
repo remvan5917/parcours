@@ -2273,7 +2273,11 @@ function session(type, d, h){
     const perso = (plan().mots || {})[matin ? "matin" : "soir"] || [];
     const pool = (matin ? MATIN : SOIR).concat(Array.isArray(perso) ? perso : []);
     const n = Math.floor(new Date(d).setHours(12, 0, 0, 0) / 86400000);
-    L.push(`<b>${matin ? "Réveil à deux" : "Soirée à deux"}</b> · ${esc(pool[n % pool.length])}`);
+    // « Réveil à deux » seulement si vous étiez ensemble la veille au soir
+    const veille = matin && slotsOn(addDays(new Date(d), -1)).some(x => x.t === "ensemble" && Number(String(x.h || "0").split(":")[0]) >= 18);
+    const titre = matin ? (veille ? "Réveil à deux" : "Matin à deux") : "Soirée à deux";
+    const pool2 = matin && !veille ? ["La journée commence bien ♥", "Bonne journée, je pense à toi ♥", "Un bisou avant d'attaquer la journée", "On démarre la journée ensemble ♥"] : pool;
+    L.push(`<b>${titre}</b> · ${esc(pool2[n % pool2.length])}`);
   } else if (type === "repos"){
     L.push("Repos complet. C'est pendant le repos que le corps progresse.");
   }
