@@ -367,6 +367,43 @@ footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padd
 .view>h2:first-child{display:none}
 @media (min-width:900px){.card-today{padding:20px}.sess{grid-template-columns:52px minmax(0,1fr)}.sess .ic{width:52px;height:52px}}
 
+/* ---------- calendrier jusqu'au concours ---------- */
+.frise{position:relative;padding-top:22px}
+.frise .bars{display:flex;height:34px;border-radius:10px;overflow:hidden;gap:2px}
+.frise .bars span{display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:600;font-size:.78rem;color:var(--ink);white-space:nowrap;overflow:hidden;padding:0 4px}
+.frise .now{position:absolute;top:0;bottom:-4px;width:2px;background:var(--ink)}
+.frise .now::before{content:"Tu es ici";position:absolute;top:0;left:50%;transform:translateX(-50%);font-size:.7rem;font-weight:700;white-space:nowrap;background:var(--ink);color:var(--ground);border-radius:999px;padding:1px 7px}
+.frise .flags{position:relative;height:18px;margin-top:4px}
+.frise .flags i{position:absolute;top:0;width:10px;height:10px;transform:translateX(-50%) rotate(45deg);background:var(--warn);border-radius:2px}
+.frise .flags i.ok{background:var(--ok)} .frise .flags i.jj{background:var(--cone);width:14px;height:14px}
+.frise .ends{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted)}
+.b0{background:var(--floor)} .b1{background:var(--run-soft)} .b2{background:var(--mat-soft)} .b3{background:var(--gym-soft)} .b4{background:var(--cone-soft)} .b5{background:var(--warn-soft)}
+.calnav{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.calnav h4{font-size:1.3rem;letter-spacing:0;text-transform:capitalize;font-weight:700;color:var(--ink)}
+.mcal{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.mcal .dh{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);text-align:center;padding-bottom:2px}
+.mcell{position:relative;min-height:54px;border-radius:9px;padding:4px 3px 3px;display:flex;flex-direction:column;align-items:center;gap:3px;border:1px solid transparent;background:none;font-family:var(--body);font-weight:500;letter-spacing:0;color:var(--ink)}
+.mcell.out{visibility:hidden}
+.mcell .n{font-family:var(--display);font-weight:700;font-size:1rem;line-height:1;color:var(--ink);min-width:0}
+.mcell .pts{display:flex;flex-wrap:wrap;justify-content:center;gap:2px;max-width:100%}
+.mcell .pts i{width:6px;height:6px;border-radius:50%}
+.mcell .pts i.run{background:var(--run)} .mcell .pts i.fp{background:var(--cone)} .mcell .pts i.club{background:var(--gym)} .mcell .pts i.daily{background:var(--mat)} .mcell .pts i.love{background:#E0567F}
+.mcell .pts i.ok{outline:2px solid var(--ok);outline-offset:1px}
+.mcell.past{opacity:.55}
+.mcell.today{box-shadow:0 0 0 2px var(--ink) inset}
+.mcell[aria-selected="true"]{border-color:var(--mat);box-shadow:0 0 0 2px var(--mat) inset}
+.mcell .tag{position:absolute;top:2px;right:3px;font-size:.62rem;font-weight:800;line-height:1}
+.mcell .tag.t{color:var(--cone)} .mcell .tag.o{color:var(--warn)} .mcell .tag.j{color:#fff;background:var(--cone);border-radius:4px;padding:1px 3px}
+.legend2{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:.8rem;color:var(--muted)}
+.legend2 span{display:inline-flex;align-items:center;gap:5px}
+.legend2 i{width:9px;height:9px;border-radius:50%;display:inline-block}
+.legend2 i.sq{border-radius:3px;width:12px;height:12px}
+.calday{border-radius:14px;background:var(--floor);padding:12px;display:flex;flex-direction:column;gap:8px}
+.calday .it{display:flex;gap:10px;align-items:flex-start}
+.calday .it i{width:10px;height:10px;border-radius:50%;margin-top:6px;flex:0 0 auto}
+.calday .it i.run{background:var(--run)} .calday .it i.fp{background:var(--cone)} .calday .it i.club{background:var(--gym)} .calday .it i.daily{background:var(--mat)} .calday .it i.love{background:#E0567F}
+@media (max-width:420px){.mcell{min-height:48px}.mcell .n{font-size:.92rem}}
+
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -396,6 +433,7 @@ footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padd
 
   <div class="card-today">
     <div class="daystrip" id="daystrip" role="tablist" aria-label="Jours de la semaine"></div>
+    <button type="button" class="link" data-goto="plan" data-anchor="cal-panel" style="align-self:flex-end;margin-top:-6px">Calendrier jusqu'au concours ›</button>
     <div id="today"></div>
   </div>
 
@@ -667,7 +705,20 @@ footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padd
 <!-- =================== PLAN =================== -->
 <section class="view" id="v-plan" data-view="plan" hidden>
   <h2>Ton plan</h2>
-  <p class="note">Tout ton entraînement organisé jusqu'aux épreuves : le programme par blocs, tes objectifs datés, ton planning semaine A / semaine B, les rappels dans ton agenda et ce qu'on peut faire dans chaque lieu. Ensuite, l'onglet Aujourd'hui te dit chaque jour quoi faire.</p>
+  <p class="note">Tout ton entraînement jusqu'aux épreuves : le calendrier, le programme par blocs, ton planning semaine A / semaine B, ton agenda et les lieux. L'onglet Aujourd'hui te dit chaque jour quoi faire.</p>
+
+  <div class="panel" id="cal-panel">
+    <h3>Ton calendrier jusqu'au concours</h3>
+    <div class="frise" id="frise"></div>
+    <div class="calnav"><button type="button" class="icon-btn" id="cal-prev" aria-label="Mois précédent"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><h4 id="cal-title"></h4><button type="button" class="icon-btn" id="cal-next" aria-label="Mois suivant"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button></div>
+    <div class="mcal" id="mcal"></div>
+    <div class="legend2">
+      <span><i class="sq b1"></i>Fondations</span><span><i class="sq b2"></i>Dév. 1</span><span><i class="sq b3"></i>Dév. 2</span><span><i class="sq b4"></i>Spécifique</span><span><i class="sq b5"></i>Affûtage</span>
+      <span><i style="background:var(--run)"></i>Course</span><span><i style="background:var(--cone)"></i>Parcours / Freeletics</span><span><i style="background:var(--gym)"></i>Club</span><span><i style="background:#E0567F"></i><span id="leg-love">Moments à deux</span></span>
+      <span><b style="color:var(--cone)">T</b> test</span><span><b style="color:var(--warn)">◆</b> échéance</span>
+    </div>
+    <div id="cal-day"></div>
+  </div>
 
   <div class="panel">
     <h3>Le programme, bloc par bloc</h3>
@@ -2286,7 +2337,7 @@ $("lieux").addEventListener("click", e => {
   if (n.dataset.lieuNo) o[k][ik] = false; else delete o[k][ik];
   const open = n.closest("details"); saveLieux(o); if (open){ const d = [...$("lieux").querySelectorAll("details")].find(x => x.querySelector("summary").textContent === open.querySelector("summary").textContent); if (d) d.open = true; }
 });
-function renderPlanAll(){ renderToday(); renderObjectifs(); renderPlanning(); renderAgendaSub(); renderLieux(); scheduleAgenda(); }
+function renderPlanAll(){ renderToday(); renderObjectifs(); renderPlanning(); renderAgendaSub(); renderLieux(); renderCalAll(); scheduleAgenda(); }
 
 
 /* ======================= REFONTE : navigation, aujourd'hui, minuteur ======================= */
@@ -2488,6 +2539,68 @@ function frEnd(finished){
 $("fr-go").addEventListener("click", () => { if (FR.state !== "run") frStart(); });
 $("fr-stop").addEventListener("click", () => { if (FR.state === "run") frEnd(false); });
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && FR.state === "run") grabWake(); });
+
+
+/* ======================= CALENDRIER JUSQU'AU CONCOURS ======================= */
+let calMonth = null, calSel = null;
+function calStart(){ return parseDay("2026-11-09"); }
+function calEnd(){ return parseDay(S.exam || "2027-03-29"); }
+function renderFrise(){
+  const el = $("frise"); if (!el) return;
+  const M = mesos(), a = calStart().getTime(), b = calEnd().getTime() + 86400000, span = b - a;
+  const pos = t => Math.max(0, Math.min(100, (t - a) / span * 100));
+  const bars = M.map(m => { const w = (Math.min(b, m.B.getTime() + 86400000) - Math.max(a, m.A.getTime())) / span * 100; return `<span class="b${m.i}" style="width:${w}%" title="${m.n}">${w > 9 ? m.n : ""}</span>`; }).join("");
+  const now = Date.now(), O = objectifs();
+  const flags = O.map((o, i) => `<i class="${i === O.length - 1 ? "jj" : o.ok ? "ok" : ""}" style="left:${pos(parseDay(o.due).getTime())}%" title="${esc(o.label)}"></i>`).join("");
+  el.innerHTML = `<div class="bars">${bars}</div>${now >= a && now <= b ? `<span class="now" style="left:${pos(now)}%"></span>` : ""}<div class="flags">${flags}</div>
+    <div class="ends"><span>9 nov.</span><span>${calEnd().toLocaleDateString("fr-FR", {day: "numeric", month: "short"})} · épreuves</span></div>`;
+}
+function dayInfo(d){
+  const inRange = d >= calStart() && d <= calEnd();
+  const m = inRange ? mesoAt(d) : null;
+  const sl = inRange && !planEmpty() ? slotsOn(d).filter(s => s.t !== "repos") : [];
+  const test = sl.some(s => /Test|TEST|Simulation/i.test(session(s.t, d, s.h).L.join(" ")));
+  const obj = objectifs().filter(o => o.due === ymd(d));
+  const exam = ymd(d) === ymd(calEnd());
+  return {inRange, m, sl, test, obj, exam};
+}
+function renderCal(){
+  const el = $("mcal"); if (!el) return;
+  if (!calMonth){ const t = new Date(); calMonth = new Date(Math.max(calStart().getTime(), Math.min(calEnd().getTime(), t.getTime()))); calMonth.setDate(1); calMonth.setHours(12, 0, 0, 0); }
+  const y = calMonth.getFullYear(), mo = calMonth.getMonth(), first = new Date(y, mo, 1, 12), days = new Date(y, mo + 1, 0).getDate();
+  $("cal-title").textContent = first.toLocaleDateString("fr-FR", {month: "long", year: "numeric"});
+  const minM = new Date(calStart()); minM.setDate(1); const maxM = new Date(calEnd()); maxM.setDate(1);
+  $("cal-prev").disabled = first <= new Date(minM.getFullYear(), minM.getMonth(), 1, 12);
+  $("cal-next").disabled = first >= new Date(maxM.getFullYear(), maxM.getMonth(), 1, 12);
+  const lead = (first.getDay() + 6) % 7, today = ymd(new Date());
+  let h = ["L", "M", "M", "J", "V", "S", "D"].map(x => `<span class="dh">${x}</span>`).join("");
+  for (let i = 0; i < lead; i++) h += `<span class="mcell out"></span>`;
+  for (let n = 1; n <= days; n++){
+    const d = new Date(y, mo, n, 12), k = ymd(d), I = dayInfo(d);
+    const tag = I.exam ? `<span class="tag j">J</span>` : I.test ? `<span class="tag t">T</span>` : I.obj.length ? `<span class="tag o">◆</span>` : "";
+    h += `<button type="button" class="mcell ${I.m ? "b" + I.m.i : ""}${k < today ? " past" : ""}${k === today ? " today" : ""}" data-cal="${k}" aria-selected="${calSel === k}" aria-label="${d.toLocaleDateString("fr-FR", {weekday: "long", day: "numeric", month: "long"})}">${tag}<span class="n">${n}</span><span class="pts">${I.sl.slice(0, 6).map(s => `<i class="${(TYPES[s.t] || {ic: "daily"}).ic}${s.t !== "ensemble" && isDone(d, s) ? " ok" : ""}"></i>`).join("")}</span></button>`;
+  }
+  el.innerHTML = h;
+  renderCalDay();
+}
+function renderCalDay(){
+  const el = $("cal-day"); if (!el) return;
+  if (!calSel){ el.innerHTML = `<p class="note">Touche un jour pour voir ses séances.</p>`; return; }
+  const d = parseDay(calSel), I = dayInfo(d);
+  const head = `<div class="row between"><b style="font-family:var(--display);font-size:1.15rem;text-transform:capitalize">${d.toLocaleDateString("fr-FR", {weekday: "long", day: "numeric", month: "long"})}</b><span class="note">${I.m ? "Bloc " + I.m.n + (I.m.deload ? " · semaine allégée" : "") + " · semaine " + weekType(d) : ""}</span></div>`;
+  const items = I.sl.map(s => { const T = TYPES[s.t] || {ic: "daily"}, x = session(s.t, d, s.h); return `<div class="it"><i class="${T.ic}"></i><div><b>${s.h ? s.h.replace(":", " h ") + " · " : ""}${esc(typeLabel(s.t))}</b>${s.t !== "ensemble" && isDone(d, s) ? ` <span class="verdict ok">fait</span>` : ""}<div class="note">${stripTags(x.L[0] || "")}</div></div></div>`; }).join("");
+  const objs = I.obj.map(o => `<div class="it"><i style="background:var(--warn);border-radius:2px;transform:rotate(45deg)"></i><div><b>Échéance</b><div class="note">${esc(o.label)}${o.ok ? " · atteint" : ""}</div></div></div>`).join("");
+  const exam = I.exam ? `<div class="it"><i style="background:var(--cone)"></i><div><b>Épreuves sportives</b><div class="note">Le grand jour ♥</div></div></div>` : "";
+  el.innerHTML = `<div class="calday">${head}${items || (I.inRange ? `<p class="note">${planEmpty() ? "Remplis ton planning pour voir tes séances." : "Rien de prévu : repos."}</p>` : `<p class="note">En dehors du programme.</p>`)}${objs}${exam}
+    ${I.inRange && !planEmpty() ? `<button type="button" class="ghost small" data-open-day="${calSel}" style="align-self:flex-start">Ouvrir ce jour dans Aujourd'hui</button>` : ""}</div>`;
+}
+$("cal-prev").addEventListener("click", () => { calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth() - 1, 1, 12); renderCal(); });
+$("cal-next").addEventListener("click", () => { calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth() + 1, 1, 12); renderCal(); });
+document.addEventListener("click", e => {
+  const c = e.target.closest("[data-cal]"); if (c){ calSel = c.dataset.cal; renderCal(); return; }
+  const o = e.target.closest("[data-open-day]"); if (o){ selDay = o.dataset.openDay === ymd(new Date()) ? null : o.dataset.openDay; show("accueil"); renderToday(); }
+});
+function renderCalAll(){ renderFrise(); renderCal(); if ($("leg-love")) $("leg-love").textContent = typeLabel("ensemble"); }
 
 
 /* ======================= INSTALLATION ======================= */
