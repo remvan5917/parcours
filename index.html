@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Athéna</title>
 <meta name="description" content="Athéna, ta coach pour les épreuves sportives du concours de police : parcours, Luc Léger, programme et progrès.">
-<meta name="theme-color" content="#2B1A4C">
+<meta name="theme-color" content="#151318">
 <script>try{var t=JSON.parse(localStorage.getItem("phm-theme"));if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/athena.svg" type="image/svg+xml">
@@ -706,6 +706,8 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--accent)}
 .gh{flex-wrap:nowrap;align-items:center}.gh .lab{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.gh .verdict{flex:0 0 auto;white-space:nowrap}
 @media (min-width:800px){.wrap{max-width:760px}.topbar{padding-inline:max(16px,calc((100% - 760px)/2 + 16px))}nav.tabs{max-width:560px}}
 #mes-form button{min-height:46px;font-size:1rem;padding:10px 16px}
+[data-athena] img{display:block;width:100%;height:100%;border-radius:23%;box-shadow:0 0 0 1px rgba(255,255,255,.14)}
+.topbar .brand::before{background-color:#151318;box-shadow:0 0 0 1px color-mix(in srgb,var(--ink) 14%,transparent)}
 </style>
 </head>
 <body>
@@ -2774,7 +2776,13 @@ function nextSession(){
   }
   return null;
 }
+function setAppName(){
+  const n = prenom(); if (!n) return;
+  document.title = n;
+  const m = document.querySelector('meta[name="apple-mobile-web-app-title"]'); if (m && m.content !== n) m.content = n;
+}
 function renderHello(){
+  setAppName();
   if (!$("v-accueil").hidden) $("top-title").textContent = prenom() || "Athéna";
   const now = new Date(), h = now.getHours(), dl = daysLeft(), m = mesoAt(now);
   $("topcount").textContent = dl != null && dl >= 0 ? (dl === 0 ? "Jour J" : "J−" + dl) : "";
