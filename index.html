@@ -1542,9 +1542,10 @@ function renderShare(){
     return;
   }
   if (!team){
-    el.innerHTML = `<p class="note">Pour voir les mêmes résultats sur deux téléphones : sur le premier, active le partage et envoie le lien. Sur l'autre, ouvre le lien, ou colle-le ci-dessous (indispensable dans l'appli installée sur iPhone).</p>
-      <button type="button" class="ghost small" id="share-on">Activer le partage</button>
-      <div class="row"><input type="text" id="join-in" placeholder="Colle ici le lien de partage reçu" autocomplete="off" style="flex:1 1 220px;font:inherit;font-size:.9rem;padding:7px 9px;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--ink)"><button type="button" class="ghost small" id="join-go">Rejoindre</button></div>`;
+    el.innerHTML = `<p class="note"><b style="color:var(--ink)">On t'a envoyé un lien de partage ?</b> Copie-le, puis touche « Coller et rejoindre » : ce téléphone retrouve tout de suite le planning, les résultats et l'agenda de votre espace.</p>
+      <button type="button" class="btn" id="join-paste" style="width:100%">Coller et rejoindre</button>
+      <div class="row"><input type="text" id="join-in" placeholder="…ou colle le lien ici" autocomplete="off" style="flex:1 1 200px;font:inherit;font-size:.9rem;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink)"><button type="button" class="ghost small" id="join-go">Rejoindre</button></div>
+      <details class="more"><summary>Personne ne t'a envoyé de lien ?</summary><div class="in"><p class="note">Crée un nouvel espace vide, puis envoie son lien à l'autre téléphone. <b>Ne fais pas ça si vous avez déjà un espace</b> : tu te retrouverais avec un planning vide.</p><button type="button" class="ghost small" id="share-on">Créer un nouvel espace</button></div></details>`;
     return;
   }
   el.innerHTML = `<p class="note"><b style="color:var(--ink)">Partage activé.</b> Ouvre ce lien sur l'autre téléphone pour le rejoindre. Garde-le pour vous deux : toute personne qui a le lien voit les résultats.</p>
@@ -1553,7 +1554,12 @@ function renderShare(){
 }
 document.addEventListener("click", async e => {
   const t = e.target.closest("button"); if (!t) return;
+  if (t.id === "join-paste"){
+    try { const txt = await navigator.clipboard.readText(); $("join-in").value = txt || ""; } catch(err){ setSync("Colle le lien dans la case juste en dessous, puis touche « Rejoindre ».", true); $("join-in").focus(); return; }
+    $("join-go").click(); return;
+  }
   if (t.id === "share-on"){
+    if (!confirm("Créer un NOUVEL espace vide ? Si quelqu'un t'a déjà envoyé un lien de partage, annule et utilise plutôt « Coller et rejoindre ».")) return;
     team = Array.from(crypto.getRandomValues(new Uint8Array(24)), b => "abcdefghijklmnopqrstuvwxyz0123456789"[b % 36]).join("");
     lsSet("phm-team", team);
     const local = {}; COLLS.forEach(k => local[k] = S[k].slice());
@@ -1568,7 +1574,7 @@ document.addEventListener("click", async e => {
     if (!m){ setSync("Ce lien de partage n'est pas reconnu. Copie-le en entier depuis le message reçu.", true); return; }
     team = m[1]; lsSet("phm-team", team);
     try { await connectFirebase(); } catch(err){ setSync("Impossible de joindre le partage. Réessaie avec du réseau.", true); team = null; lsSet("phm-team", null); renderShare(); return; }
-    renderShare(); setSync("Tu as rejoint le partage : les résultats de l'équipe arrivent.");
+    renderShare(); renderAll(); setSync("Ce téléphone est relié à votre espace : le planning, les résultats et l'agenda arrivent.");
   }
   if (t.id === "share-send"){
     const link = shareLink();
@@ -2634,7 +2640,7 @@ function syncAgenda(){
 function renderAgendaSub(){
   const el = $("agenda-sub"); if (!el) return;
   $("alarm-min").value = String(lsGet("phm-alarm", 30));
-  if (!team || !FB){ el.innerHTML = `<p class="note">D'abord, active le partage (roue dentée en haut › Partage entre téléphones) : l'agenda en ligne utilise votre espace partagé.</p>`; return; }
+  if (!team || !FB){ el.innerHTML = `<p class="note">Ce téléphone n'est pas encore relié à votre espace. Copie le lien de partage reçu, puis va dans Réglages › Partage entre téléphones › « Coller et rejoindre ».</p><button type="button" class="ghost small" data-goto="reglages" data-anchor="share">Relier ce téléphone</button>`; return; }
   if (planEmpty()){ el.innerHTML = `<p class="note">Remplis d'abord ton planning ci-dessus.</p>`; return; }
   const https = `${AGENDA_BASE}/agenda/${team}.ics`, webcal = https.replace(/^https:/, "webcal:");
   el.innerHTML = `<div class="gcal" id="gcal"></div>
@@ -2916,7 +2922,7 @@ function renderSetup(){
   const steps = [
     {ok: lsGet("phm-age2", null) != null, t: "Indique ton âge", d: "Pour calculer tes notes avec le bon bonus.", go: "reglages", b: "Régler"},
     {ok: !planEmpty(), t: "Remplis ton planning A / B", d: "Tes séances habituelles, avec l'heure.", go: "plan", b: "Remplir"},
-    {ok: !!(team && FB), t: "Active le partage avec Rémy", d: "Vos résultats sur vos deux téléphones.", go: "reglages", b: "Activer"},
+    {ok: !!(team && FB), t: "Relie ce téléphone à votre espace", d: "Avec le lien de partage reçu : planning, résultats et agenda.", go: "reglages", b: "Relier"},
     {ok: !!lsGet("phm-agenda-ok", false), t: "Abonne ton agenda", d: "Tes séances et les rappels arrivent tout seuls.", go: "plan", b: "Abonner", tick: true},
     {ok: S.essais.length > 0 && S.luc.length > 0, t: "Fais tes tests de départ", d: "Un parcours chronométré et un Luc Léger complet.", go: "parcours", b: "Commencer"}
   ];
