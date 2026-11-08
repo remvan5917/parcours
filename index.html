@@ -321,6 +321,7 @@ footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padd
 .day small{font-size:.7rem;text-transform:uppercase;letter-spacing:.05em}
 .day .dots{display:flex;gap:3px;height:6px}
 .day .dots i{width:6px;height:6px;border-radius:50%;background:var(--line)}
+.day .dots i.love{background:#E0567F}
 .day .dots i.run{background:var(--run)} .day .dots i.fp{background:var(--cone)} .day .dots i.club{background:var(--gym)} .day .dots i.daily{background:var(--mat)}
 .day .dots i.ok{outline:2px solid var(--ok);outline-offset:1px}
 .day.is-today{background:var(--floor)}
@@ -331,6 +332,7 @@ footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padd
 .sess-list{display:flex;flex-direction:column;gap:10px}
 .sess{display:grid;grid-template-columns:44px minmax(0,1fr);gap:12px;align-items:start;padding:12px;border-radius:16px;background:var(--floor)}
 .sess .ic{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--display);font-weight:700;font-size:.95rem}
+.sess .ic.love{background:#E0567F}
 .sess .ic.run{background:var(--run)} .sess .ic.fp{background:var(--cone)} .sess .ic.club{background:var(--gym)} .sess .ic.daily{background:var(--mat)}
 .sess .ic svg{width:22px;height:22px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .sess h3{font-size:1.2rem}
@@ -1807,7 +1809,7 @@ Meilleurs temps par atelier : ${best.map((v, i) => `${TIMED[i].short} ${v == nul
 Luc Léger :\n${l}
 Tests :\n${m}
 Vitesses Luc Léger : palier 1 = 8 km/h, +0,5 km/h par palier (palier 5 = 10 km/h, palier 6 = 10,5, palier 8 = 11,5, palier 10 = 12,5).${luc.length ? ` Son dernier palier atteint correspond à ${fr(speedOf(luc[luc.length - 1].palier))} km/h.` : ""}
-Bloc actuel : ${(() => { const m = mesoAt(new Date()); return m.n + (m.deload ? ' (semaine allégée + tests)' : ''); })()}.\nSon planning (semaine ${weekType(new Date())} en cours) : ${planEmpty() ? 'pas encore rempli' : ['A', 'B'].map(w => 'semaine ' + w + ' : ' + [1,2,3,4,5,6,7].map(d => ((plan()[w] || {})[d] || []).map(x => DAYS[d] + ' ' + (x.h || '') + ' ' + (TYPES[x.t] || {l: x.t}).l).join(', ')).filter(Boolean).join(' ; ')).join(' | ')}.\nObjectifs datés : ${objectifs().map(o => o.label + ' (avant le ' + o.due + ', ' + (o.ok ? 'atteint' : 'pas encore') + ')').join(' ; ')}.\nRecommandations déjà calculées par l'appli :\n${recos().map(r => "- " + r.t + " : " + r.d).join("\n")}`;
+Bloc actuel : ${(() => { const m = mesoAt(new Date()); return m.n + (m.deload ? ' (semaine allégée + tests)' : ''); })()}.\nSon planning (semaine ${weekType(new Date())} en cours) : ${planEmpty() ? 'pas encore rempli' : ['A', 'B'].map(w => 'semaine ' + w + ' : ' + [1,2,3,4,5,6,7].map(d => ((plan()[w] || {})[d] || []).map(x => DAYS[d] + ' ' + (x.h || '') + ' ' + typeLabel(x.t)).join(', ')).filter(Boolean).join(' ; ')).join(' | ')}.\nObjectifs datés : ${objectifs().map(o => o.label + ' (avant le ' + o.due + ', ' + (o.ok ? 'atteint' : 'pas encore') + ')').join(' ; ')}.\nRecommandations déjà calculées par l'appli :\n${recos().map(r => "- " + r.t + " : " + r.d).join("\n")}`;
 }
 const RULES = `Règles officielles (descriptif 2025, femmes) :
 - Note de sport = moyenne de 2 notes sur 20 : parcours d'habileté motrice (PHM) et Luc Léger. Sous 7/20 à l'une : éliminée. +1 point si 30-40 ans.
@@ -1982,9 +1984,11 @@ const TYPES = {
   freeletics: {l: "Freeletics", ic: "fp"},
   krav: {l: "Krav maga", ic: "club"},
   jjb: {l: "Jujitsu / Taïso", ic: "club"},
-  ensemble: {l: "Ensemble avec Rémy", ic: "daily"},
+  ensemble: {l: "Moment à deux", ic: "love"},
   repos: {l: "Repos", ic: "daily"}
 };
+// nom personnalisé d'un type de séance (gardé dans le planning privé, pas dans le code public)
+const typeLabel = t => ((plan().labels || {})[t]) || (TYPES[t] || {l: t}).l;
 const ymd = d => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
 const parseDay = s => new Date(s + "T12:00:00");
 function mesos(){
@@ -2084,7 +2088,8 @@ function session(type, d){
   } else if (type === "krav" || type === "jjb"){
     L.push("Ton cours, sans rien changer : c'est aussi du cardio et du gainage. Pense à bien boire.");
   } else if (type === "ensemble"){
-    L.push("Avec Rémy : le bon moment pour chronométrer un parcours ou un Luc Léger.");
+    L.push("Votre moment à deux ♥");
+    L.push("Si tu as un parcours ou un Luc Léger à faire cette semaine, c'est aussi le bon moment pour que Rémy te chronomètre.");
   } else if (type === "repos"){
     L.push("Repos complet. C'est pendant le repos que le corps progresse.");
   }
@@ -2141,7 +2146,7 @@ function renderPlanning(){
   const W = p[planWk] || {};
   $("planning").innerHTML = `<ul class="steps">${[1, 2, 3, 4, 5, 6, 7].map(d => {
     const l = (W[d] || []).slice().sort((a, b) => (a.h || "").localeCompare(b.h || ""));
-    return `<li><div style="flex:1"><div class="s-t" style="text-transform:capitalize">${DAYS[d]}</div><div class="chips" style="margin-top:4px">${l.length ? l.map((s, i) => `<span class="chip">${s.h ? esc(s.h) + " · " : ""}${esc((TYPES[s.t] || {l: s.t}).l)} <button type="button" class="ghost tiny" data-slot-del="${d}:${esc(s.t)}:${esc(s.h || "")}" aria-label="Retirer" style="padding:0 6px;margin-left:4px">×</button></span>`).join("") : `<span class="note">rien</span>`}</div></div></li>`;
+    return `<li><div style="flex:1"><div class="s-t" style="text-transform:capitalize">${DAYS[d]}</div><div class="chips" style="margin-top:4px">${l.length ? l.map((s, i) => `<span class="chip">${s.h ? esc(s.h) + " · " : ""}${esc(typeLabel(s.t))} <button type="button" class="ghost tiny" data-slot-del="${d}:${esc(s.t)}:${esc(s.h || "")}" aria-label="Retirer" style="padding:0 6px;margin-left:4px">×</button></span>`).join("") : `<span class="note">rien</span>`}</div></div></li>`;
   }).join("")}</ul>`;
 }
 $("slot-type").innerHTML = Object.entries(TYPES).map(([k, t]) => `<option value="${k}">${t.l}</option>`).join("");
@@ -2204,7 +2209,7 @@ function agendaEvents(){
     slotsOn(d).forEach(s => {
       if (s.t === "repos") return;
       const x = session(s.t, d), m = x.m;
-      out.push({d: ymd(d), h: s.h || "18:00", dur: s.t.startsWith("course") ? 60 : 90, t: (TYPES[s.t] || {l: s.t}).l,
+      out.push({d: ymd(d), h: s.h || "18:00", dur: s.t.startsWith("course") ? 60 : 90, t: typeLabel(s.t),
         desc: [`Bloc ${m.n}${m.deload ? " (semaine allégée + tests)" : ""} · semaine ${weekType(d)}`, x.lieu ? "Lieu : " + x.lieu : "", ...x.L.map(stripTags), "", "Détails et chrono : " + location.origin + location.pathname].filter((l, i) => l || i > 0).join("\n")});
     });
   }
@@ -2301,7 +2306,7 @@ const slotKey = s => s.t + "@" + (s.h || "");
 const isDone = (d, s) => !!((S.fait || {})[ymd(d)] || {})[slotKey(s)];
 function weekCount(d){
   const st = weekStart(d || Date.now()); let plan_ = 0, done = 0;
-  for (let i = 0; i < 7; i++){ const day = addDays(st, i); slotsOn(day).forEach(s => { if (s.t === "repos") return; plan_++; if (isDone(day, s)) done++; }); }
+  for (let i = 0; i < 7; i++){ const day = addDays(st, i); slotsOn(day).forEach(s => { if (s.t === "repos" || s.t === "ensemble") return; plan_++; if (isDone(day, s)) done++; }); }
   return {plan: plan_, done};
 }
 
@@ -2310,7 +2315,8 @@ const ICONS = {
   run: '<svg viewBox="0 0 24 24"><circle cx="14" cy="4" r="2"/><path d="M8 21l3-6 3 3v3M6 12l3-4 4 1 3 4 3 1"/></svg>',
   fp: '<svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M10 2h4"/></svg>',
   club: '<svg viewBox="0 0 24 24"><path d="M3 12h18M6 8v8M18 8v8"/></svg>',
-  daily: '<svg viewBox="0 0 24 24"><path d="M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.6-7 10-7 10z"/></svg>'
+  daily: '<svg viewBox="0 0 24 24"><path d="M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.6-7 10-7 10z"/></svg>',
+  love: '<svg viewBox="0 0 24 24"><path d="M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.6-7 10-7 10z" fill="#fff"/></svg>'
 };
 let selDay = null;
 function actionFor(s, d, x){
@@ -2328,7 +2334,7 @@ function renderToday(){
   // bandeau de la semaine
   const st = weekStart(d);
   $("daystrip").innerHTML = [0, 1, 2, 3, 4, 5, 6].map(i => {
-    const day = addDays(st, i), sl = slotsOn(day).filter(s => s.t !== "repos"), all = sl.length && sl.every(s => isDone(day, s));
+    const day = addDays(st, i), sl = slotsOn(day).filter(s => s.t !== "repos"), tr = sl.filter(s => s.t !== "ensemble"), all = tr.length && tr.every(s => isDone(day, s));
     return `<button type="button" class="day${ymd(day) === ymd(now) ? " is-today" : ""}${all ? " all-done" : ""}" role="tab" aria-selected="${ymd(day) === ymd(d)}" data-day="${ymd(day)}"><small>${DAYS[i + 1].slice(0, 3)}</small><b>${day.getDate()}</b><span class="dots">${sl.slice(0, 4).map(s => `<i class="${(TYPES[s.t] || {ic: "daily"}).ic}${isDone(day, s) ? " ok" : ""}"></i>`).join("")}</span></button>`;
   }).join("");
   const title = isToday ? "Aujourd'hui" : d.toLocaleDateString("fr-FR", {weekday: "long", day: "numeric", month: "long"});
@@ -2342,10 +2348,10 @@ function renderToday(){
     const T = TYPES[s.t] || {l: s.t, ic: "daily"}, x = session(s.t, d), a = actionFor(s, d, x), done = isDone(d, s);
     const main = x.L[0] || "", more = x.L.slice(1);
     return `<div class="sess${done ? " done" : ""}"><span class="ic ${T.ic}">${ICONS[T.ic] || ICONS.daily}</span><div>
-      <h3>${T.l}</h3><div class="when">${s.h ? s.h.replace(":", " h ") : "Quand tu veux"}${x.lieu ? " · " + esc(x.lieu) : ""}</div>
+      <h3>${esc(typeLabel(s.t))}</h3><div class="when">${s.h ? s.h.replace(":", " h ") : "Quand tu veux"}${x.lieu ? " · " + esc(x.lieu) : ""}</div>
       <p class="what">${main}</p>
       ${more.length ? `<details><summary>Détails</summary>${more.map(l => `<p>${l}</p>`).join("")}</details>` : ""}
-      ${s.t === "repos" ? "" : `<div class="acts">${a ? `<button type="button" class="btn" data-goto="${a.go}"${a.mode ? ` data-mode="${a.mode}"` : ""}>${a.l}</button>` : ""}<button type="button" class="ghost done-btn" data-done="${ymd(d)}|${esc(slotKey(s))}" aria-pressed="${done}">${done ? "Fait ✓" : "Fait"}</button></div>`}
+      ${s.t === "repos" || s.t === "ensemble" ? "" : `<div class="acts">${a ? `<button type="button" class="btn" data-goto="${a.go}"${a.mode ? ` data-mode="${a.mode}"` : ""}>${a.l}</button>` : ""}<button type="button" class="ghost done-btn" data-done="${ymd(d)}|${esc(slotKey(s))}" aria-pressed="${done}">${done ? "Fait ✓" : "Fait"}</button></div>`}
     </div></div>`;
   });
   if (!sl.some(s => s.t === "repos")) cards.push(`<div class="sess"><span class="ic daily">${ICONS.daily}</span><div><h3>Routine 10 min</h3><div class="when">Quand tu veux</div><p class="what">3 suspensions à la barre, 3 × 5 pompes, mobilité des poignets.</p></div></div>`);
