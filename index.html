@@ -713,7 +713,7 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--accent)}
 <body>
 <header class="topbar">
   <button type="button" class="icon-btn" id="top-back" aria-label="Retour" hidden><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
-  <span class="brand" id="top-title">Athéna</span>
+  <span class="brand" id="top-title"></span>
   <button type="button" class="count-chip" id="topcount" data-goto="reglages" aria-label="Jours avant les épreuves"></button>
   <button type="button" class="icon-btn" data-goto="reglages" aria-label="Réglages"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
   <button type="button" class="inst-chip" data-install aria-label="Installer l'appli"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Installer</button>
@@ -2672,7 +2672,7 @@ function renderTrainNav(v){
   document.querySelectorAll(".trainnav").forEach(n => n.innerHTML = TRAIN.map(k => `<button type="button" data-goto="${k}" aria-current="${k === v}">${TRAIN_LABELS[k]}</button>`).join(""));
 }
 function chrome(v){
-  $("top-title").textContent = v === "accueil" ? (prenom() || "Athéna") : (TITLES[v] || "Athéna");
+  $("top-title").textContent = v === "accueil" ? prenom() : (TITLES[v] || "Athéna");
   const sub = v === "ateliers" || v === "reglages";
   $("top-back").hidden = !sub;
   document.querySelector(".topbar").classList.toggle("sub", sub);
@@ -2783,7 +2783,7 @@ function setAppName(){
 }
 function renderHello(){
   setAppName();
-  if (!$("v-accueil").hidden) $("top-title").textContent = prenom() || "Athéna";
+  if (!$("v-accueil").hidden) $("top-title").textContent = prenom();
   const now = new Date(), h = now.getHours(), dl = daysLeft(), m = mesoAt(now);
   $("topcount").textContent = dl != null && dl >= 0 ? (dl === 0 ? "Jour J" : "J−" + dl) : "";
   const a = parseDay("2026-11-09").getTime(), b = parseDay(S.exam || "2027-03-29").getTime();
