@@ -733,6 +733,22 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--accent)}
 .mcal .mwk.wA{color:var(--accent)}
 .mcell .lv{position:absolute;top:2px;left:4px;font-size:.62rem;line-height:1;color:#E0567F}
 .mcell.love{background:color-mix(in srgb,#E0567F 9%,transparent)}
+.weeklist{display:flex;flex-direction:column;gap:6px;margin-top:14px}
+.weeklist .wl-h{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.weeklist .wl-h b{font-family:var(--display);font-size:1.05rem}
+.weeklist .wd{display:grid;grid-template-columns:44px 1fr;gap:10px;align-items:start;text-align:left;width:100%;background:none;border:1px solid var(--line);border-radius:12px;padding:8px 10px;color:var(--ink);font:inherit;cursor:pointer}
+.weeklist .wd.today{border-color:var(--accent)}
+.weeklist .wd.sel{background:var(--floor)}
+.weeklist .wd-h{display:flex;flex-direction:column;align-items:center;line-height:1.15}
+.weeklist .wd-h b{font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.weeklist .wd-h span{font-family:var(--display);font-size:1.15rem;font-weight:700}
+.weeklist .wd-l{display:flex;flex-direction:column;gap:4px;min-width:0}
+.ev{display:block;border-radius:8px;padding:4px 8px;font-size:.84rem;font-weight:600;line-height:1.3;overflow-wrap:anywhere}
+.ev em{font-style:normal;font-weight:700;margin-right:6px;opacity:.85}
+.ev.sport{background:color-mix(in srgb,#E8833A 18%,transparent);color:var(--ink);border-left:3px solid #E8833A}
+.ev.love{background:color-mix(in srgb,#E0567F 16%,transparent);color:var(--ink);border-left:3px solid #E0567F}
+.weeklist .wl-leg{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:2px}
+.weeklist .wl-leg .ev{display:inline-block;font-size:.76rem;padding:2px 8px}
 </style>
 </head>
 <body>
@@ -3088,14 +3104,33 @@ function renderCal(){
 }
 function renderCalDay(){
   const el = $("cal-day"); if (!el) return;
-  if (!calSel){ el.innerHTML = `<p class="note">Touche un jour pour voir ses séances.</p>`; return; }
+  if (!calSel){ el.innerHTML = weekList(new Date(new Date().setHours(12, 0, 0, 0))) + `<p class="note">Touche un jour du calendrier pour voir sa semaine et le détail de ses séances.</p>`; return; }
   const d = parseDay(calSel), I = dayInfo(d);
   const head = `<div class="row between"><b style="font-family:var(--display);font-size:1.15rem;text-transform:capitalize">${d.toLocaleDateString("fr-FR", {weekday: "long", day: "numeric", month: "long"})}</b><span class="note">${I.m ? "Bloc " + I.m.n + (I.m.deload ? " · semaine allégée" : "") + " · semaine " + weekType(d) : ""}</span></div>`;
-  const items = I.sl.map(s => { const T = TYPES[s.t] || {ic: "daily"}, x = session(s.t, d, s.h); return `<div class="it"><i class="${T.ic}"></i><div><b>${s.h ? fmtH(s.h) + " · " : ""}${esc(slotTitle(s))}</b>${s.t !== "ensemble" && isDone(d, s) ? ` <span class="verdict ok">fait</span>` : ""}<div class="note">${stripTags(x.L[0] || "")}</div></div></div>`; }).join("");
+  const items = I.sl.map(s => { const T = TYPES[s.t] || {ic: "daily"}, x = session(s.t, d, s.h); return `<div class="it"><i class="${T.ic}"></i><div><b>${s.h ? slotHours(s) + " · " : ""}${esc(slotTitle(s, d))}</b>${s.t !== "ensemble" && isDone(d, s) ? ` <span class="verdict ok">fait</span>` : ""}<div class="note">${stripTags(x.L[0] || "")}</div></div></div>`; }).join("");
   const objs = I.obj.map(o => `<div class="it"><i style="background:var(--warn);border-radius:2px;transform:rotate(45deg)"></i><div><b>Échéance</b><div class="note">${esc(o.label)}${o.ok ? " · atteint" : ""}</div></div></div>`).join("");
   const exam = I.exam ? `<div class="it"><i style="background:var(--cone)"></i><div><b>Épreuves sportives</b><div class="note">Le grand jour ♥</div></div></div>` : "";
   el.innerHTML = `<div class="calday">${head}${items || (I.inRange ? `<p class="note">${planEmpty() ? (notLinked() ? "Ce téléphone n'est pas relié à votre espace : Réglages › Partage entre téléphones › « Coller et rejoindre »." : "Remplis ton planning pour voir tes séances.") : "Rien de prévu : repos."}</p>` : `<p class="note">En dehors du programme.</p>`)}${objs}${exam}
-    ${I.inRange && !planEmpty() ? `<button type="button" class="ghost small" data-open-day="${calSel}" style="align-self:flex-start">Ouvrir ce jour dans Aujourd'hui</button>` : ""}</div>`;
+    ${I.inRange && !planEmpty() ? `<button type="button" class="ghost small" data-open-day="${calSel}" style="align-self:flex-start">Ouvrir ce jour dans Aujourd'hui</button>` : ""}</div>` + weekList(d);
+}
+// la semaine en liste, comme un agenda : orange = sport, rose = moments à deux
+function weekList(base){
+  if (planEmpty()) return "";
+  const st = weekStart(base), en = addDays(st, 6), today = ymd(new Date()), sel = calSel;
+  const f = x => x.toLocaleDateString("fr-FR", {day: "numeric", month: "short"});
+  const rows = [0, 1, 2, 3, 4, 5, 6].map(i => {
+    const d = addDays(st, i); d.setHours(12, 0, 0, 0);
+    const k = ymd(d), inR = d >= calStart() && d <= calEnd();
+    const sl = inR ? slotsOn(d).filter(s => s.t !== "repos") : [];
+    const evs = sl.map(s => {
+      const love = s.t === "ensemble", x = session(s.t, d, s.h);
+      const name = love ? (stripTags(x.L[0] || "").split(" · ")[0] || typeLabel("ensemble")) : ((s.t !== "ensemble" && x.titre) || typeLabel(s.t));
+      return `<span class="ev ${love ? "love" : "sport"}">${s.h ? `<em>${slotHours(s)}</em>` : ""}${love || s.duo ? "♥ " : ""}${esc(name)}</span>`;
+    }).join("");
+    return `<button type="button" class="wd${k === today ? " today" : ""}${k === sel ? " sel" : ""}" data-cal="${k}"><span class="wd-h"><b>${DAYS[dow(d)].slice(0, 3)}</b><span>${d.getDate()}</span></span><span class="wd-l">${evs || `<span class="note">${inR ? "Repos" : "—"}</span>`}</span></button>`;
+  }).join("");
+  return `<div class="weeklist"><div class="wl-h"><b>Semaine ${weekType(st)}</b><span class="note">${f(st)} – ${f(en)}</span></div>${rows}
+    <div class="wl-leg"><span class="ev sport">Sport</span><span class="ev love">Moments à deux</span><span class="note">♥ = ensemble</span></div></div>`;
 }
 $("cal-prev").addEventListener("click", () => { calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth() - 1, 1, 12); renderCal(); });
 $("cal-next").addEventListener("click", () => { calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth() + 1, 1, 12); renderCal(); });
