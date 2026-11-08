@@ -708,6 +708,12 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--accent)}
 #mes-form button{min-height:46px;font-size:1rem;padding:10px 16px}
 [data-athena] img{display:block;width:100%;height:100%;border-radius:23%;box-shadow:0 0 0 1px rgba(255,255,255,.14)}
 .topbar .brand::before{background-color:#151318;box-shadow:0 0 0 1px color-mix(in srgb,var(--ink) 14%,transparent)}
+.weeknav{display:grid;grid-template-columns:40px 1fr 40px;align-items:center;margin-bottom:8px}
+.weeknav .wk-lab{text-align:center;display:flex;flex-direction:column;line-height:1.25}
+.weeknav .wk-lab b{font-family:var(--display);font-size:1rem}
+.weeknav .wk-lab span{font-size:.8rem;color:var(--muted)}
+.weeknav .wk-arrow{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:transparent;color:var(--ink);font-size:1.4rem;line-height:1;cursor:pointer;display:grid;place-items:center;padding:0 0 3px}
+.weeknav .wk-today{grid-column:1/-1;justify-self:center;margin-top:4px}
 </style>
 </head>
 <body>
@@ -731,6 +737,7 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--accent)}
   <div class="panel setup" id="setup" hidden></div>
 
   <div class="card-today">
+    <div class="weeknav" id="weeknav"></div>
     <div class="daystrip" id="daystrip" role="tablist" aria-label="Jours de la semaine"></div>
     <button type="button" class="link" data-goto="plan" data-anchor="cal-panel" style="align-self:flex-end;margin-top:-6px">Calendrier jusqu'au concours ›</button>
     <div id="today"></div>
@@ -2714,7 +2721,12 @@ function renderToday(){
   const now = new Date(); now.setHours(12, 0, 0, 0);
   const d = selDay ? parseDay(selDay) : now, isToday = ymd(d) === ymd(now), m = mesoAt(d);
   // bandeau de la semaine
-  const st = weekStart(d);
+  const st = weekStart(d), en = addDays(st, 6), curWk = ymd(st) === ymd(weekStart(now));
+  const f = x => x.toLocaleDateString("fr-FR", {day: "numeric", month: "short"});
+  $("weeknav").innerHTML = `<button type="button" class="wk-arrow" data-wk="-1" aria-label="Semaine précédente">‹</button>
+    <div class="wk-lab"><b>${curWk ? "Cette semaine" : ymd(st) === ymd(addDays(weekStart(now), 7)) ? "Semaine prochaine" : "Semaine " + weekType(st)}</b><span>${st.getDate()}${st.getMonth() === en.getMonth() ? "" : " " + f(st).split(" ")[1]} – ${f(en)}${curWk ? "" : " · semaine " + weekType(st)}</span></div>
+    <button type="button" class="wk-arrow" data-wk="1" aria-label="Semaine suivante">›</button>`
+    + (isToday ? "" : `<button type="button" class="link wk-today" data-wk="0">Revenir à aujourd'hui</button>`);
   $("daystrip").innerHTML = [0, 1, 2, 3, 4, 5, 6].map(i => {
     const day = addDays(st, i), sl = slotsOn(day).filter(s => s.t !== "repos"), tr = sl.filter(s => s.t !== "ensemble"), all = tr.length && tr.every(s => isDone(day, s));
     return `<button type="button" class="day${ymd(day) === ymd(now) ? " is-today" : ""}${all ? " all-done" : ""}" role="tab" aria-selected="${ymd(day) === ymd(d)}" data-day="${ymd(day)}"><small>${DAYS[i + 1].slice(0, 3)}</small><b>${day.getDate()}</b><span class="dots">${sl.slice(0, 4).map(s => `<i class="${(TYPES[s.t] || {ic: "daily"}).ic}${isDone(day, s) ? " ok" : ""}"></i>`).join("")}</span></button>`;
@@ -2742,6 +2754,13 @@ function renderToday(){
 document.addEventListener("click", e => {
   const day = e.target.closest("[data-day]");
   if (day){ selDay = day.dataset.day === ymd(new Date()) ? null : day.dataset.day; renderToday(); return; }
+  const wk = e.target.closest("[data-wk]");
+  if (wk){
+    const n = Number(wk.dataset.wk), now = new Date(); now.setHours(12, 0, 0, 0);
+    if (!n){ selDay = null; renderToday(); return; }
+    const cur = selDay ? parseDay(selDay) : now, tgt = weekStart(addDays(cur, 7 * n));
+    selDay = ymd(tgt) === ymd(weekStart(now)) ? null : ymd(tgt); renderToday(); return;
+  }
   const b = e.target.closest("[data-done]"); if (!b) return;
   const [d, k] = b.dataset.done.split("|"), o = JSON.parse(JSON.stringify(S.fait || {}));
   o[d] = o[d] || {}; if (o[d][k]) delete o[d][k]; else o[d][k] = Date.now();
