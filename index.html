@@ -2418,7 +2418,7 @@ function poutrePalier(){
 // contenu de chaque séance selon le bloc et la semaine
 function session(type, d, h){
   const m = mesoAt(d), w = Math.min(m.wk, 3), L = [];
-  let lieu = "";
+  let lieu = "", titre = "";
   const warm = "Échauffement : 15 min de footing + 3 accélérations. Retour au calme : 10 min très lent.";
   if (type === "course_end"){
     const tab = [[30], [35, 40, 50, 30], [45, 55, 60, 35], [45, 45, 50, 30], [40, 40, 40, 25], [35, 30, 20]][m.i];
@@ -2431,8 +2431,9 @@ function session(type, d, h){
     lieu = "Citadelle (mesure 20 m pour les navettes) ou tapis de course s'il pleut";
     const test = m.deload || (m.i === 0 && type === "luc");
     if (m.i === 0 && type === "course_frac"){
+      titre = "Course · facile";
       L.push("<b>30 min</b> de course facile : ton test Luc Léger se fait avec le parcours cette semaine.");
-    } else if (test) L.push("<b>Test Luc Léger complet</b> avec l'appli (départ palier 1). Le résultat s'enregistre tout seul.");
+    } else if (test){ titre = "Test Luc Léger"; L.push("<b>Test Luc Léger complet</b> avec l'appli (départ palier 1). Le résultat s'enregistre tout seul."); }
     else {
       const TT = [null,
         [{reps: 6, work: 60, rest: 60}, {reps: 8, work: 60, rest: 60}, {reps: 10, work: 60, rest: 60}],
@@ -2464,7 +2465,11 @@ function session(type, d, h){
       ["Parcours, 2 min de repos, parcours (enchaîner fatiguée), 2 fois.", "Idem, en visant zéro pénalité.", "3 parcours + 10 min sur ton atelier le plus lent.", "<b>Test</b> : parcours chronométré + Luc Léger."],
       ["<b>Simulation concours</b> : sac + parcours, 30 min de repos, Luc Léger complet.", "3 parcours sans aucune pénalité.", "<b>Simulation concours</b>.", "<b>Test</b> : parcours + Luc Léger."],
       ["<b>Dernière simulation concours</b> (au moins 10 jours avant les épreuves).", "2 parcours tranquilles, technique.", "1 parcours léger, puis repos."]][m.i];
-    L.push(P[Math.min(m.wk, P.length - 1)]);
+    const pt = P[Math.min(m.wk, P.length - 1)];
+    if (/^<b>TEST/.test(pt)) titre = "Tests de départ : parcours + Luc Léger";
+    else if (/^<b>Test/.test(pt)) titre = /Luc Léger/.test(pt) ? "Test : parcours + Luc Léger" : "Test parcours";
+    else if (/simulation/i.test(pt)) titre = "Simulation concours";
+    L.push(pt);
     L.push("Chronomètre avec l'onglet Parcours.");
   } else if (type === "gym"){
     lieu = "Club de gymnastique";
@@ -2494,7 +2499,7 @@ function session(type, d, h){
     L.push("Repos complet. C'est pendant le repos que le corps progresse.");
   }
   if ((type.startsWith("course") || type === "freeletics" || type === "luc") && L.length) L[0] += " Puis <b>20 min de souplesse</b> avec Pliability.";
-  return {lieu, L, m, timer: typeof timer !== "undefined" ? timer : null};
+  return {lieu, L, m, titre, timer: typeof timer !== "undefined" ? timer : null};
 }
 function slotHTML(s, d, compact){
   const T = TYPES[s.t] || {l: s.t, ic: "daily"}, x = session(s.t, d);
@@ -2610,7 +2615,7 @@ function agendaEvents(){
     slotsOn(d).forEach(s => {
       if (s.t === "repos") return;
       const x = session(s.t, d, s.h), m = x.m;
-      out.push({d: ymd(d), h: s.h || "18:00", dur: s.t.startsWith("course") ? 60 : 90, t: slotTitle(s),
+      out.push({d: ymd(d), h: s.h || "18:00", dur: ({gym: 120, krav: 60, jjb: 180})[s.t] || (s.t.startsWith("course") ? 60 : 90), t: slotTitle(s, d),
         desc: [`Bloc ${m.n}${m.deload ? " (semaine allégée + tests)" : ""} · semaine ${weekType(d)}`, x.lieu ? "Lieu : " + x.lieu : "", ...x.L.map(stripTags), "", "Détails et chrono : " + location.origin + location.pathname].filter((l, i) => l || i > 0).join("\n")});
     });
   }
@@ -2754,7 +2759,7 @@ $("top-back").addEventListener("click", () => show(prevView && prevView !== "reg
 /* ---- séances faites ---- */
 function saveFait(o){ S.fait = o; lsSet("phm-fait", o); if (FS) FS.setDoc(FS.doc(FS.db, "equipes", team, "reglages", "fait"), o).catch(writeErr); }
 const slotKey = s => s.t + "@" + (s.h || "");
-const slotTitle = s => (s.duo ? typeLabel("ensemble") + " · " : "") + typeLabel(s.t);
+const slotTitle = (s, d) => (s.duo ? typeLabel("ensemble") + " · " : "") + ((d && s.t !== "ensemble" && session(s.t, d, s.h).titre) || typeLabel(s.t));
 const isDone = (d, s) => !!((S.fait || {})[ymd(d)] || {})[slotKey(s)];
 function weekCount(d){
   const st = weekStart(d || Date.now()); let plan_ = 0, done = 0;
@@ -2805,7 +2810,7 @@ function renderToday(){
     const T = TYPES[s.t] || {l: s.t, ic: "daily"}, x = session(s.t, d, s.h), a = actionFor(s, d, x), done = isDone(d, s);
     const main = x.L[0] || "", more = x.L.slice(1);
     return `<div class="sess${done ? " done" : ""}"><span class="ic ${T.ic}" style="position:relative">${ICONS[T.ic] || ICONS.daily}${s.duo ? `<em class="duo-badge">♥</em>` : ""}</span><div>
-      <h3>${esc(slotTitle(s))}</h3><div class="when">${s.h ? fmtH(s.h) : "Quand tu veux"}${x.lieu ? " · " + esc(x.lieu) : ""}</div>
+      <h3>${esc(slotTitle(s, d))}</h3><div class="when">${s.h ? fmtH(s.h) : "Quand tu veux"}${x.lieu ? " · " + esc(x.lieu) : ""}</div>
       <p class="what">${main}</p>
       ${more.length ? `<details><summary>Détails</summary>${more.map(l => `<p>${l}</p>`).join("")}</details>` : ""}
       ${s.t === "repos" || s.t === "ensemble" ? "" : `<div class="acts">${a ? `<button type="button" class="btn" data-goto="${a.go}"${a.mode ? ` data-mode="${a.mode}"` : ""}>${a.l}</button>` : ""}<button type="button" class="ghost done-btn" data-done="${ymd(d)}|${esc(slotKey(s))}" aria-pressed="${done}">${done ? "Fait ✓" : "Fait"}</button></div>`}
@@ -2873,7 +2878,7 @@ function renderHello(){
   const nWeeks = Math.max(1, Math.round((m.B - m.A) / (7 * 86400000)));
   const nx = planEmpty() ? null : nextSession();
   const nxTxt = planEmpty() ? `<button type="button" class="link" style="color:#FFB07F" data-goto="plan" data-anchor="planning-panel">Remplis ton planning ›</button>`
-    : nx ? `<b>${nx.i === 0 ? "Aujourd'hui" : nx.i === 1 ? "Demain" : DAYS[dow(nx.day)].replace(/^./, c => c.toUpperCase())}${nx.s.h ? " · " + fmtH(nx.s.h) : ""}</b><span class="nx-t">${esc(slotTitle(nx.s))}</span>` : "Rien de prévu cette semaine";
+    : nx ? `<b>${nx.i === 0 ? "Aujourd'hui" : nx.i === 1 ? "Demain" : DAYS[dow(nx.day)].replace(/^./, c => c.toUpperCase())}${nx.s.h ? " · " + fmtH(nx.s.h) : ""}</b><span class="nx-t">${esc(slotTitle(nx.s, nx.day))}</span>` : "Rien de prévu cette semaine";
   $("hero-main").innerHTML = `<div class="kick">${now.toLocaleDateString("fr-FR", {weekday: "long", day: "numeric", month: "long"})}</div>
     <h1>${h < 12 ? "Bonjour" : h < 18 ? "Bon après-midi" : "Bonsoir"}</h1>
     <div class="hero-grid">
