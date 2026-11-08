@@ -696,6 +696,15 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--accent)}
 #hero-main .nx b{display:block}
 #hero-main .nx .nx-t{display:block;opacity:.82;font-size:.92em;line-height:1.3;margin-top:2px}
 .frise .bars span{font-size:.72rem;padding:0 2px;text-overflow:clip;min-width:0}
+#mes-form{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#mes-form select,#mes-form button{grid-column:1/-1}
+#mes-form>*{width:100%;min-width:0;margin:0}
+.topbar .inst-chip{order:1}.topbar #topcount{order:2}.topbar .icon-btn[data-goto]{order:3}
+#v-reglages select,#v-reglages input[type=date],#v-reglages input[type=number]{width:100%;max-width:none}
+#share-on{width:100%}
+#join-in+#join-go{flex:0 0 auto}
+.gh{flex-wrap:nowrap;align-items:center}.gh .lab{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.gh .verdict{flex:0 0 auto;white-space:nowrap}
+@media (min-width:800px){.wrap{max-width:760px}.topbar{padding-inline:max(16px,calc((100% - 760px)/2 + 16px))}nav.tabs{max-width:560px}}
 </style>
 </head>
 <body>
@@ -856,9 +865,9 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--accent)}
         <option value="poutre">Poutre : hauteur maîtrisée (cm)</option>
         <option value="course">Course sans t'arrêter (km)</option>
       </select>
-      <input type="number" id="mes-val" min="0" step="0.5" required aria-label="Valeur" style="width:90px">
+      <input type="number" id="mes-val" min="0" step="0.5" required aria-label="Valeur" placeholder="Valeur" inputmode="decimal">
       <input type="date" id="mes-date" aria-label="Date">
-      <button class="ghost small" type="submit">Ajouter</button>
+      <button class="go" type="submit">Ajouter</button>
     </form>
   </div>
   <div class="mes-grid" id="mes-grid"></div>
@@ -1639,8 +1648,8 @@ function scoreCard(el, kind){
   }
   const pct = note == null ? 0 : note / 20 * 100;
   const color = kind === "phm" ? "var(--cone)" : "var(--run)";
-  const badge = note == null ? "" : note >= 7 ? `<span class="verdict ok">au-dessus de 7</span>` : `<span class="verdict slow">sous 7, éliminatoire</span>`;
-  el.innerHTML = `<div class="row between"><span class="lab">${kind === "phm" ? "Parcours d'habileté motrice" : "Luc Léger"}</span>${badge}</div>
+  const badge = note == null ? "" : note >= 7 ? `<span class="verdict ok" title="au-dessus de 7/20">validé</span>` : `<span class="verdict slow" title="sous 7/20 : éliminatoire">sous 7</span>`;
+  el.innerHTML = `<div class="row between gh"><span class="lab">${kind === "phm" ? "Parcours d'habileté motrice" : "Luc Léger"}</span>${badge}</div>
     <div class="big">${note == null ? "—" : fr(note)}<small> /20</small></div>
     <div class="gauge" aria-hidden="true"><i style="width:${pct}%;background:${color}"></i><span class="seuil" style="left:35%"></span></div>
     <div class="note"><b style="color:var(--ink)">${main}</b> · ${sub}</div><div class="note" style="font-size:.8rem">Le petit trait sur la barre marque 7/20, le minimum.</div>`;
