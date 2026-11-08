@@ -1399,6 +1399,7 @@ function show(v, noScroll){
   chrome(v);
   if (v === "frac") frFill();
   if (v === "tests") renderMesures();
+  if (v === "plan" && typeof renderGcal === "function") renderGcal(true);
   try { history.replaceState(null, "", "#" + v); } catch(e){}
   if (!noScroll) window.scrollTo(0, 0);
   if (v === "progres") renderProg();
@@ -2635,7 +2636,7 @@ async function gcalCall(path, extra){
 let gcalAt = 0, gcalFlash = "";
 async function renderGcal(force){
   if (!$("gcal") || !team || !AGENDA_BASE) return;
-  if (gcalState && !force && Date.now() - gcalAt < 60000) return paintGcal();
+  if (gcalState && gcalState.configured && !force && Date.now() - gcalAt < 60000) return paintGcal();
   if (gcalState) paintGcal();
   try { gcalState = await gcalCall("status"); gcalAt = Date.now(); } catch(e){ if (!gcalState) gcalState = {offline: true}; }
   paintGcal();
