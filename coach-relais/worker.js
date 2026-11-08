@@ -147,7 +147,7 @@ async function gSyncKey(env, k, team, force){
       start: {dateTime: `${e.d}T${e.h}:00`, timeZone: "Europe/Paris"},
       end: {dateTime: `${e.d}T${String(Math.floor(endMin / 60)).padStart(2, "0")}:${String(endMin % 60).padStart(2, "0")}:00`, timeZone: "Europe/Paris"},
       reminders: alarm > 0 ? {useDefault: false, overrides: [{method: "popup", minutes: alarm}]} : {useDefault: false}, status: "confirmed"};
-    body.colorId = e.love ? "4" : "6"; // rose (Flamingo) = moments à deux · orange (Mandarine) = sport
+    body.colorId = e.love ? "11" : "10"; // rouge (Tomate) = moments à deux · vert (Basilic) = sport — pas de violet (ses rdv perso)
     want[key] = {body, hash: JSON.stringify(body).length + ":" + [...JSON.stringify(body)].reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 0)};
   }
   const calP = `/calendar/v3/calendars/${encodeURIComponent(st.cal)}/events`, today = parisToday(), ops = [];
