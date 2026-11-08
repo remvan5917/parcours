@@ -592,6 +592,7 @@ nav.tabs button[aria-current="page"],.trainnav button[aria-current="true"],.chip
 [data-athena] img{display:block;width:100%;height:100%;border-radius:22%}
 .hero-card .kick,.hero-card h1{padding-right:66px}
 #hero-main{position:relative;z-index:1}
+.topbar.sub .brand::before,.topbar.sub .count-chip,.topbar.sub .inst-chip{display:none}
 .hero-ava{position:absolute;z-index:3;top:16px;right:16px;width:56px;height:56px;filter:drop-shadow(0 8px 14px rgba(0,0,0,.35));animation:float 4s ease-in-out infinite}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
 .ath-head{display:flex;align-items:center;gap:14px}
@@ -2566,6 +2567,7 @@ function chrome(v){
   $("top-title").textContent = TITLES[v] || "Athéna";
   const sub = v === "ateliers" || v === "reglages";
   $("top-back").hidden = !sub;
+  document.querySelector(".topbar").classList.toggle("sub", sub);
   if (TRAIN.includes(v)){ lsSet("phm-train", v); renderTrainNav(v); }
 }
 $("top-back").addEventListener("click", () => show(prevView && prevView !== "reglages" && prevView !== "ateliers" ? prevView : "accueil"));
