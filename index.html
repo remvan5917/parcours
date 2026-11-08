@@ -2610,7 +2610,7 @@ function syncAgenda(){
   const payload = JSON.stringify({alarm: Number(lsGet("phm-alarm", 30)) || 30, ev: agendaEvents()});
   let h = 0; for (let i = 0; i < payload.length; i++) h = (h * 31 + payload.charCodeAt(i)) | 0;
   if (lsGet("phm-agenda-hash-" + team, null) === h) return;
-  FS.setDoc(FS.doc(FS.db, "equipes", team, "reglages", "agenda"), {at: Date.now(), json: payload}).then(() => lsSet("phm-agenda-hash-" + team, h)).catch(writeErr);
+  FS.setDoc(FS.doc(FS.db, "equipes", team, "reglages", "agenda"), {at: Date.now(), json: payload}).then(() => { lsSet("phm-agenda-hash-" + team, h); if (AGENDA_BASE) gcalCall("sync").catch(() => {}); }).catch(writeErr);
 }
 function renderAgendaSub(){
   const el = $("agenda-sub"); if (!el) return;
@@ -2618,14 +2618,59 @@ function renderAgendaSub(){
   if (!team || !FB){ el.innerHTML = `<p class="note">D'abord, active le partage (roue dentée en haut › Partage entre téléphones) : l'agenda en ligne utilise votre espace partagé.</p>`; return; }
   if (planEmpty()){ el.innerHTML = `<p class="note">Remplis d'abord ton planning ci-dessus.</p>`; return; }
   const https = `${AGENDA_BASE}/agenda/${team}.ics`, webcal = https.replace(/^https:/, "webcal:");
-  el.innerHTML = `<p><b>Sur iPhone :</b></p>
+  el.innerHTML = `<div class="gcal" id="gcal"></div>
+    <details class="more"><summary>Plutôt l'agenda de l'iPhone (Calendrier Apple) ?</summary><div class="in">
+    <p><b>Sur iPhone :</b></p>
     <a class="btn small" style="text-decoration:none;display:inline-block;padding:9px 14px;border-radius:9px;align-self:flex-start" href="${webcal}">S'abonner dans l'agenda de l'iPhone</a>
     <p class="note">Touche « S'abonner », puis <b>désactive « Supprimer les alertes »</b> pour garder les rappels, et « Ajouter ».</p>
-    <p><b>Sur Android (Google Agenda) :</b></p>
-    <a class="ghost small" style="text-decoration:none;display:inline-block;padding:8px 13px;border:1px solid var(--line);border-radius:9px;color:var(--ink);align-self:flex-start" href="https://calendar.google.com/calendar/r?cid=${encodeURIComponent(webcal)}" target="_blank" rel="noopener">Ajouter à Google Agenda</a>
-    <p class="note">Confirme « Ajouter ». Puis, dans l'appli Google Agenda : Paramètres › « Entraînement concours » › Notifications, choisis une alerte. Google met à jour un agenda abonné toutes les quelques heures.</p>
+    <p class="note">N'utilise pas les deux : chaque séance apparaîtrait en double.</p></div></details>
     <details class="more"><summary>Autre agenda (Samsung, Outlook…)</summary><div class="in"><p class="note">Ajoute un agenda « par adresse / abonnement » avec ce lien :</p><input type="text" readonly value="${esc(https)}" style="font:inherit;font-size:.82rem;width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:7px;background:var(--floor);color:var(--ink)"></div></details>`;
+  paintGcal(); renderGcal();
 }
+let gcalState = null;
+async function gcalCall(path, extra){
+  const r = await fetch(`${AGENDA_BASE}/google/${path}`, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(Object.assign({equipe: team}, extra || {}))});
+  return r.json();
+}
+let gcalAt = 0, gcalFlash = "";
+async function renderGcal(force){
+  if (!$("gcal") || !team || !AGENDA_BASE) return;
+  if (gcalState && !force && Date.now() - gcalAt < 60000) return paintGcal();
+  if (gcalState) paintGcal();
+  try { gcalState = await gcalCall("status"); gcalAt = Date.now(); } catch(e){ if (!gcalState) gcalState = {offline: true}; }
+  paintGcal();
+}
+function paintGcal(){
+  const g = gcalState && !gcalState.offline ? gcalState : null, el2 = $("gcal"); if (!el2) return;
+  const head = `<p><b>Google Agenda</b></p>` + (gcalFlash ? `<p class="verdict ${/connecté/.test(gcalFlash) ? "ok" : "slow"}" style="display:inline-block;margin:0 0 6px">${gcalFlash}</p>` : "");
+  if (!gcalState){ el2.innerHTML = head + `<p class="note">Vérification…</p>`; return; }
+  if (!g){ el2.innerHTML = head + `<p class="note">Pas de réseau pour le moment.</p>`; return; }
+  if (!g.configured){ el2.innerHTML = head + `<p class="note">La connexion à Google Agenda arrive très bientôt.</p>`; return; }
+  if (g.connected && !g.revoked){
+    const when = g.synced ? new Date(g.synced).toLocaleString("fr-FR", {day: "numeric", month: "short", hour: "2-digit", minute: "2-digit"}) : "";
+    el2.innerHTML = head + `<p class="note"><b style="color:var(--ok)">Connecté.</b> Tes séances sont dans l'agenda « Athéna · entraînement » de ton compte Google, avec un rappel avant chacune. Elles se mettent à jour toutes seules.${when ? ` Dernière mise à jour : ${when}.` : ""}${g.pending ? " Quelques séances sont encore en cours d'envoi." : ""}</p>
+      <div class="row"><button type="button" class="ghost small" id="gcal-sync">Mettre à jour maintenant</button><button type="button" class="ghost small" id="gcal-off">Déconnecter</button></div>`;
+    return;
+  }
+  el2.innerHTML = head + `<p class="note">${g.revoked ? "L'accès à ton Google Agenda a été retiré. Reconnecte-le pour continuer à recevoir tes séances." : "Tes séances arrivent directement dans ton Google Agenda, avec un rappel avant chacune, et se mettent à jour toutes seules."}</p>
+    <a class="btn" style="text-decoration:none;display:inline-block;padding:11px 16px;border-radius:12px;align-self:flex-start" href="${AGENDA_BASE}/google/start?equipe=${team}">Connecter Google Agenda</a>
+    <p class="note" style="font-size:.82rem">Choisis ton compte Google puis « Continuer ». Si Google affiche « Cette appli n'a pas été validée », touche « Paramètres avancés », puis « Accéder à Athéna ». L'appli ne voit que l'agenda qu'elle crée, rien d'autre.</p>`;
+}
+document.addEventListener("click", async e => {
+  const b = e.target.closest("#gcal-sync, #gcal-off"); if (!b) return;
+  if (b.id === "gcal-off" && !confirm("Déconnecter Google Agenda ? L'agenda « Athéna · entraînement » sera retiré de ton compte Google.")) return;
+  b.disabled = true; b.textContent = b.id === "gcal-off" ? "Déconnexion…" : "Mise à jour…";
+  try { await gcalCall(b.id === "gcal-off" ? "off" : "sync", {force: true}); } catch(err){}
+  gcalFlash = ""; renderGcal(true);
+});
+(function(){
+  try {
+    const u = new URL(location.href), g = u.searchParams.get("google"); if (!g) return;
+    u.searchParams.delete("google"); history.replaceState(null, "", u.pathname + u.hash);
+    const msg = {ok: "Google Agenda est connecté : tes séances arrivent dans l'agenda « Athéna · entraînement ».", refus: "Connexion à Google Agenda annulée.", erreur: "La connexion à Google Agenda n'a pas abouti. Réessaie depuis Plan › Agenda."}[g];
+    if (msg){ gcalFlash = msg; setTimeout(() => { show("plan"); renderGcal(true); const a = $("agenda-panel"); if (a) a.scrollIntoView({block: "start"}); }, 800); }
+  } catch(e){}
+})();
 $("alarm-min").addEventListener("change", () => { lsSet("phm-alarm", Number($("alarm-min").value)); syncAgenda(); });
 function renderAgendaLinks(){
   const el = $("gcal-links"); if (!el) return;

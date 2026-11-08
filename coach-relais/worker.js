@@ -35,11 +35,149 @@ async function agenda(team){
   return new Response(L.join("\r\n") + "\r\n", { headers: { "Content-Type": "text/calendar; charset=utf-8", "Cache-Control": "public, max-age=900", "Access-Control-Allow-Origin": "*" } });
 }
 
+// ===================== Google Agenda (connexion directe) =====================
+// La personne autorise une fois l'appli sur son compte Google ; le relais crée un agenda
+// « Athéna · entraînement » et y écrit les séances (avec rappels), puis le tient à jour
+// tout seul (toutes les 15 min, et juste après chaque changement dans l'appli).
+// Secrets Cloudflare : GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET. Stockage : KV « GKV ».
+const G_SCOPE = "https://www.googleapis.com/auth/calendar.app.created";
+const G_CALLBACK = "https://parcours-coach.remyvancoppenolle.workers.dev/google/callback";
+const APP_URL = "https://remvan5917.github.io/parcours/index.html";
+const CAL_API = "https://www.googleapis.com/calendar/v3";
+const TEAM_RE = /^[a-z0-9]{20,40}$/;
+const b64url = buf => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+async function sign(env, msg){
+  const k = await crypto.subtle.importKey("raw", new TextEncoder().encode(env.GOOGLE_CLIENT_SECRET), {name: "HMAC", hash: "SHA-256"}, false, ["sign"]);
+  return b64url(await crypto.subtle.sign("HMAC", k, new TextEncoder().encode(msg)));
+}
+async function evId(team, key){
+  const h = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(team + "|" + key));
+  return "ath" + [...new Uint8Array(h)].slice(0, 16).map(b => b.toString(16).padStart(2, "0")).join(""); // base32hex valide
+}
+const back = q => Response.redirect(APP_URL + "?google=" + q + "#plan", 302);
+const parisToday = () => new Intl.DateTimeFormat("en-CA", {timeZone: "Europe/Paris"}).format(new Date());
+async function gToken(env, refresh){
+  const r = await fetch("https://oauth2.googleapis.com/token", {method: "POST", headers: {"Content-Type": "application/x-www-form-urlencoded"},
+    body: new URLSearchParams({client_id: env.GOOGLE_CLIENT_ID, client_secret: env.GOOGLE_CLIENT_SECRET, refresh_token: refresh, grant_type: "refresh_token"})});
+  const d = await r.json().catch(() => ({}));
+  return r.ok ? d.access_token : (d.error === "invalid_grant" ? "REVOKED" : null);
+}
+async function gStart(env, team){
+  if (!env.GOOGLE_CLIENT_ID || !env.GOOGLE_CLIENT_SECRET || !env.GKV) return new Response("La connexion Google n'est pas encore configurée.", {status: 503, headers: {"Content-Type": "text/plain; charset=utf-8"}});
+  if (!TEAM_RE.test(team || "")) return back("erreur");
+  const exp = Date.now() + 15 * 60000, state = `${team}.${exp}.${await sign(env, team + "." + exp)}`;
+  const u = new URL("https://accounts.google.com/o/oauth2/v2/auth");
+  Object.entries({client_id: env.GOOGLE_CLIENT_ID, redirect_uri: G_CALLBACK, response_type: "code", scope: G_SCOPE, access_type: "offline", prompt: "consent", state}).forEach(([k, v]) => u.searchParams.set(k, v));
+  return Response.redirect(u.toString(), 302);
+}
+async function gCallback(env, url, ctx){
+  const [team, exp, sig] = (url.searchParams.get("state") || "").split(".");
+  if (!TEAM_RE.test(team || "") || !(Number(exp) > Date.now()) || sig !== await sign(env, team + "." + exp)) return back("erreur");
+  if (url.searchParams.get("error") || !url.searchParams.get("code")) return back("refus");
+  const r = await fetch("https://oauth2.googleapis.com/token", {method: "POST", headers: {"Content-Type": "application/x-www-form-urlencoded"},
+    body: new URLSearchParams({code: url.searchParams.get("code"), client_id: env.GOOGLE_CLIENT_ID, client_secret: env.GOOGLE_CLIENT_SECRET, redirect_uri: G_CALLBACK, grant_type: "authorization_code"})});
+  const t = await r.json().catch(() => ({}));
+  if (!r.ok || !t.refresh_token) return back("erreur");
+  if (!String(t.scope || "").includes("calendar.app.created")) return back("refus");
+  const H = {Authorization: "Bearer " + t.access_token, "Content-Type": "application/json"};
+  const old = JSON.parse(await env.GKV.get("g:" + team) || "null");
+  let cal = null, map = {};
+  if (old && old.cal){ const c = await fetch(`${CAL_API}/calendars/${encodeURIComponent(old.cal)}`, {headers: H}); if (c.ok){ cal = old.cal; map = old.map || {}; } }
+  if (!cal){
+    const c = await fetch(`${CAL_API}/calendars`, {method: "POST", headers: H, body: JSON.stringify({summary: "Athéna · entraînement", description: "Séances préparées par Athéna. Mis à jour automatiquement : modifie ton planning dans l'appli, pas ici.", timeZone: "Europe/Paris"})});
+    if (!c.ok) return back("erreur");
+    cal = (await c.json()).id;
+  }
+  await env.GKV.put("g:" + team, JSON.stringify({refresh: t.refresh_token, cal, map, lastAt: 0, at: Date.now()}));
+  ctx.waitUntil(gSync(env, team, true));
+  return back("ok");
+}
+async function gBatch(token, ops){
+  const res = [];
+  for (let i = 0; i < ops.length; i += 50){
+    const part = ops.slice(i, i + 50), b = "athena_" + crypto.randomUUID();
+    const body = part.map((o, j) => `--${b}\r\nContent-Type: application/http\r\nContent-ID: <it${j}>\r\n\r\n${o.method} ${o.path} HTTP/1.1\r\n` +
+      (o.body ? `Content-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(o.body)}\r\n` : "\r\n")).join("") + `--${b}--`;
+    const r = await fetch("https://www.googleapis.com/batch/calendar/v3", {method: "POST", headers: {Authorization: "Bearer " + token, "Content-Type": "multipart/mixed; boundary=" + b}, body});
+    const txt = await r.text(), st = {};
+    for (const m of txt.matchAll(/Content-ID:\s*<response-it(\d+)>[\s\S]*?HTTP\/1\.1 (\d{3})/gi)) st[m[1]] = Number(m[2]);
+    part.forEach((o, j) => res.push(st[j] || (r.ok ? 0 : r.status)));
+    if (i + 50 < ops.length) await new Promise(z => setTimeout(z, 1200));
+  }
+  return res;
+}
+async function gSync(env, team, force){
+  const st = JSON.parse(await env.GKV.get("g:" + team) || "null");
+  if (!st || st.revoked) return {connected: !!st, revoked: !!(st && st.revoked)};
+  const r = await fetch(`https://firestore.googleapis.com/v1/projects/${FB_PROJECT}/databases/(default)/documents/equipes/${team}/reglages/agenda?key=${FB_WEB_KEY}`);
+  if (!r.ok) return {connected: true, error: "agenda introuvable"};
+  const doc = await r.json(), at = Number((doc.fields.at || {}).integerValue || (doc.fields.at || {}).doubleValue || 0);
+  if (!force && at && st.lastAt === at && !st.pending) return {connected: true, upToDate: true};
+  let data = {alarm: 30, ev: []}; try { data = JSON.parse(doc.fields.json.stringValue); } catch (e) {}
+  const token = await gToken(env, st.refresh);
+  if (token === "REVOKED"){ st.revoked = true; await env.GKV.put("g:" + team, JSON.stringify(st)); return {connected: true, revoked: true}; }
+  if (!token) return {connected: true, error: "jeton"};
+  const alarm = Math.min(240, Math.max(0, Number(data.alarm) || 30)), want = {};
+  for (const e of (Array.isArray(data.ev) ? data.ev : []).slice(0, 600)){
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(e.d) || !/^\d{2}:\d{2}$/.test(e.h)) continue;
+    const [hh, mm] = e.h.split(":").map(Number), endMin = Math.min(23 * 60 + 59, hh * 60 + mm + Math.min(240, Number(e.dur) || 60));
+    const key = `${e.d}|${e.h}|${String(e.t || "").slice(0, 80)}`;
+    const body = {summary: String(e.t || "Séance"), description: String(e.desc || ""),
+      start: {dateTime: `${e.d}T${e.h}:00`, timeZone: "Europe/Paris"},
+      end: {dateTime: `${e.d}T${String(Math.floor(endMin / 60)).padStart(2, "0")}:${String(endMin % 60).padStart(2, "0")}:00`, timeZone: "Europe/Paris"},
+      reminders: alarm > 0 ? {useDefault: false, overrides: [{method: "popup", minutes: alarm}]} : {useDefault: false}, status: "confirmed"};
+    want[key] = {body, hash: JSON.stringify(body).length + ":" + [...JSON.stringify(body)].reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 0)};
+  }
+  const calP = `/calendar/v3/calendars/${encodeURIComponent(st.cal)}/events`, today = parisToday(), ops = [];
+  for (const [key, w] of Object.entries(want)){
+    if (st.map[key] === w.hash) continue;
+    const id = await evId(team, key);
+    ops.push(st.map[key] ? {key, kind: "upd", method: "PUT", path: `${calP}/${id}`, body: w.body, hash: w.hash, id}
+                         : {key, kind: "ins", method: "POST", path: calP, body: {id, ...w.body}, hash: w.hash, id});
+  }
+  for (const key of Object.keys(st.map)) if (!want[key] && key.slice(0, 10) >= today) ops.push({key, kind: "del", method: "DELETE", path: `${calP}/${await evId(team, key)}`});
+  const apply = (o, code) => {
+    if (o.kind === "del"){ if (code < 300 || code === 404 || code === 410) delete st.map[o.key]; return null; }
+    if (code >= 200 && code < 300){ st.map[o.key] = o.hash; return null; }
+    if (o.kind === "ins" && code === 409) return {...o, kind: "upd", method: "PUT", path: `${calP}/${o.id}`, body: Object.fromEntries(Object.entries(o.body).filter(([k]) => k !== "id"))};
+    if (o.kind === "upd" && (code === 404 || code === 410)) return {...o, kind: "ins", method: "POST", path: calP, body: {id: o.id, ...o.body}};
+    return "fail";
+  };
+  let todo = ops, fails = 0;
+  for (let round = 0; round < 2 && todo.length; round++){
+    const codes = await gBatch(token, todo), next = [];
+    todo.forEach((o, i) => { const x = apply(o, codes[i]); if (x === "fail") fails++; else if (x) next.push(x); });
+    todo = next;
+  }
+  st.lastAt = at; st.pending = fails + todo.length > 0; st.synced = Date.now();
+  await env.GKV.put("g:" + team, JSON.stringify(st));
+  return {connected: true, changed: ops.length, pending: st.pending};
+}
+async function gOff(env, team){
+  const st = JSON.parse(await env.GKV.get("g:" + team) || "null");
+  if (!st) return {connected: false};
+  const token = st.revoked ? null : await gToken(env, st.refresh);
+  if (token && token !== "REVOKED"){
+    await fetch(`${CAL_API}/calendars/${encodeURIComponent(st.cal)}`, {method: "DELETE", headers: {Authorization: "Bearer " + token}});
+    await fetch("https://oauth2.googleapis.com/revoke?token=" + encodeURIComponent(st.refresh), {method: "POST"});
+  }
+  await env.GKV.delete("g:" + team);
+  return {connected: false};
+}
+
 export default {
-  async fetch(req, env) {
+  async scheduled(event, env, ctx) {
+    if (!env.GKV || !env.GOOGLE_CLIENT_ID) return;
+    const list = await env.GKV.list({prefix: "g:"});
+    for (const k of list.keys) ctx.waitUntil(gSync(env, k.name.slice(2), false).catch(() => {}));
+  },
+  async fetch(req, env, ctx) {
+    const url = new URL(req.url);
     if (req.method === "GET"){
-      const m = new URL(req.url).pathname.match(/^\/agenda\/([a-z0-9]{20,40})\.ics$/);
+      const m = url.pathname.match(/^\/agenda\/([a-z0-9]{20,40})\.ics$/);
       if (m) return agenda(m[1]);
+      if (url.pathname === "/google/start") return gStart(env, url.searchParams.get("equipe"));
+      if (url.pathname === "/google/callback") return gCallback(env, url, ctx);
       return new Response("Relais du coach Parcours.", { status: 404 });
     }
     const origin = req.headers.get("Origin") || "";
@@ -51,6 +189,16 @@ export default {
     };
     if (req.method === "OPTIONS") return new Response(null, { headers: cors });
     if (req.method !== "POST" || !ORIGINS.includes(origin)) return json({ error: { message: "interdit" } }, 403, cors);
+    if (url.pathname.startsWith("/google/")){
+      if (!env.GKV || !env.GOOGLE_CLIENT_ID) return json({ configured: false }, 200, cors);
+      let b = {}; try { b = await req.json(); } catch (e) {}
+      const team = String(b.equipe || "");
+      if (!TEAM_RE.test(team)) return json({ error: { message: "code invalide" } }, 400, cors);
+      if (url.pathname === "/google/sync") return json(await gSync(env, team, !!b.force), 200, cors);
+      if (url.pathname === "/google/off") return json(await gOff(env, team), 200, cors);
+      if (url.pathname === "/google/status"){ const st = JSON.parse(await env.GKV.get("g:" + team) || "null"); return json({ configured: true, connected: !!st, revoked: !!(st && st.revoked), synced: st && st.synced, pending: !!(st && st.pending) }, 200, cors); }
+      return json({ error: { message: "inconnu" } }, 404, cors);
+    }
     if (!env.GROQ_API_KEY) return json({ error: { message: "clé Groq absente du relais" } }, 500, cors);
 
     // limite de débit gérée par Cloudflare (partagée entre toutes les instances) : 12 demandes par minute et par adresse

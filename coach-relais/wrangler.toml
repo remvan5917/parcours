@@ -7,3 +7,12 @@ compatibility_date = "2026-11-01"
 name = "LIMITER"
 namespace_id = "1001"
 simple = { limit = 12, period = 60 }
+
+# Google Agenda : jetons et suivi des séances déjà écrites
+[[kv_namespaces]]
+binding = "GKV"
+id = "b1fb5ae5e2e44b85b760b7a392402b70"
+
+# Mise à jour automatique des agendas Google toutes les 15 minutes
+[triggers]
+crons = ["*/15 * * * *"]
