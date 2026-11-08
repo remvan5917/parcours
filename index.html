@@ -2277,6 +2277,7 @@ function session(type, d, h){
   } else if (type === "repos"){
     L.push("Repos complet. C'est pendant le repos que le corps progresse.");
   }
+  if ((type.startsWith("course") || type === "freeletics" || type === "luc") && L.length) L[0] += " Puis <b>20 min de souplesse</b> avec Pliability.";
   return {lieu, L, m, timer: typeof timer !== "undefined" ? timer : null};
 }
 function slotHTML(s, d, compact){
