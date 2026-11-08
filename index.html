@@ -734,7 +734,9 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--accent)}
 .mcell .lv{position:absolute;top:2px;left:4px;font-size:.62rem;line-height:1;color:#E0567F}
 .mcell.love{background:color-mix(in srgb,#E0567F 9%,transparent)}
 .weeklist{display:flex;flex-direction:column;gap:6px;margin-top:14px}
-.weeklist .wl-h{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.weeklist .wl-h{display:grid;grid-template-columns:40px 1fr 40px;align-items:center;gap:8px}
+.weeklist .wl-t{display:flex;flex-direction:column;align-items:center;line-height:1.25}
+.weeklist .wk-arrow{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:transparent;color:var(--ink);font-size:1.4rem;line-height:1;cursor:pointer;display:grid;place-items:center;padding:0 0 3px}
 .weeklist .wl-h b{font-family:var(--display);font-size:1.05rem}
 .weeklist .wd{display:grid;grid-template-columns:44px 1fr;gap:10px;align-items:start;text-align:left;width:100%;background:none;border:1px solid var(--line);border-radius:12px;padding:8px 10px;color:var(--ink);font:inherit;cursor:pointer}
 .weeklist .wd.today{border-color:var(--accent)}
@@ -743,7 +745,7 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--accent)}
 .weeklist .wd-h b{font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
 .weeklist .wd-h span{font-family:var(--display);font-size:1.15rem;font-weight:700}
 .weeklist .wd-l{display:flex;flex-direction:column;gap:4px;min-width:0}
-.ev{display:block;border-radius:8px;padding:4px 8px;font-size:.84rem;font-weight:600;line-height:1.3;overflow-wrap:anywhere}
+.ev{display:block;font-style:normal;border-radius:8px;padding:4px 8px;font-size:.84rem;font-weight:600;line-height:1.3;overflow-wrap:anywhere}
 .ev em{font-style:normal;font-weight:700;margin-right:6px;opacity:.85}
 .ev.sport{background:color-mix(in srgb,#E8833A 18%,transparent);color:var(--ink);border-left:3px solid #E8833A}
 .ev.love{background:color-mix(in srgb,#E0567F 16%,transparent);color:var(--ink);border-left:3px solid #E0567F}
@@ -3104,7 +3106,11 @@ function renderCal(){
 }
 function renderCalDay(){
   const el = $("cal-day"); if (!el) return;
-  if (!calSel){ el.innerHTML = weekList(new Date(new Date().setHours(12, 0, 0, 0))) + `<p class="note">Touche un jour du calendrier pour voir sa semaine et le détail de ses séances.</p>`; return; }
+  if (!calSel){
+    // semaine utile : celle d'aujourd'hui, la suivante dès le dimanche, jamais avant le début du programme
+    let b = new Date(new Date().setHours(12, 0, 0, 0)); if (dow(b) === 7) b = addDays(b, 1); if (b < calStart()) b = new Date(calStart());
+    el.innerHTML = weekList(b) + `<p class="note">Touche un jour pour voir le détail de ses séances.</p>`; return;
+  }
   const d = parseDay(calSel), I = dayInfo(d);
   const head = `<div class="row between"><b style="font-family:var(--display);font-size:1.15rem;text-transform:capitalize">${d.toLocaleDateString("fr-FR", {weekday: "long", day: "numeric", month: "long"})}</b><span class="note">${I.m ? "Bloc " + I.m.n + (I.m.deload ? " · semaine allégée" : "") + " · semaine " + weekType(d) : ""}</span></div>`;
   const items = I.sl.map(s => { const T = TYPES[s.t] || {ic: "daily"}, x = session(s.t, d, s.h); return `<div class="it"><i class="${T.ic}"></i><div><b>${s.h ? slotHours(s) + " · " : ""}${esc(slotTitle(s, d))}</b>${s.t !== "ensemble" && isDone(d, s) ? ` <span class="verdict ok">fait</span>` : ""}<div class="note">${stripTags(x.L[0] || "")}</div></div></div>`; }).join("");
@@ -3129,7 +3135,7 @@ function weekList(base){
     }).join("");
     return `<button type="button" class="wd${k === today ? " today" : ""}${k === sel ? " sel" : ""}" data-cal="${k}"><span class="wd-h"><b>${DAYS[dow(d)].slice(0, 3)}</b><span>${d.getDate()}</span></span><span class="wd-l">${evs || `<span class="note">${inR ? "Repos" : "—"}</span>`}</span></button>`;
   }).join("");
-  return `<div class="weeklist"><div class="wl-h"><b>Semaine ${weekType(st)}</b><span class="note">${f(st)} – ${f(en)}</span></div>${rows}
+  return `<div class="weeklist"><div class="wl-h"><button type="button" class="wk-arrow" data-cal="${ymd(addDays(st, -7))}" aria-label="Semaine précédente">‹</button><div class="wl-t"><b>Semaine ${weekType(st)}</b><span class="note">${f(st)} – ${f(en)}</span></div><button type="button" class="wk-arrow" data-cal="${ymd(addDays(st, 7))}" aria-label="Semaine suivante">›</button></div>${rows}
     <div class="wl-leg"><span class="ev sport">Sport</span><span class="ev love">Moments à deux</span><span class="note">♥ = ensemble</span></div></div>`;
 }
 $("cal-prev").addEventListener("click", () => { calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth() - 1, 1, 12); renderCal(); });
