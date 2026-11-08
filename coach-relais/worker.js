@@ -136,7 +136,7 @@ async function gSyncKey(env, k, team, force){
     if (e.allDay && /^\d{4}-\d{2}-\d{2}$/.test(e.d)){
       const key = `${e.d}|semaine|${String(e.t || "").slice(0, 40)}`;
       const body = {summary: String(e.t || "Semaine"), description: String(e.desc || ""), start: {date: e.d}, end: {date: addD(e.d, Math.min(7, Number(e.days) || 1))},
-        transparency: "transparent", colorId: /A$/.test(e.t) ? "9" : "8", reminders: {useDefault: false}, status: "confirmed"};
+        transparency: "transparent", colorId: "8", reminders: {useDefault: false}, status: "confirmed"};
       want[key] = {body, hash: JSON.stringify(body).length + ":" + [...JSON.stringify(body)].reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 0)};
       continue;
     }
@@ -147,7 +147,7 @@ async function gSyncKey(env, k, team, force){
       start: {dateTime: `${e.d}T${e.h}:00`, timeZone: "Europe/Paris"},
       end: {dateTime: `${e.d}T${String(Math.floor(endMin / 60)).padStart(2, "0")}:${String(endMin % 60).padStart(2, "0")}:00`, timeZone: "Europe/Paris"},
       reminders: alarm > 0 ? {useDefault: false, overrides: [{method: "popup", minutes: alarm}]} : {useDefault: false}, status: "confirmed"};
-    if (e.love) body.colorId = "4"; // moments à deux en rose (Flamingo)
+    body.colorId = e.love ? "4" : "6"; // rose (Flamingo) = moments à deux · orange (Mandarine) = sport
     want[key] = {body, hash: JSON.stringify(body).length + ":" + [...JSON.stringify(body)].reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 0)};
   }
   const calP = `/calendar/v3/calendars/${encodeURIComponent(st.cal)}/events`, today = parisToday(), ops = [];

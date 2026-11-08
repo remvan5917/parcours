@@ -2566,7 +2566,7 @@ function renderPlanning(){
   const W = p[planWk] || {};
   $("planning").innerHTML = `<ul class="steps">${[1, 2, 3, 4, 5, 6, 7].map(d => {
     const l = (W[d] || []).slice().sort((a, b) => (a.h || "").localeCompare(b.h || ""));
-    return `<li><div style="flex:1"><div class="s-t" style="text-transform:capitalize">${DAYS[d]}</div><div class="chips" style="margin-top:4px">${l.length ? l.map((s, i) => `<span class="chip">${s.h ? fmtH(s.h) + " · " : ""}${s.duo ? "♥ " : ""}${esc(typeLabel(s.t))} <button type="button" class="ghost tiny" data-slot-del="${d}:${esc(s.t)}:${esc(s.h || "")}" aria-label="Retirer" style="padding:0 6px;margin-left:4px">×</button></span>`).join("") : `<span class="note">rien</span>`}</div></div></li>`;
+    return `<li><div style="flex:1"><div class="s-t" style="text-transform:capitalize">${DAYS[d]}</div><div class="chips" style="margin-top:4px">${l.length ? l.map((s, i) => `<span class="chip">${s.h ? slotHours(s) + " · " : ""}${s.duo ? "♥ " : ""}${esc(typeLabel(s.t))} <button type="button" class="ghost tiny" data-slot-del="${d}:${esc(s.t)}:${esc(s.h || "")}" aria-label="Retirer" style="padding:0 6px;margin-left:4px">×</button></span>`).join("") : `<span class="note">rien</span>`}</div></div></li>`;
   }).join("")}</ul>`;
 }
 $("slot-type").innerHTML = Object.entries(TYPES).map(([k, t]) => `<option value="${k}">${t.l}</option>`).join("");
@@ -2622,6 +2622,12 @@ function icsText(){
 // abonnement : l'appli dépose les séances calculées dans l'espace partagé, le relais les publie en agenda
 const AGENDA_BASE = (window.PARCOURS_COACH_URL || "").replace(/\/$/, "");
 const stripTags = t => String(t).replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ");
+// durée d'un créneau : heure de fin enregistrée (cours du club), sinon durée type
+function slotDur(s){
+  if (s.h && s.fin){ const m = t => { const [a, b] = t.split(":").map(Number); return a * 60 + b; }, d = m(s.fin) - m(s.h); if (d > 0) return d; }
+  return ({gym: 120, krav: 60, jjb: 180})[s.t] || (s.t.startsWith("course") ? 60 : 90);
+}
+const slotHours = s => s.h ? fmtH(s.h) + (s.fin ? " – " + fmtH(s.fin) : "") : "";
 function agendaEvents(){
   const out = []; if (planEmpty()) return out;
   const exam = parseDay(S.exam || "2027-03-29");
@@ -2630,7 +2636,7 @@ function agendaEvents(){
     slotsOn(d).forEach(s => {
       if (s.t === "repos") return;
       const x = session(s.t, d, s.h), m = x.m;
-      out.push({d: ymd(d), h: s.h || "18:00", dur: ({gym: 120, krav: 60, jjb: 180})[s.t] || (s.t.startsWith("course") ? 60 : 90), t: slotTitle(s, d), love: s.t === "ensemble" || !!s.duo,
+      out.push({d: ymd(d), h: s.h || "18:00", dur: slotDur(s), t: slotTitle(s, d), love: s.t === "ensemble", sport: s.t !== "ensemble",
         desc: [`Bloc ${m.n}${m.deload ? " (semaine allégée + tests)" : ""} · semaine ${weekType(d)}`, x.lieu ? "Lieu : " + x.lieu : "", ...x.L.map(stripTags), "", "Détails et chrono : " + location.origin + location.pathname].filter((l, i) => l || i > 0).join("\n")});
     });
   }
@@ -2833,7 +2839,7 @@ function renderToday(){
     const T = TYPES[s.t] || {l: s.t, ic: "daily"}, x = session(s.t, d, s.h), a = actionFor(s, d, x), done = isDone(d, s);
     const main = x.L[0] || "", more = x.L.slice(1);
     return `<div class="sess${done ? " done" : ""}"><span class="ic ${T.ic}" style="position:relative">${ICONS[T.ic] || ICONS.daily}${s.duo ? `<em class="duo-badge">♥</em>` : ""}</span><div>
-      <h3>${esc(slotTitle(s, d))}</h3><div class="when">${s.h ? fmtH(s.h) : "Quand tu veux"}${x.lieu ? " · " + esc(x.lieu) : ""}</div>
+      <h3>${esc(slotTitle(s, d))}</h3><div class="when">${s.h ? slotHours(s) : "Quand tu veux"}${x.lieu ? " · " + esc(x.lieu) : ""}</div>
       <p class="what">${main}</p>
       ${more.length ? `<details><summary>Détails</summary>${more.map(l => `<p>${l}</p>`).join("")}</details>` : ""}
       ${s.t === "repos" || s.t === "ensemble" ? "" : `<div class="acts">${a ? `<button type="button" class="btn" data-goto="${a.go}"${a.mode ? ` data-mode="${a.mode}"` : ""}>${a.l}</button>` : ""}<button type="button" class="ghost done-btn" data-done="${ymd(d)}|${esc(slotKey(s))}" aria-pressed="${done}">${done ? "Fait ✓" : "Fait"}</button></div>`}
