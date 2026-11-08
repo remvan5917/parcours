@@ -11,7 +11,7 @@ const json = (data, status, headers) => new Response(JSON.stringify(data), { sta
 const FB_PROJECT = "parcours-gpx-2027";
 const FB_WEB_KEY = "AIzaSyDwb_C6B_LDUCgiY_r6ljIChmZzo_9dkJ8"; // clé web Firebase (publique par nature, déjà dans config.js)
 const icsEsc = t => String(t || "").replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
-function fold(line){ const out = []; let l = line; while (l.length > 74){ out.push(l.slice(0, 74)); l = " " + l.slice(74); } out.push(l); return out.join("\r\n"); }
+function fold(line){ const enc = new TextEncoder(), out = []; let cur = "", n = 0, lim = 75; for (const ch of line){ const b = enc.encode(ch).length; if (n + b > lim){ out.push(cur); cur = " "; n = 1; lim = 75; } cur += ch; n += b; } out.push(cur); return out.join("\r\n"); }
 async function agenda(team){
   const r = await fetch(`https://firestore.googleapis.com/v1/projects/${FB_PROJECT}/databases/(default)/documents/equipes/${team}/reglages/agenda?key=${FB_WEB_KEY}`);
   let data = {alarm: 30, ev: []};

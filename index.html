@@ -303,21 +303,86 @@ tr.done td:first-child{color:var(--muted)}
 .inst-chip svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .install-help ol{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:6px}
 footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padding-top:14px;margin-top:10px;display:flex;flex-direction:column;gap:6px}
+/* ---------- refonte : barre du haut, aujourd'hui, entraînement ---------- */
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:15;display:flex;align-items:center;gap:8px;margin-inline:-16px;padding:10px 16px;background:color-mix(in srgb,var(--ground) 86%,transparent);backdrop-filter:saturate(1.4) blur(12px);-webkit-backdrop-filter:saturate(1.4) blur(12px);border-bottom:1px solid color-mix(in srgb,var(--line) 60%,transparent)}
+.topbar .brand{font-family:var(--display);font-weight:700;font-size:1.3rem;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.icon-btn{width:40px;height:40px;padding:0;display:inline-flex;align-items:center;justify-content:center;border-radius:12px;background:var(--surface);border:1px solid var(--line);color:var(--ink)}
+.icon-btn svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.count-chip{font-family:var(--display);font-weight:700;font-size:1rem;padding:6px 12px;border-radius:999px;background:var(--cone-soft);color:var(--cone);border:0;font-variant-numeric:tabular-nums}
+.count-chip:empty{display:none}
+.kicker{font-family:var(--display);font-weight:600;text-transform:uppercase;letter-spacing:.1em;font-size:.78rem;color:var(--muted)}
+.link{background:none;border:0;padding:2px 0;font-family:var(--body);font-size:.88rem;font-weight:600;color:var(--mat);letter-spacing:0}
+.hello{display:flex;flex-direction:column;gap:4px}
+.hello h1{font-size:clamp(2rem,8vw,2.8rem)}
+.card-today{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:14px;box-shadow:0 6px 24px -14px rgba(20,32,46,.35)}
+.daystrip{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.day{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 0 7px;border-radius:12px;border:1px solid transparent;background:none;font-family:var(--body);font-weight:500;letter-spacing:0;color:var(--muted)}
+.day b{font-family:var(--display);font-size:1.15rem;color:var(--ink);line-height:1}
+.day small{font-size:.7rem;text-transform:uppercase;letter-spacing:.05em}
+.day .dots{display:flex;gap:3px;height:6px}
+.day .dots i{width:6px;height:6px;border-radius:50%;background:var(--line)}
+.day .dots i.run{background:var(--run)} .day .dots i.fp{background:var(--cone)} .day .dots i.club{background:var(--gym)} .day .dots i.daily{background:var(--mat)}
+.day .dots i.ok{outline:2px solid var(--ok);outline-offset:1px}
+.day.is-today{background:var(--floor)}
+.day[aria-selected="true"]{border-color:var(--ink);background:var(--surface);box-shadow:0 0 0 1px var(--ink) inset}
+.day.all-done b{color:var(--ok)}
+.today-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.today-head h2{font-size:1.5rem}
+.sess-list{display:flex;flex-direction:column;gap:10px}
+.sess{display:grid;grid-template-columns:44px minmax(0,1fr);gap:12px;align-items:start;padding:12px;border-radius:16px;background:var(--floor)}
+.sess .ic{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--display);font-weight:700;font-size:.95rem}
+.sess .ic.run{background:var(--run)} .sess .ic.fp{background:var(--cone)} .sess .ic.club{background:var(--gym)} .sess .ic.daily{background:var(--mat)}
+.sess .ic svg{width:22px;height:22px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.sess h3{font-size:1.2rem}
+.sess .when{font-size:.85rem;color:var(--muted)}
+.sess .what{font-size:.97rem;margin-top:4px}
+.sess .what b{font-weight:600}
+.sess details{margin-top:4px}
+.sess details summary{cursor:pointer;font-size:.86rem;color:var(--mat);font-weight:600;list-style:none}
+.sess details summary::-webkit-details-marker{display:none}
+.sess details p{font-size:.92rem;margin-top:6px}
+.sess .acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.sess .acts .btn,.sess .acts .ghost{font-size:1rem;padding:8px 14px}
+.done-btn[aria-pressed="true"]{background:var(--ok-soft);color:var(--ok);border-color:var(--ok)}
+.sess.done{opacity:.72}
+.sess.done h3{text-decoration:line-through;text-decoration-thickness:2px}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:2px;text-align:left;font-family:var(--body);letter-spacing:0;color:var(--ink)}
+.tile span{font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.tile b{font-family:var(--display);font-size:1.75rem;line-height:1.05;font-variant-numeric:tabular-nums}
+.tile small{font-size:.78rem;color:var(--muted)}
+.tile.warn b{color:var(--warn)} .tile.good b{color:var(--ok)}
+.duo{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.panel.mini{gap:8px;padding:14px}
+.setup{border:1px solid var(--mat);background:var(--mat-soft)}
+.setup .steps li{background:var(--surface)}
+.trainnav{display:flex;gap:4px;background:var(--floor);border-radius:14px;padding:4px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 62px);z-index:10}
+.trainnav button{flex:1;font-size:.98rem;padding:9px 4px;border-radius:11px;color:var(--muted)}
+.trainnav button[aria-current="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.fr-phase{font-family:var(--display);font-weight:700;font-size:2.2rem;text-align:center;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.fr-phase.vite{color:var(--cone)} .fr-phase.lent{color:var(--run)} .fr-phase.pause{color:var(--mat)}
+#fr-time{text-align:center}
+.view>h2:first-child{display:none}
+@media (min-width:900px){.card-today{padding:20px}.sess{grid-template-columns:52px minmax(0,1fr)}.sess .ic{width:52px;height:52px}}
+
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
+<header class="topbar">
+  <button type="button" class="icon-btn" id="top-back" aria-label="Retour" hidden><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+  <span class="brand" id="top-title">Parcours</span>
+  <button type="button" class="count-chip" id="topcount" data-goto="reglages" aria-label="Jours avant les épreuves"></button>
+  <button type="button" class="icon-btn" data-goto="reglages" aria-label="Réglages"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+  <button type="button" class="inst-chip" data-install aria-label="Installer l'appli"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Installer</button>
+</header>
 <div class="wrap">
 
-<!-- =================== ACCUEIL =================== -->
+<!-- =================== AUJOURD'HUI =================== -->
 <section class="view" id="v-accueil" data-view="accueil">
-  <div class="hero">
-    <div class="row between" style="gap:8px;flex-wrap:nowrap;align-items:center">
-      <div class="eyebrow">Concours gardien de la paix · épreuves physiques · femmes</div>
-      <button type="button" class="inst-chip" data-install aria-label="Installer l'appli sur ton téléphone"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Installer</button>
-    </div>
-    <h1>Parcours d'habileté motrice</h1>
-    <div class="count" id="countdown"></div>
+  <div class="hello">
+    <p class="kicker" id="hello-date"></p>
+    <h1 id="hello-title">Aujourd'hui</h1>
     <p class="love" id="love"></p>
   </div>
   <p class="sync" id="sync" hidden></p>
@@ -325,100 +390,153 @@ footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padd
     <div class="panel install-help" id="install-help" hidden></div>
   </div>
 
-  <div class="panel" id="today" style="border-top:4px solid var(--cone)"></div>
+  <div class="panel setup" id="setup" hidden></div>
 
-  <div class="grid2">
-    <div class="score phm" id="score-phm"></div>
-    <div class="score luc" id="score-luc"></div>
+  <div class="card-today">
+    <div class="daystrip" id="daystrip" role="tablist" aria-label="Jours de la semaine"></div>
+    <div id="today"></div>
   </div>
-  <p class="note" id="score-avg" hidden></p>
-  <p class="note">Ta note de sport est la moyenne de ces deux notes, coefficient 8 dans le concours. Sous 7/20 à l'une des deux, c'est éliminatoire. Les notes sont calculées à partir de ton dernier essai, avec le bonus d'âge réglé plus bas.</p>
 
+  <div class="tiles" id="home-tiles"></div>
+
+  <div class="duo">
+    <div class="panel mini">
+      <div class="row between"><span class="kicker">Prochain objectif</span><button type="button" class="link" data-goto="progres">Tous</button></div>
+      <ul class="steps" id="home-obj"></ul>
+    </div>
+    <div class="panel mini">
+      <div class="row between"><span class="kicker">Le coach</span><button type="button" class="link" data-goto="coach">Rapport</button></div>
+      <p class="note" id="home-week"></p>
+      <ul class="steps" id="home-recos"></ul>
+    </div>
+  </div>
+  <p class="sign">Fait avec <i>♥</i> par ton Rémy</p>
+</section>
+
+<!-- =================== RÉGLAGES =================== -->
+<section class="view" id="v-reglages" data-view="reglages" hidden>
+  <h2>Réglages</h2>
   <div class="panel">
-    <div class="row between"><h2>Tes prochains objectifs</h2><button type="button" class="ghost tiny" data-goto="plan">Tout le plan</button></div>
-    <ul class="steps" id="home-obj"></ul>
-  </div>
-
-  <div class="panel" style="border-top:4px solid var(--run)">
-    <div class="row between"><h2>Conseils du coach</h2><button type="button" class="ghost tiny" data-goto="coach">Rapport de la semaine</button></div>
-    <p class="note" id="home-week"></p>
-    <ul class="steps" id="home-recos"></ul>
-  </div>
-
-  <div class="quick">
-    <button type="button" data-goto="parcours"><b>Chrono parcours</b><span>Sac, 10 ateliers, pénalités</span></button>
-    <button type="button" data-goto="ateliers" data-mode="fp"><b>Plan réel et reconstitution</b><span>Le parcours officiel et sa copie à Fitness Park</span></button>
-    <button type="button" data-goto="luc"><b>Luc Léger</b><span>Bips de la navette 20 m</span></button>
-    <button type="button" data-goto="ateliers"><b>Ateliers</b><span>Concours, Fitness Park, club</span></button>
-    <button type="button" data-goto="plan"><b>Mon plan</b><span>Programme, planning A/B, lieux</span></button>
-    <button type="button" data-goto="progres"><b>Progrès</b><span>Courbes et historique</span></button>
-  </div>
-
-  <details class="more">
-    <summary>Mode d'emploi de l'outil</summary>
-    <div class="in">
-      <p>L'appli sert à toi et à la personne qui te chronomètre. Tout ce qui est enregistré (temps, tests) reste sur le téléphone. Si le partage est activé (dans Réglages, en bas de l'accueil), c'est visible sur vos deux téléphones. Elle marche aussi sans réseau.</p>
-      <p><b>Accueil</b> : ta séance du jour (quoi, où, combien de temps), tes prochains objectifs, tes notes estimées et les conseils du coach.</p>
-      <p><b>Parcours</b> : le chronomètre du parcours. Il montre l'atelier en cours, ce qui le rend réussi et les pénalités possibles.</p>
-      <p><b>Luc Léger</b> : le téléphone fait les bips de la course navette. Un bouton « Arrêt » donne ton palier et ta note.</p>
-      <p><b>Plan</b> : le programme bloc par bloc, tes objectifs datés, ton planning semaine A / semaine B (modifiable), les rappels dans ton agenda et le matériel de chaque lieu.</p>
-      <p><b>Ateliers</b> (depuis l'accueil ou le plan) : les 10 ateliers expliqués, avec trois vues : comme au concours, comment les recréer à Fitness Park, et quoi travailler au club de gym.</p>
-      <p><b>Coach</b> : tes priorités du moment, calculées à partir de tes résultats, et un coach IA à qui poser tes questions.</p>
-      <p><b>Progrès</b> : tes courbes, atelier par atelier, et tout l'historique.</p>
-    </div>
-  </details>
-
-  <details class="more">
-    <summary>Les mots utilisés</summary>
-    <div class="in gloss">
-      <div><b>Atelier</b> : une des 10 étapes du parcours (pompes, haies, poutre…).</div>
-      <div><b>Pénalité</b> : des secondes ajoutées à ton temps quand un atelier est raté.</div>
-      <div><b>Note éliminatoire</b> : sous 7/20 à une des deux épreuves, le concours s'arrête.</div>
-      <div><b>Bonus d'âge</b> : +1 point sur chaque note si tu as entre 30 et 40 ans au 1er janvier.</div>
-      <div><b>Luc Léger</b> : course aller-retour entre deux lignes à 20 m, de plus en plus vite, au rythme de bips.</div>
-      <div><b>Navette</b> : un trajet de 20 m d'une ligne à l'autre.</div>
-      <div><b>Palier</b> : une minute de course à la même vitesse. À chaque palier, la vitesse augmente de 0,5 km/h.</div>
-      <div><b>Fractionné</b> : alterner des moments rapides et des moments lents, par exemple 30 s vite puis 30 s en trottinant.</div>
-      <div><b>Footing</b> : course lente, à une allure où tu peux parler.</div>
-      <div><b>Gainage / planche</b> : tenir le corps droit, en appui sur les avant-bras et les pointes de pieds.</div>
-      <div><b>Caisson</b> : le gros bloc de gym en mousse ou en bois, réglable en hauteur.</div>
-      <div><b>Caisse de saut</b> : à Fitness Park, la caisse en mousse ou en bois sur laquelle on saute (« plyo box »).</div>
-      <div><b>Zone fonctionnelle</b> : à Fitness Park, l'espace avec tapis, caisses et barres, sans machines.</div>
-      <div><b>Parade</b> : le coach marche à côté de toi, prêt à te tenir si tu perds l'équilibre.</div>
-    </div>
-  </details>
-
-  <div class="panel">
-    <h2>Réglages</h2>
-    <div class="row">
-      <label for="exam-date" class="note" style="color:var(--ink)">Date des épreuves sportives</label>
-      <input type="date" id="exam-date">
-    </div>
+    <h3>Toi</h3>
     <div class="row"><label for="opt-age" class="note" style="color:var(--ink)">Ton âge au 1er janvier de l'année des épreuves</label>
       <select id="opt-age"><option value="0">moins de 30 ans</option><option value="1">30 à 40 ans (+1 point)</option><option value="2">plus de 40 ans (+2 points)</option></select></div>
-    <h3>Thème</h3>
+    <div class="row"><label for="exam-date" class="note" style="color:var(--ink)">Date des épreuves sportives</label><input type="date" id="exam-date"></div>
+    <div class="count" id="countdown"></div>
+  </div>
+  <div class="panel">
+    <h3>Partage entre téléphones</h3>
+    <div id="share" class="col"></div>
+  </div>
+  <div class="panel">
+    <h3>Affichage</h3>
     <div class="seg" id="theme-seg" role="group" aria-label="Thème">
       <button type="button" data-th="auto">Automatique</button>
       <button type="button" data-th="light">Clair</button>
       <button type="button" data-th="dark">Sombre</button>
     </div>
     <p class="note">« Automatique » suit le réglage clair ou sombre du téléphone.</p>
+  </div>
+  <div class="panel">
     <h3>Installer l'appli</h3>
     <p class="note" id="install-state">Elle s'ouvrira comme une vraie appli, en plein écran, même sans réseau.</p>
     <div class="row"><button type="button" class="ghost small" data-install>Installer l'appli sur ce téléphone</button></div>
-    <h3>Partage entre téléphones</h3>
-    <div id="share" class="col"></div>
+  </div>
+  <div class="panel">
     <h3>Sauvegarde</h3>
     <p class="note">Crée un fichier avec tous les résultats, à garder ou à envoyer. « Restaurer » ajoute les résultats d'un fichier de sauvegarde à ceux déjà dans l'appli.</p>
     <div class="row"><button type="button" class="ghost small" id="backup-save">Télécharger une sauvegarde</button><button type="button" class="ghost small" id="backup-load">Restaurer une sauvegarde</button><input type="file" id="backup-file" accept="application/json,.json" hidden></div>
   </div>
+  <details class="more">
+    <summary>Comment marche l'appli</summary>
+    <div class="in">
+      <p>L'appli sert à toi et à la personne qui te chronomètre. Tout ce qui est enregistré reste sur le téléphone, et si le partage est activé, c'est visible sur vos deux téléphones. Elle marche aussi sans réseau.</p>
+      <p><b>Aujourd'hui</b> : ta semaine, la séance du jour avec un bouton pour la lancer, et la case « Fait » à cocher.</p>
+      <p><b>S'entraîner</b> : le chrono du parcours, le Luc Léger avec les bips, le minuteur de fractionné et tes tests (suspension, pompes, poutre, course).</p>
+      <p><b>Progrès</b> : tes notes, tes objectifs datés, tes courbes et l'historique.</p>
+      <p><b>Coach</b> : le rapport et les recommandations de la semaine, et un coach IA à qui poser tes questions.</p>
+      <p><b>Plan</b> : le programme bloc par bloc, ton planning semaine A / semaine B, ton agenda, les lieux et le guide des 10 ateliers.</p>
+    </div>
+  </details>
+  <details class="more">
+    <summary>Les mots utilisés</summary>
+    <div class="in gloss">
+      <div><b>Atelier</b> : une des 10 étapes du parcours (pompes, haies, poutre…).</div>
+      <div><b>Pénalité</b> : des secondes ajoutées à ton temps quand un atelier est raté.</div>
+      <div><b>Note éliminatoire</b> : sous 7/20 à une des deux épreuves, le concours s'arrête.</div>
+      <div><b>Bonus d'âge</b> : +1 point sur chaque note entre 30 et 40 ans au 1er janvier, +2 au-delà.</div>
+      <div><b>Luc Léger</b> : course aller-retour entre deux lignes à 20 m, de plus en plus vite, au rythme de bips.</div>
+      <div><b>Navette</b> : un trajet de 20 m d'une ligne à l'autre.</div>
+      <div><b>Palier</b> : une minute de course à la même vitesse ; à chaque palier, la vitesse augmente.</div>
+      <div><b>Fractionné</b> : alterner des moments rapides et des moments lents, par exemple 30 s vite puis 30 s en trottinant.</div>
+      <div><b>Footing / endurance</b> : course lente, à une allure où tu peux parler.</div>
+      <div><b>Bloc</b> : 4 semaines du programme (3 où ça monte, 1 plus légère avec des tests).</div>
+      <div><b>Gainage / planche</b> : tenir le corps droit, en appui sur les avant-bras et les pointes de pieds.</div>
+      <div><b>Caisson</b> : le gros bloc de gym, réglable en hauteur.</div>
+      <div><b>Caisse de saut</b> : à Fitness Park, la caisse sur laquelle on saute (« box jump »).</div>
+      <div><b>Parade</b> : le coach marche à côté de toi, prêt à te tenir si tu perds l'équilibre.</div>
+    </div>
+  </details>
   <p class="sign">Fait avec <i>♥</i> par ton Rémy</p>
+</section>
+
+<!-- =================== FRACTIONNÉ =================== -->
+<section class="view" id="v-frac" data-view="frac" hidden>
+  <div class="trainnav"></div>
+  <div class="panel">
+    <p class="note" id="fr-presc"></p>
+    <div class="fr-phase" id="fr-phase">Prête</div>
+    <div class="time" id="fr-time">0:00</div>
+    <div class="luc-bar" aria-hidden="true"><i id="fr-bar"></i></div>
+    <div class="luc-top">
+      <div><span>Répétition</span><b id="fr-rep">–</b></div>
+      <div><span>Série</span><b id="fr-set">–</b></div>
+      <div><span>Reste</span><b id="fr-left">–</b></div>
+    </div>
+    <button class="go run" id="fr-go" type="button">Lancer le fractionné</button>
+    <div class="row"><button class="ghost small" type="button" id="fr-stop">Arrêter</button><span class="note">Bips à chaque changement, 3 petits bips avant.</span></div>
+  </div>
+  <details class="more">
+    <summary>Modifier la séance</summary>
+    <div class="in">
+      <div class="row">
+        <label class="note" style="color:var(--ink)">Séries <input type="number" id="fr-sets" min="1" max="6" style="width:64px"></label>
+        <label class="note" style="color:var(--ink)">Répétitions <input type="number" id="fr-reps" min="1" max="30" style="width:64px"></label>
+        <label class="note" style="color:var(--ink)">Vite (s) <input type="number" id="fr-work" min="10" max="600" step="5" style="width:74px"></label>
+        <label class="note" style="color:var(--ink)">Lent (s) <input type="number" id="fr-rest" min="10" max="600" step="5" style="width:74px"></label>
+        <label class="note" style="color:var(--ink)">Pause entre séries (s) <input type="number" id="fr-setrest" min="0" max="600" step="15" style="width:74px"></label>
+      </div>
+      <button type="button" class="ghost small" id="fr-reset">Revenir à la séance du programme</button>
+    </div>
+  </details>
+  <p class="note">Avant : 15 min de footing et 3 accélérations. Après : 10 min très lent. Le minuteur ne compte que le fractionné.</p>
+</section>
+
+<!-- =================== TESTS =================== -->
+<section class="view" id="v-tests" data-view="tests" hidden>
+  <div class="trainnav"></div>
+  <div class="panel">
+    <h3>Note un test</h3>
+    <p class="note">Combien de temps tu tiens suspendue, combien de pompes tu fais d'affilée, à quelle hauteur tu traverses la poutre sans les mains, combien de km tu cours sans t'arrêter.</p>
+    <form class="row" id="mes-form">
+      <select id="mes-type" aria-label="Test">
+        <option value="suspension">Suspension à la barre (s)</option>
+        <option value="pompes">Pompes réglementaires d'affilée</option>
+        <option value="poutre">Poutre : hauteur maîtrisée (cm)</option>
+        <option value="course">Course sans t'arrêter (km)</option>
+      </select>
+      <input type="number" id="mes-val" min="0" step="0.5" required aria-label="Valeur" style="width:90px">
+      <input type="date" id="mes-date" aria-label="Date">
+      <button class="ghost small" type="submit">Ajouter</button>
+    </form>
+  </div>
+  <div class="mes-grid" id="mes-grid"></div>
 </section>
 
 <!-- =================== PARCOURS =================== -->
 <section class="view" id="v-parcours" data-view="parcours" hidden>
+  <div class="trainnav"></div>
   <div class="row between">
-    <h2>Chrono parcours</h2>
+    <span class="kicker">Lieu de l'essai</span>
     <select id="lieu" aria-label="Lieu de l'essai">
       <option>Fitness Park Lille</option>
       <option>Lycée Saint-Quentin (vrai parcours)</option>
@@ -426,7 +544,7 @@ footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padd
       <option>Autre</option>
     </select>
   </div>
-  <p class="note">Pour chronométrer un parcours complet. Choisis d'abord le lieu juste au-dessus. La barre ci-dessous montre les 10 ateliers : celui en cours est en orange.</p>
+  <p class="note">La barre montre les 10 ateliers : celui en cours est en orange.</p>
   <div class="strip" id="strip" aria-label="Avancement du parcours"></div>
   <div class="panel">
     <div class="time" id="time" aria-live="off">0:00.0</div>
@@ -466,7 +584,7 @@ footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padd
 
 <!-- =================== LUC LÉGER =================== -->
 <section class="view" id="v-luc" data-view="luc" hidden>
-  <h2>Luc Léger</h2>
+  <div class="trainnav"></div>
   <p class="note">Le téléphone fait les bips à ta place. À chaque bip, tu dois être sur la ligne d'en face (20 m). Quand tu n'arrives plus à suivre, on appuie sur « Arrêt » : ton palier et ta note s'affichent.</p>
   <div class="panel">
     <div class="luc-pal" id="ll-pal">1</div>
@@ -547,18 +665,12 @@ footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padd
 <!-- =================== PLAN =================== -->
 <section class="view" id="v-plan" data-view="plan" hidden>
   <h2>Ton plan</h2>
-  <p class="note">Tout ton entraînement organisé jusqu'aux épreuves : le programme par blocs, tes objectifs datés, ton planning semaine A / semaine B, les rappels dans ton agenda et ce qu'on peut faire dans chaque lieu. Ensuite, l'onglet Accueil te dit chaque jour quoi faire.</p>
+  <p class="note">Tout ton entraînement organisé jusqu'aux épreuves : le programme par blocs, tes objectifs datés, ton planning semaine A / semaine B, les rappels dans ton agenda et ce qu'on peut faire dans chaque lieu. Ensuite, l'onglet Aujourd'hui te dit chaque jour quoi faire.</p>
 
   <div class="panel">
     <h3>Le programme, bloc par bloc</h3>
     <p class="note">Méthode de préparateur physique : des blocs de 4 semaines (3 semaines où la charge monte doucement, puis 1 semaine allégée avec des tests), environ 80 % de course facile et 20 % de course rapide, jamais plus de 10 % de volume en plus d'une semaine à l'autre, et un affûtage avant le jour J pour arriver en forme.</p>
     <div class="phases" id="phases"></div>
-  </div>
-
-  <div class="panel">
-    <h3>Tes objectifs datés</h3>
-    <p class="note">Ils se cochent tout seuls à partir de tes résultats (chronos, Luc Léger, tests). Ils seront ajustés après tes tests de départ.</p>
-    <ul class="steps" id="objectifs"></ul>
   </div>
 
   <div class="panel" id="planning-panel">
@@ -591,7 +703,11 @@ footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padd
     <div class="col" id="lieux"></div>
   </div>
 
-  <button type="button" class="ghost" data-goto="ateliers">Voir les 10 ateliers en détail</button>
+  <div class="panel">
+    <h3>Le guide des 10 ateliers</h3>
+    <p class="note">Chaque atelier comme au concours, recréé à Fitness Park, et à travailler au club. Avec le plan réel et la reconstitution, les règles et le barème.</p>
+    <div class="row"><button type="button" class="btn small" data-goto="ateliers" data-mode="concours">Au concours</button><button type="button" class="ghost small" data-goto="ateliers" data-mode="fp">À Fitness Park</button><button type="button" class="ghost small" data-goto="ateliers" data-mode="club">Au club (et plan vertige)</button></div>
+  </div>
 </section>
 
 <!-- =================== COACH =================== -->
@@ -634,7 +750,19 @@ footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padd
 <!-- =================== PROGRÈS =================== -->
 <section class="view" id="v-progres" data-view="progres" hidden>
   <h2>Progrès</h2>
-  <p class="note">Tout ce qui a été enregistré : tes temps de parcours, tes paliers au Luc Léger, tes tests, et l'historique complet.</p>
+  <div class="grid2">
+    <div class="score phm" id="score-phm"></div>
+    <div class="score luc" id="score-luc"></div>
+  </div>
+  <p class="note" id="score-avg" hidden></p>
+  <p class="note">Ta note de sport est la moyenne de ces deux notes, coefficient 8 dans le concours. Sous 7/20 à l'une des deux, c'est éliminatoire.</p>
+  <div class="panel">
+    <h3>Tes objectifs datés</h3>
+    <p class="note">Ils se cochent tout seuls à partir de tes résultats (chronos, Luc Léger, tests). Ils seront ajustés après tes tests de départ.</p>
+    <ul class="steps" id="objectifs"></ul>
+  </div>
+
+
   <div class="panel">
     <div class="row between"><h3>Parcours : temps total</h3><div class="chips" id="chips" role="group" aria-label="Filtrer par lieu"></div></div>
     <div class="kpis" id="kpis"></div>
@@ -656,22 +784,6 @@ footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padd
     <p class="note">« Évolution » compare ton dernier parcours au premier : en vert, tu vas plus vite sur cet atelier.</p>
   </div>
   <div class="panel">
-    <h3>Tests à côté</h3>
-    <p class="note">Note ici tes tests faits en dehors du parcours : combien de temps tu tiens suspendue, combien de pompes tu fais d'affilée, et à quelle hauteur tu traverses la poutre sans les mains.</p>
-    <form class="row" id="mes-form">
-      <select id="mes-type" aria-label="Test">
-        <option value="suspension">Suspension à la barre (s)</option>
-        <option value="pompes">Pompes réglementaires d'affilée</option>
-        <option value="poutre">Poutre : hauteur maîtrisée (cm)</option>
-        <option value="course">Course sans t'arrêter (km)</option>
-      </select>
-      <input type="number" id="mes-val" min="0" step="0.5" required aria-label="Valeur" style="width:90px">
-      <input type="date" id="mes-date" aria-label="Date">
-      <button class="ghost small" type="submit">Ajouter</button>
-    </form>
-    <div class="mes-grid" id="mes-grid"></div>
-  </div>
-  <div class="panel">
     <h3>Historique</h3>
     <div class="seg" id="hist-seg" role="group" aria-label="Historique">
       <button type="button" data-h="essais" aria-pressed="true">Parcours</button>
@@ -688,12 +800,11 @@ footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padd
 
 <nav class="tabs" aria-label="Navigation">
   <div class="in">
-    <button type="button" data-tab="accueil"><svg viewBox="0 0 24 24"><path d="M3 11 12 4l9 7v9H3z"/><path d="M9 20v-6h6v6"/></svg>Accueil</button>
-    <button type="button" data-tab="parcours"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M10 2h4"/></svg>Parcours</button>
-    <button type="button" data-tab="luc"><svg viewBox="0 0 24 24"><path d="M4 18h16M6 18V8M18 18V8M6 8l6 5 6-5"/></svg>Luc Léger</button>
-    <button type="button" data-tab="plan"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M7 14h4M7 17h7"/></svg>Plan</button>
-    <button type="button" data-tab="coach"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/></svg>Coach</button>
+    <button type="button" data-tab="accueil"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>Aujourd'hui</button>
+    <button type="button" data-tab="train"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M10 2h4"/></svg>S'entraîner</button>
     <button type="button" data-tab="progres"><svg viewBox="0 0 24 24"><path d="M4 19h16"/><path d="M5 15l4-5 4 3 6-7"/></svg>Progrès</button>
+    <button type="button" data-tab="coach"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/></svg>Coach</button>
+    <button type="button" data-tab="plan"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Plan</button>
   </div>
 </nav>
 
@@ -775,7 +886,7 @@ footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padd
       <div class="col"><span class="lab">Ne plus avoir peur de tomber</span>
         <p>Dès le palier 2, entraîne-toi à <b>sauter volontairement</b> sur le côté, réception pieds joints sur le tapis, genoux fléchis. Savoir tomber enlève une bonne partie de la peur.</p>
         <p>Demande au coach une <b>parade</b> pour tes premiers passages à 80 cm et à 1 m.</p>
-        <p>Note ta <b>hauteur maîtrisée</b> dans Progrès › Tests à côté.</p>
+        <p>Note ta <b>hauteur maîtrisée</b> dans S'entraîner › Tests.</p>
       </div>
     </div>
     <p class="note">Si ce sont de vrais vertiges (tête qui tourne, déséquilibre même hors de la poutre), parles-en au médecin du sport.</p>
@@ -910,24 +1021,29 @@ const palTxt = (p, s) => `palier ${p}${s ? " + " + s + " s" : ""}`;
 const palBig = (p, s) => `Palier ${p}${s ? " + " + s + " s" : ""}`;
 
 /* ======================= NAVIGATION ======================= */
-const VIEWS = ["accueil", "parcours", "luc", "ateliers", "plan", "coach", "progres"];
+const VIEWS = ["accueil", "parcours", "luc", "frac", "tests", "ateliers", "plan", "coach", "progres", "reglages"];
 function show(v, noScroll){
   if (!VIEWS.includes(v)) v = "accueil";
+  const cur = document.querySelector(".view:not([hidden])"); if (cur && cur.dataset.view !== v) prevView = cur.dataset.view;
   document.querySelectorAll(".view").forEach(el => el.hidden = el.dataset.view !== v);
-  document.querySelectorAll("[data-tab]").forEach(b => b.setAttribute("aria-current", (b.dataset.tab === v || (v === "ateliers" && b.dataset.tab === "plan")) ? "page" : "false"));
+  const tab = TRAIN.includes(v) ? "train" : v === "ateliers" ? "plan" : v;
+  document.querySelectorAll("[data-tab]").forEach(b => b.setAttribute("aria-current", b.dataset.tab === tab ? "page" : "false"));
+  chrome(v);
+  if (v === "frac") frFill();
+  if (v === "tests") renderMesures();
   try { history.replaceState(null, "", "#" + v); } catch(e){}
   if (!noScroll) window.scrollTo(0, 0);
   if (v === "progres") renderProg();
   if (v === "coach"){ renderRecos(); renderChat(); renderWeek(); genWeek(false); }
   if (v === "plan") renderPlanAll();
 }
-document.querySelectorAll("[data-tab]").forEach(b => b.addEventListener("click", () => show(b.dataset.tab)));
-document.addEventListener("click", e => { const g = e.target.closest("[data-goto]"); if (g){ show(g.dataset.goto); if (g.dataset.mode) setMode(g.dataset.mode); } });
+document.querySelectorAll("[data-tab]").forEach(b => b.addEventListener("click", () => show(b.dataset.tab === "train" ? lsGet("phm-train", "parcours") : b.dataset.tab)));
+document.addEventListener("click", e => { const g = e.target.closest("[data-goto]"); if (g){ show(g.dataset.goto); if (g.dataset.mode) setMode(g.dataset.mode); if (g.dataset.anchor && $(g.dataset.anchor)) setTimeout(() => $(g.dataset.anchor).scrollIntoView({block: "start"}), 50); } });
 
 /* ======================= STOCKAGE =======================
    Toujours sur ce téléphone. Si le partage est activé (config.js + code d'équipe),
    aussi dans la base en ligne, visible sur tous les téléphones de l'équipe. */
-const S = { essais: [], mesures: [], luc: [], rapports: [], exam: null, examLabel: null, plan: null, lieux: null };
+const S = { essais: [], mesures: [], luc: [], rapports: [], exam: null, examLabel: null, plan: null, lieux: null, fait: null };
 const LKEY = {essais:"phm-essais-v3", mesures:"phm-mesures-v1", luc:"phm-luc-v1", rapports:"phm-rapports-v1"};
 const COLLS = ["essais", "mesures", "luc", "rapports"];
 const EXAM_DEFAULT = {date:"2027-03-29", label:"fin mars – début avril 2027"};
@@ -939,7 +1055,7 @@ function setSync(msg, warn){ const el = $("sync"); el.textContent = msg; el.clas
 function loadLocal(){
   for (const k of COLLS) S[k] = lsGet(LKEY[k], []).filter(x => x && x.id).map(x => cleanItem(k, x));
   const ex = lsGet("phm-exam-obj", EXAM_DEFAULT); S.exam = ex.date; S.examLabel = ex.label;
-  S.plan = lsGet("phm-plan", null); S.lieux = lsGet("phm-lieux", null);
+  S.plan = lsGet("phm-plan", null); S.lieux = lsGet("phm-lieux", null); S.fait = lsGet("phm-fait", null);
 }
 function writeErr(){ setSync("Enregistrement en ligne impossible pour le moment. Le résultat est gardé sur ce téléphone et partira dès que possible.", true); }
 // rejoindre une équipe avec un lien ?equipe=CODE
@@ -983,6 +1099,10 @@ async function connectFirebase(){
   F.onSnapshot(F.doc(db, "equipes", team, "reglages", "planning"), snap => {
     if (snap.exists()){ S.plan = snap.data(); lsSet("phm-plan", S.plan); renderPlanAll(); }
     else if (S.plan) F.setDoc(F.doc(db, "equipes", team, "reglages", "planning"), S.plan).catch(() => {});
+  }, () => {});
+  F.onSnapshot(F.doc(db, "equipes", team, "reglages", "fait"), snap => {
+    if (snap.exists()){ S.fait = snap.data(); lsSet("phm-fait", S.fait); renderToday(); renderTiles(); }
+    else if (S.fait) F.setDoc(F.doc(db, "equipes", team, "reglages", "fait"), S.fait).catch(() => {});
   }, () => {});
   F.onSnapshot(F.doc(db, "equipes", team, "reglages", "lieux"), snap => {
     if (snap.exists()){ S.lieux = snap.data(); lsSet("phm-lieux", S.lieux); renderLieux(); }
@@ -1121,7 +1241,7 @@ const SEANCES = {
     {t:"Ton cours de gym, comme d'habitude", d:"On ne change rien au cours."},
     {t:"Avant ou après le cours, si c'est possible : la poutre", d:"10 traversées sans les mains, à la hauteur où tu en es dans le plan vertige · 10 à 15 min", go:"ateliers", mode:"club", btn:"Plan vertige"},
     {t:"Si tu as encore 5 min : la barre", d:"3 fois suspendue le plus longtemps possible"},
-    {t:"Note ta hauteur de poutre et ta suspension", d:"Dans Progrès › Tests à côté.", go:"progres", btn:"Noter"}
+    {t:"Note ta hauteur de poutre et ta suspension", d:"Dans S'entraîner › Tests.", go:"progres", btn:"Noter"}
   ],
   run: [
     {t:"Échauffement", d:"15 min de course lente, talons-fesses, montées de genoux, 3 accélérations"},
@@ -1655,7 +1775,7 @@ function recos(){
   else if (susp != null && susp < 30) R.push({t:"Suspension : vise 30 s", d:`Dernier test : ${fr(susp)} s. 30 s te donnent de la marge le jour J.`});
   if (pomp != null && pomp < 3) R.push({t:"Pompes : priorité", d:`Dernier test : ${fr(pomp)}. Il en faut 3 bien faites. Commence mains sur un caisson, descends lentement en 3 s.`});
   if (pout != null && pout < 100) R.push({t:`Poutre : tu es à ${fr(pout)} cm`, d:"Suis le plan vertige (vue Club) : passe au palier suivant seulement quand 10 traversées sont faciles.", go:"ateliers", mode:"club", btn:"Plan vertige"});
-  if (susp == null && pomp == null && pout == null) R.push({t:"Note tes premiers tests", d:"Suspension, pompes, hauteur de poutre : dans Progrès › Tests à côté. Le coach s'en sert pour te conseiller.", go:"progres", btn:"Progrès"});
+  if (susp == null && pomp == null && pout == null) R.push({t:"Note tes premiers tests", d:"Suspension, pompes, hauteur de poutre : dans S'entraîner › Tests. Le coach s'en sert pour te conseiller.", go:"progres", btn:"Progrès"});
   if (last){ const days = Math.floor((Date.now() - last.at) / 86400000); if (days > 10) R.push({t:`${days} jours sans parcours complet`, d:"Un parcours complet par semaine à Fitness Park garde les enchaînements en mémoire.", go:"parcours", btn:"Chrono"}); }
   const ph = curPhase();
   if (ph) R.push({t:`Étape « ${ph.t.replace(/^\d+ · /, "")} »`, d:ph.p});
@@ -1665,7 +1785,7 @@ function recoHTML(r){ return `<li><div><div class="s-t">${esc(r.t)}</div><div cl
 function renderRecos(){
   const R = recos();
   $("recos").innerHTML = R.map(recoHTML).join("");
-  $("home-recos").innerHTML = R.slice(0, 2).map(recoHTML).join("");
+  $("home-recos").innerHTML = R.slice(0, 1).map(recoHTML).join("");
   const ph = curPhase(); $("coach-phase").textContent = ph ? ph.t : "";
   const on = aiOn();
   $("ai-on").hidden = !on; $("ai-off").hidden = on;
@@ -1694,7 +1814,7 @@ const RULES = `Règles officielles (descriptif 2025, femmes) :
 - PHM : atelier 1 sac 25 kg sur 20 m hors chrono, puis chrono 15 s après la pose du sac. Ateliers numérotés : 2 pompes x3 (buste au plot, coudes verrouillés), 3 haies (3 haies de 60 cm à 4 m), 4 poutre (5 m à 1 m de haut sans les mains, pas de tapis à la sortie), 5 multibonds (cerceaux 70 cm), 6 appuis alternés (banc 50 cm, semelle sur le banc), 7 barrières (2 chevaux mousse 1,20 m à 2,20 m), 8 échelle horizontale (2 m ou suspension 15 s), 9 ramper (3 m sous 50 cm), 10 slalom (45 m, 1er cône par la droite). Utilise toujours le bon nom avec le bon numéro. Pénalités : +10 s par atelier raté, +20 s suspension non tenue, +5 s par plot. Atelier pas tenté ou abandon = 0. Dixièmes non comptés.
 - Barème PHM femmes : 0:50=20, 1:00=17,5, 1:10=14,5, 1:20=11,5, 1:30=10, 1:40=9, 1:49=7, 2:07=0.
 - Luc Léger : navette 20 m, départ 8 km/h, +0,5 km/h par palier d'1 min environ. Femmes : palier 4+15 s = 7/20, palier 6 = 10,5, palier 8 = 14,5, palier 10 = 18,5, palier 10+45 s = 20.
-- Sa semaine actuelle : 2 Freeletics, 2 gymnastique, 3 courses de 5 km, 2 krav maga, 1 jujitsu (10 séances). On ne rajoute pas de séances. La gym, le krav maga et le jujitsu ne se modifient JAMAIS (ne propose pas de les changer). On transforme seulement : 1 course devient fractionné, 1 Freeletics devient le parcours complet à Fitness Park. En plus : 10 min par jour de suspension et pompes, et si possible 10-15 min de poutre avant ou après un cours de gym. Au moins 1 jour de repos. Pas de pause pendant les fêtes. Premiers tests chronométrés (parcours + Luc Léger) la semaine du 9 novembre 2026.
+- Sa semaine habituelle est dans son planning A/B (ci-dessous dans ses données, s'il est rempli) ; à défaut : 2 Freeletics, 2 gymnastique, 3 courses de 5 km, 2 krav maga, 1 jujitsu (10 séances). On ne rajoute pas de séances. La gym, le krav maga et le jujitsu ne se modifient JAMAIS (ne propose pas de les changer). On transforme seulement : 1 course devient fractionné, 1 Freeletics devient le parcours complet à Fitness Park. En plus : 10 min par jour de suspension et pompes, et si possible 10-15 min de poutre avant ou après un cours de gym. Au moins 1 jour de repos. Pas de pause pendant les fêtes. Premiers tests chronométrés (parcours + Luc Léger) la semaine du 9 novembre 2026.
 - Elle s'entraîne à Fitness Park Lille (parcours recréé dans la zone fonctionnelle), dans un club de gymnastique (exercices seule sur les agrès) et en course. Le vrai parcours existe au lycée professionnel sécurité de Saint-Quentin. Elle peut avoir le vertige sur la poutre. La poutre du concours est à 1 m de haut, sans tapis à la sortie. Le plan vertige de l'appli (ne pas en inventer un autre) : palier 1 au sol (ligne de 5 m puis poutre posée au sol) ; palier 2 poutre basse 30 à 50 cm avec tapis ; palier 3 60 à 80 cm avec tapis épais, d'abord main tenue puis contact sur l'épaule puis seule ; palier 4 1 m avec gros tapis empilés ; palier 5 1 m sans les tapis surélevés ; palier 6 dans le parcours, essoufflée. On passe au palier suivant après 10 traversées d'affilée sans les mains, sans s'arrêter, avec une appréhension de 3 sur 10 ou moins. Conseils : regarder un point au bout de la poutre à hauteur des yeux, longue expiration avant de monter, petits pas réguliers, bras écartés, s'entraîner à sauter volontairement sur le tapis, demander une parade au coach du club.`;
 function systemPrompt(){
   return `Tu es le coach sportif d'une candidate au concours de gardien de la paix (police nationale), qui prépare les épreuves sportives. Tu la tutoies, en français simple, chaleureux et motivant, sans jargon : si tu utilises un mot technique, explique-le en quelques mots. Réponses courtes et concrètes (séances, durées, répétitions, quel atelier, où). FORMAT : jamais de tableau, jamais de titre, pas d'emoji numéroté ; des phrases courtes ou une liste simple avec des tirets. En discussion, 120 mots au maximum.
@@ -1743,6 +1863,7 @@ function weekBilan(start){
   const pk = Object.keys(pens);
   if (W.essais.length) facts.push({t: pk.length ? `Pénalités : ${pk.map(n => byN(Number(n)).short + " +" + pens[n] + " s").join(", ")}` : "Aucune pénalité cette semaine", d: pk.length ? "Ce sont les ateliers à travailler en priorité." : "Bravo : c'est là qu'on gagne le plus de temps."});
   if (bl) facts.push({t:`Luc Léger : ${palTxt(bl.palier, bl.sec)} (${fr(withBonus(lucBase(bl.palier, bl.sec)))}/20)`, d: pbl ? `Semaine d'avant : ${palTxt(pbl.palier, pbl.sec)}.` : "Objectif : palier " + LUC_TARGET + "."});
+  const wc = weekCount(start); if (wc.plan) facts.push({t:`Séances faites : ${wc.done} sur ${wc.plan}`, d: wc.done >= wc.plan ? "Semaine complète, bravo." : "Coche « Fait » dans Aujourd'hui après chaque séance."});
   if (W.mesures.length) facts.push({t:"Tests notés", d: W.mesures.map(m => `${MES[m.type].label} : ${fr(m.value)}${MES[m.type].unit ? " " + MES[m.type].unit : ""}`).join(" · ")});
   return {W, b, bl, facts, pens};
 }
@@ -1781,7 +1902,7 @@ async function genWeek(force){
   wkBusy = true; renderWeek();
   const prev = addDays(start, -7);
   try {
-    const t = await askGroq([{role: "system", content: systemPrompt()}, {role: "user", content: `C'est le début de la semaine du ${dayTxt(start)}. Voici le bilan de la semaine dernière :\n${bilanText(prev)}\nEt ce qui est déjà fait cette semaine :\n${bilanText(start)}\n\nÉcris mes recommandations pour cette semaine, en tenant compte de ma semaine habituelle (2 Freeletics, 2 gym, 3 courses de 5 km, 2 krav maga, 1 jujitsu ; on ne change ni la gym, ni le krav maga, ni le jujitsu). Base-toi STRICTEMENT sur ces bilans chiffrés (nombre de parcours, de Luc Léger, de tests) : ne dis jamais qu'il n'y a rien eu si le bilan indique des résultats. Commence par une phrase de bilan de la semaine dernière, avec ses chiffres. Puis 3 à 5 recommandations, chacune avec un titre court en gras puis 1 ou 2 phrases concrètes (quoi, à quelle séance de sa semaine, combien). Ne cite JAMAIS de jour (lundi, mardi…) : elle a déjà son planning et ses cours en club ; dis plutôt « une fois dans la semaine », « à une de tes courses », « à ta séance Freeletics remplacée ». Puis l'objectif chiffré de la semaine sur une ligne commençant par « Objectif de la semaine : ». Rappel : la routine quotidienne dure 10 min AU TOTAL (3 suspensions à la barre + 3 séries de 5 pompes + mobilité des poignets). Pour le fractionné, la partie rapide se court à la vitesse du palier visé (palier 8 = 11,5 km/h) ou au moins au palier au-dessus de son dernier test. Pas de tableau.`}], 800);
+    const t = await askGroq([{role: "system", content: systemPrompt()}, {role: "user", content: `C'est le début de la semaine du ${dayTxt(start)}. Voici le bilan de la semaine dernière :\n${bilanText(prev)}\nEt ce qui est déjà fait cette semaine :\n${bilanText(start)}\n\nÉcris mes recommandations pour cette semaine, en tenant compte de mon planning A/B et de la séance prévue chaque jour par l'appli (on ne change ni la gym, ni le krav maga, ni le jujitsu). Base-toi STRICTEMENT sur ces bilans chiffrés (nombre de parcours, de Luc Léger, de tests) : ne dis jamais qu'il n'y a rien eu si le bilan indique des résultats. Commence par une phrase de bilan de la semaine dernière, avec ses chiffres. Puis 3 à 5 recommandations, chacune avec un titre court en gras puis 1 ou 2 phrases concrètes (quoi, à quelle séance de sa semaine, combien). Ne cite JAMAIS de jour (lundi, mardi…) : elle a déjà son planning et ses cours en club ; dis plutôt « une fois dans la semaine », « à une de tes courses », « à ta séance Freeletics remplacée ». Puis l'objectif chiffré de la semaine sur une ligne commençant par « Objectif de la semaine : ». Rappel : la routine quotidienne dure 10 min AU TOTAL (3 suspensions à la barre + 3 séries de 5 pompes + mobilité des poignets). Pour le fractionné, la partie rapide se court à la vitesse du palier visé (palier 8 = 11,5 km/h) ou au moins au palier au-dessus de son dernier test. Pas de tableau.`}], 800);
     if (t) await setDoc("rapports", key, {at: Date.now(), week: key, conseils: t, bilan: bilanText(prev)});
   } catch(e){ $("wk-recos").innerHTML = `<p class="sync warn">${esc(e.message || "Le coach ne répond pas.")}</p>`; wkBusy = false; return; }
   wkBusy = false; renderWeek();
@@ -1909,33 +2030,38 @@ function session(type, d){
   let lieu = "";
   const warm = "Échauffement : 15 min de footing + 3 accélérations. Retour au calme : 10 min très lent.";
   if (type === "course_end"){
-    const tab = [[30], [30, 35, 40, 25], [45, 50, 60, 30], [45, 45, 50, 30], [40, 40, 40, 25], [35, 30, 20]][m.i];
+    const tab = [[30], [35, 40, 50, 30], [45, 55, 60, 35], [45, 45, 50, 30], [40, 40, 40, 25], [35, 30, 20]][m.i];
     const min = tab[Math.min(m.wk, tab.length - 1)];
     lieu = "Dehors (Citadelle, canal…) ou tapis de course s'il pleut";
-    if (m.i === 2 && m.wk === 2) L.push("Objectif du mois : <b>10 km sans t'arrêter</b>, allure facile. Note ta distance dans Progrès › Tests à côté.");
-    else L.push(`<b>${min} min</b> de course à allure facile : tu dois pouvoir parler en courant.`);
+    if (m.i === 2 && m.wk === 2) L.push("Objectif du mois : <b>10 km sans t'arrêter</b>, allure facile. Note ta distance dans S'entraîner › Tests.");
+    else L.push(`<b>${min} min</b> de course à allure facile : tu dois pouvoir parler en courant.${m.i === 1 && m.wk === 2 ? " Objectif du bloc : <b>8 km sans t'arrêter</b>, note-le dans S'entraîner › Tests." : ""}`);
     if (m.deload) L.push("Semaine allégée : on récupère pour progresser.");
   } else if (type === "course_frac" || type === "luc"){
     lieu = "Citadelle (mesure 20 m pour les navettes) ou tapis de course s'il pleut";
-    const test = m.i === 0 || m.deload;
-    if (test) L.push("<b>Test Luc Léger complet</b> avec l'appli (départ palier 1). Le résultat s'enregistre tout seul.");
+    const test = m.deload || (m.i === 0 && type === "luc");
+    if (m.i === 0 && type === "course_frac"){
+      L.push("<b>30 min</b> de course facile : ton test Luc Léger se fait avec le parcours cette semaine.");
+    } else if (test) L.push("<b>Test Luc Léger complet</b> avec l'appli (départ palier 1). Le résultat s'enregistre tout seul.");
     else {
-      const F = [null,
-        ["6 × (1 min vite / 1 min lent)", "8 × (1 min vite / 1 min lent)", "10 × (1 min vite / 1 min lent)"],
-        ["2 séries de 8 × (30 s vite / 30 s trot), 3 min entre les séries", "2 × 10 × (30 s / 30 s)", "3 × 8 × (30 s / 30 s)"],
-        ["6 × (1 min 30 vite / 1 min lent)", "5 × (2 min vite / 1 min lent)", "4 × (3 min vite / 1 min 30 lent)"],
-        ["Navettes de 20 m avec l'appli au palier 8 : 3 × 2 min (2 min de repos), puis 8 × (30 s / 30 s)", "Navettes au palier 8 : 4 × 2 min, puis 10 × (30 s / 30 s)", "Navettes au palier 9 : 3 × 3 min, puis 8 × (30 s / 30 s)"],
-        ["2 × 8 × (30 s / 30 s) vite", "1 × 10 × (30 s / 30 s)", "6 × (30 s / 30 s) léger, au plus tard 4 jours avant les épreuves"]][m.i];
-      L.push(`<b>${F[Math.min(m.wk, F.length - 1)]}</b>`);
+      const TT = [null,
+        [{reps: 6, work: 60, rest: 60}, {reps: 8, work: 60, rest: 60}, {reps: 10, work: 60, rest: 60}],
+        [{sets: 2, reps: 8, work: 30, rest: 30, setRest: 180}, {sets: 2, reps: 10, work: 30, rest: 30, setRest: 180}, {sets: 3, reps: 8, work: 30, rest: 30, setRest: 180}],
+        [{reps: 6, work: 90, rest: 60}, {reps: 5, work: 120, rest: 60}, {reps: 4, work: 180, rest: 90}],
+        [{reps: 8, work: 30, rest: 30}, {reps: 10, work: 30, rest: 30}, {reps: 8, work: 30, rest: 30}],
+        [{sets: 2, reps: 8, work: 30, rest: 30, setRest: 180}, {reps: 10, work: 30, rest: 30}, {reps: 6, work: 30, rest: 30}]][m.i];
+      const tm = TT[Math.min(m.wk, TT.length - 1)];
+      var timer = Object.assign({sets: 1, setRest: 0}, tm);
+      if (m.i === 4) L.push(`<b>Navettes de 20 m</b> avec l'appli au palier ${m.wk === 2 ? 9 : 8} : ${m.wk === 2 ? "3 × 3 min" : m.wk === 1 ? "4 × 2 min" : "3 × 2 min"}, 2 min de repos entre. Puis <b>${fmtTimer(timer)}</b>.`);
+      else L.push(`<b>${fmtTimer(timer)}</b>${m.i === 5 && m.wk === 2 ? ", au plus tard 4 jours avant les épreuves" : ""}.`);
       const lv = bestLuc(), tp = lv == null ? 6 : Math.min(9, Math.max(6, Math.floor(lv) + 2));
       L.push(`« Vite » = environ <b>${fr(speedOf(tp))} km/h</b> (la vitesse du palier ${tp}${lv == null ? ", à ajuster après ton premier Luc Léger" : ", deux paliers au-dessus de ton meilleur test"}). « Lent » = trot.`);
-      L.push(warm);
+      L.push("Échauffement : 15 min de footing + 3 accélérations. Retour au calme : 10 min très lent.");
     }
   } else if (type === "course_rec"){
     lieu = "Dehors";
     L.push(`<b>${m.i === 5 ? 20 : 25} min</b> très facile, puis 4 lignes droites de 80 m en accélérant.`);
   } else if (type === "parcours"){
-    lieu = "Fitness Park Lille, zone cross-training (plan dans Ateliers › À Fitness Park)";
+    lieu = "Fitness Park Lille, zone cross-training (plan dans Plan › Guide des ateliers › À Fitness Park)";
     const P = [
       ["<b>TEST de départ</b> : sac + parcours complet chronométré, 30 min de repos, puis Luc Léger complet."],
       ["Technique : chaque atelier 2 fois au calme, puis 2 parcours chronométrés.", "Technique + 2 parcours chronométrés.", "3 parcours chronométrés, 4 min de repos entre.", "<b>Test</b> : 2 parcours chronométrés, on garde le meilleur."],
@@ -1962,25 +2088,11 @@ function session(type, d){
   } else if (type === "repos"){
     L.push("Repos complet. C'est pendant le repos que le corps progresse.");
   }
-  return {lieu, L, m};
+  return {lieu, L, m, timer: typeof timer !== "undefined" ? timer : null};
 }
 function slotHTML(s, d, compact){
   const T = TYPES[s.t] || {l: s.t, ic: "daily"}, x = session(s.t, d);
   return `<div class="wk ${T.ic}"><b>${s.h ? s.h.replace(":", " h ") + " · " : ""}${T.l}</b>${x.lieu ? `<p class="note" style="margin:0">${esc(x.lieu)}</p>` : ""}${compact ? "" : x.L.map(l => `<p>${l}</p>`).join("")}</div>`;
-}
-function renderToday(){
-  const el = $("today"); if (!el) return;
-  const now = new Date(), tomorrow = addDays(now, 1), m = mesoAt(now);
-  const head = `<div class="row between"><h2>Aujourd'hui</h2><span class="note">${now.toLocaleDateString("fr-FR", {weekday: "long", day: "numeric", month: "long"})} · semaine ${weekType(now)}</span></div>
-    <p class="note">Bloc <b style="color:var(--ink)">${m.n}</b>${m.deload ? " · semaine allégée + tests" : ""}</p>`;
-  if (planEmpty()){
-    el.innerHTML = head + `<p>Pour que l'appli te dise chaque jour quoi faire, remplis ton planning semaine A / semaine B (2 minutes).</p><button type="button" class="btn small" data-goto="plan">Remplir mon planning</button>`;
-    return;
-  }
-  const sl = slotsOn(now), sl2 = slotsOn(tomorrow);
-  const routine = sl.some(s => s.t === "repos") ? "" : `<div class="wk daily"><b>Routine 10 min (n'importe quand)</b><p>3 suspensions à la barre, 3 × 5 pompes, mobilité des poignets.</p></div>`;
-  el.innerHTML = head + `<div class="week">${sl.length ? sl.map(s => slotHTML(s, now)).join("") : `<div class="wk daily"><b>Pas de séance prévue</b><p>Repos, ou la routine 10 min si tu as envie.</p></div>`}${routine}</div>
-    <p class="note"><b style="color:var(--ink)">Demain :</b> ${sl2.length ? sl2.map(s => (s.h ? s.h.replace(":", " h ") + " " : "") + (TYPES[s.t] || {l: s.t}).l).join(" · ") : "rien de prévu"}</p>`;
 }
 // objectifs datés
 function bestPhm(){ return S.essais.length ? Math.min(...S.essais.map(e => e.total)) / 1000 : null; }
@@ -1993,7 +2105,7 @@ function objectifs(){
   const mes = t => bestMes(t);
   const fmtV = (v, u) => v == null ? "pas encore mesuré" : fr(Math.round(v * 10) / 10) + (u ? " " + u : "");
   return [
-    O("2026-11-15", "Tests de départ faits (parcours, Luc Léger, au moins un test à côté)", S.essais.length && S.luc.length && S.mesures.length, ""),
+    O("2026-11-15", "Tests de départ faits (parcours, Luc Léger et au moins un test)", S.essais.length && S.luc.length && S.mesures.length, ""),
     O("2026-12-13", "Courir 8 km sans t'arrêter", mes("course") >= 8, fmtV(mes("course"), "km")),
     O("2026-12-13", "Luc Léger : +1 palier par rapport à ton test de départ", f != null && lu != null && lu >= f + 1, lu != null ? palTxt(Math.floor(lu), Math.round((lu % 1) * 60)) : "pas encore testé"),
     O("2026-12-13", "Suspension 20 s · 5 pompes · poutre à 60 cm", mes("suspension") >= 20 && mes("pompes") >= 5 && mes("poutre") >= 60, [fmtV(mes("suspension"), "s"), fmtV(mes("pompes"), "pompes"), fmtV(mes("poutre"), "cm")].join(" · ")),
@@ -2015,7 +2127,7 @@ function objHTML(o){
 function renderObjectifs(){
   const O = objectifs();
   if ($("objectifs")) $("objectifs").innerHTML = O.map(objHTML).join("");
-  const next = O.filter(o => !o.ok).slice(0, 2);
+  const next = O.filter(o => !o.ok).slice(0, 1);
   if ($("home-obj")) $("home-obj").innerHTML = next.length ? next.map(objHTML).join("") : `<li><div class="s-t">Tous les objectifs sont atteints. Bravo !</div></li>`;
 }
 // éditeur de planning
@@ -2110,7 +2222,7 @@ function syncAgenda(){
 function renderAgendaSub(){
   const el = $("agenda-sub"); if (!el) return;
   $("alarm-min").value = String(lsGet("phm-alarm", 30));
-  if (!team || !FB){ el.innerHTML = `<p class="note">D'abord, active le partage (Accueil › Réglages › Partage entre téléphones) : l'agenda en ligne utilise votre espace partagé.</p>`; return; }
+  if (!team || !FB){ el.innerHTML = `<p class="note">D'abord, active le partage (roue dentée en haut › Partage entre téléphones) : l'agenda en ligne utilise votre espace partagé.</p>`; return; }
   if (planEmpty()){ el.innerHTML = `<p class="note">Remplis d'abord ton planning ci-dessus.</p>`; return; }
   const https = `${AGENDA_BASE}/agenda/${team}.ics`, webcal = https.replace(/^https:/, "webcal:");
   el.innerHTML = `<p><b>Sur iPhone :</b></p>
@@ -2167,6 +2279,208 @@ $("lieux").addEventListener("click", e => {
 function renderPlanAll(){ renderToday(); renderObjectifs(); renderPlanning(); renderAgendaSub(); renderLieux(); scheduleAgenda(); }
 
 
+/* ======================= REFONTE : navigation, aujourd'hui, minuteur ======================= */
+const TRAIN = ["parcours", "luc", "frac", "tests"];
+const TITLES = {accueil: "Parcours", parcours: "S'entraîner", luc: "S'entraîner", frac: "S'entraîner", tests: "S'entraîner", progres: "Progrès", coach: "Coach", plan: "Ton plan", ateliers: "Les 10 ateliers", reglages: "Réglages"};
+const TRAIN_LABELS = {parcours: "Parcours", luc: "Luc Léger", frac: "Fractionné", tests: "Tests"};
+let prevView = "accueil";
+function renderTrainNav(v){
+  document.querySelectorAll(".trainnav").forEach(n => n.innerHTML = TRAIN.map(k => `<button type="button" data-goto="${k}" aria-current="${k === v}">${TRAIN_LABELS[k]}</button>`).join(""));
+}
+function chrome(v){
+  $("top-title").textContent = TITLES[v] || "Parcours";
+  const sub = v === "ateliers" || v === "reglages";
+  $("top-back").hidden = !sub;
+  if (TRAIN.includes(v)){ lsSet("phm-train", v); renderTrainNav(v); }
+}
+$("top-back").addEventListener("click", () => show(prevView && prevView !== "reglages" && prevView !== "ateliers" ? prevView : "accueil"));
+
+/* ---- séances faites ---- */
+function saveFait(o){ S.fait = o; lsSet("phm-fait", o); if (FS) FS.setDoc(FS.doc(FS.db, "equipes", team, "reglages", "fait"), o).catch(writeErr); }
+const slotKey = s => s.t + "@" + (s.h || "");
+const isDone = (d, s) => !!((S.fait || {})[ymd(d)] || {})[slotKey(s)];
+function weekCount(d){
+  const st = weekStart(d || Date.now()); let plan_ = 0, done = 0;
+  for (let i = 0; i < 7; i++){ const day = addDays(st, i); slotsOn(day).forEach(s => { if (s.t === "repos") return; plan_++; if (isDone(day, s)) done++; }); }
+  return {plan: plan_, done};
+}
+
+/* ---- aujourd'hui ---- */
+const ICONS = {
+  run: '<svg viewBox="0 0 24 24"><circle cx="14" cy="4" r="2"/><path d="M8 21l3-6 3 3v3M6 12l3-4 4 1 3 4 3 1"/></svg>',
+  fp: '<svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M10 2h4"/></svg>',
+  club: '<svg viewBox="0 0 24 24"><path d="M3 12h18M6 8v8M18 8v8"/></svg>',
+  daily: '<svg viewBox="0 0 24 24"><path d="M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.6-7 10-7 10z"/></svg>'
+};
+let selDay = null;
+function actionFor(s, d, x){
+  const test = /Test Luc Léger complet/.test(x.L.join(" "));
+  if (s.t === "course_frac" || s.t === "luc") return test ? {l: "Lancer le Luc Léger", go: "luc"} : {l: "Lancer le minuteur", go: "frac"};
+  if (s.t === "parcours") return {l: "Lancer le chrono", go: "parcours"};
+  if (s.t === "course_end") return {l: "Noter ma distance", go: "tests"};
+  if (s.t === "gym") return {l: "Plan vertige", go: "ateliers", mode: "club"};
+  return null;
+}
+function renderToday(){
+  const el = $("today"); if (!el) return;
+  const now = new Date(); now.setHours(12, 0, 0, 0);
+  const d = selDay ? parseDay(selDay) : now, isToday = ymd(d) === ymd(now), m = mesoAt(d);
+  // bandeau de la semaine
+  const st = weekStart(d);
+  $("daystrip").innerHTML = [0, 1, 2, 3, 4, 5, 6].map(i => {
+    const day = addDays(st, i), sl = slotsOn(day).filter(s => s.t !== "repos"), all = sl.length && sl.every(s => isDone(day, s));
+    return `<button type="button" class="day${ymd(day) === ymd(now) ? " is-today" : ""}${all ? " all-done" : ""}" role="tab" aria-selected="${ymd(day) === ymd(d)}" data-day="${ymd(day)}"><small>${DAYS[i + 1].slice(0, 3)}</small><b>${day.getDate()}</b><span class="dots">${sl.slice(0, 4).map(s => `<i class="${(TYPES[s.t] || {ic: "daily"}).ic}${isDone(day, s) ? " ok" : ""}"></i>`).join("")}</span></button>`;
+  }).join("");
+  const title = isToday ? "Aujourd'hui" : d.toLocaleDateString("fr-FR", {weekday: "long", day: "numeric", month: "long"});
+  const head = `<div class="today-head"><h2 style="text-transform:${isToday ? "none" : "capitalize"}">${title}</h2><span class="note">Semaine ${weekType(d)} · bloc ${m.n}${m.deload ? " · semaine allégée" : ""}</span></div>`;
+  if (planEmpty()){
+    el.innerHTML = head + `<div class="sess"><span class="ic daily">${ICONS.daily}</span><div><h3>Ton planning est vide</h3><p class="what">Indique tes séances habituelles (semaine A et semaine B) : l'appli te dira ensuite chaque jour quoi faire, où, et combien de temps.</p><div class="acts"><button type="button" class="btn" data-goto="plan" data-anchor="planning-panel">Remplir mon planning</button></div></div></div>`;
+    return;
+  }
+  const sl = slotsOn(d);
+  const cards = sl.map(s => {
+    const T = TYPES[s.t] || {l: s.t, ic: "daily"}, x = session(s.t, d), a = actionFor(s, d, x), done = isDone(d, s);
+    const main = x.L[0] || "", more = x.L.slice(1);
+    return `<div class="sess${done ? " done" : ""}"><span class="ic ${T.ic}">${ICONS[T.ic] || ICONS.daily}</span><div>
+      <h3>${T.l}</h3><div class="when">${s.h ? s.h.replace(":", " h ") : "Quand tu veux"}${x.lieu ? " · " + esc(x.lieu) : ""}</div>
+      <p class="what">${main}</p>
+      ${more.length ? `<details><summary>Détails</summary>${more.map(l => `<p>${l}</p>`).join("")}</details>` : ""}
+      ${s.t === "repos" ? "" : `<div class="acts">${a ? `<button type="button" class="btn" data-goto="${a.go}"${a.mode ? ` data-mode="${a.mode}"` : ""}>${a.l}</button>` : ""}<button type="button" class="ghost done-btn" data-done="${ymd(d)}|${esc(slotKey(s))}" aria-pressed="${done}">${done ? "Fait ✓" : "Fait"}</button></div>`}
+    </div></div>`;
+  });
+  if (!sl.some(s => s.t === "repos")) cards.push(`<div class="sess"><span class="ic daily">${ICONS.daily}</span><div><h3>Routine 10 min</h3><div class="when">Quand tu veux</div><p class="what">3 suspensions à la barre, 3 × 5 pompes, mobilité des poignets.</p></div></div>`);
+  el.innerHTML = head + `<div class="sess-list">${sl.length ? cards.join("") : `<div class="sess"><span class="ic daily">${ICONS.daily}</span><div><h3>Rien de prévu</h3><p class="what">Repos, ou la routine 10 min si tu as envie.</p></div></div>`}</div>`;
+}
+document.addEventListener("click", e => {
+  const day = e.target.closest("[data-day]");
+  if (day){ selDay = day.dataset.day === ymd(new Date()) ? null : day.dataset.day; renderToday(); return; }
+  const b = e.target.closest("[data-done]"); if (!b) return;
+  const [d, k] = b.dataset.done.split("|"), o = JSON.parse(JSON.stringify(S.fait || {}));
+  o[d] = o[d] || {}; if (o[d][k]) delete o[d][k]; else o[d][k] = Date.now();
+  // on ne garde que les 120 derniers jours
+  const lim = ymd(addDays(new Date(), -120)); Object.keys(o).forEach(x => { if (x < lim) delete o[x]; });
+  saveFait(o); renderToday(); renderTiles();
+});
+function renderHello(){
+  const now = new Date();
+  $("hello-date").textContent = now.toLocaleDateString("fr-FR", {weekday: "long", day: "numeric", month: "long"});
+  const h = now.getHours();
+  $("hello-title").textContent = h < 12 ? "Bonjour" : h < 18 ? "Bon après-midi" : "Bonsoir";
+  const dl = daysLeft();
+  $("topcount").textContent = dl != null && dl >= 0 ? (dl === 0 ? "Jour J" : "J−" + dl) : "";
+}
+function renderTiles(){
+  const el = $("home-tiles"); if (!el) return;
+  const l = sortedBy(S.essais), lu = sortedBy(S.luc);
+  const np = l.length ? withBonus(phmBase(l[l.length - 1].total / 1000), l[l.length - 1].sac ? -1 : 0) : null;
+  const nl = lu.length ? withBonus(lucBase(lu[lu.length - 1].palier, lu[lu.length - 1].sec)) : null;
+  const wc = weekCount(new Date());
+  const cls = n => n == null ? "" : n < 7 ? "warn" : n >= 14 ? "good" : "";
+  el.innerHTML = `<button type="button" class="tile ${cls(np)}" data-goto="progres"><span>Parcours</span><b>${np == null ? "—" : fr(np)}</b><small>${np == null ? "pas encore de chrono" : "/20 · dernier essai"}</small></button>
+    <button type="button" class="tile ${cls(nl)}" data-goto="progres"><span>Luc Léger</span><b>${nl == null ? "—" : fr(nl)}</b><small>${nl == null ? "pas encore de test" : "/20 · dernier test"}</small></button>
+    <button type="button" class="tile${wc.plan && wc.done >= wc.plan ? " good" : ""}" data-goto="accueil"><span>Semaine</span><b>${wc.plan ? wc.done + "/" + wc.plan : "—"}</b><small>${wc.plan ? "séances faites" : "planning vide"}</small></button>`;
+}
+/* ---- pour bien démarrer ---- */
+function renderSetup(){
+  const el = $("setup"); if (!el) return;
+  const steps = [
+    {ok: lsGet("phm-age2", null) != null, t: "Indique ton âge", d: "Pour calculer tes notes avec le bon bonus.", go: "reglages", b: "Régler"},
+    {ok: !planEmpty(), t: "Remplis ton planning A / B", d: "Tes séances habituelles, avec l'heure.", go: "plan", b: "Remplir"},
+    {ok: !!(team && FB), t: "Active le partage avec Rémy", d: "Vos résultats sur vos deux téléphones.", go: "reglages", b: "Activer"},
+    {ok: !!lsGet("phm-agenda-ok", false), t: "Abonne ton agenda", d: "Tes séances et les rappels arrivent tout seuls.", go: "plan", b: "Abonner", tick: true},
+    {ok: S.essais.length > 0 && S.luc.length > 0, t: "Fais tes tests de départ", d: "Un parcours chronométré et un Luc Léger complet.", go: "parcours", b: "Commencer"}
+  ];
+  const left = steps.filter(s => !s.ok).length;
+  if (!left || lsGet("phm-setup-hide", false)){ el.hidden = true; return; }
+  el.hidden = false;
+  el.innerHTML = `<div class="row between"><h3>Pour bien démarrer · ${steps.length - left}/${steps.length}</h3><button type="button" class="link" id="setup-hide">Masquer</button></div>
+    <ul class="steps">${steps.map(s => `<li class="${s.ok ? "done" : ""}"><div><div class="s-t">${s.ok ? "✓ " : ""}${s.t}</div><div class="s-d">${s.d}</div></div>${s.ok ? "" : `<span class="s-a row" style="gap:6px">${s.tick ? `<button type="button" class="ghost tiny" id="agenda-ok">C'est fait</button>` : ""}<button type="button" class="ghost tiny" data-goto="${s.go}">${s.b}</button></span>`}</li>`).join("")}</ul>`;
+}
+document.addEventListener("click", e => {
+  if (e.target.id === "setup-hide"){ lsSet("phm-setup-hide", true); renderSetup(); }
+  if (e.target.id === "agenda-ok"){ lsSet("phm-agenda-ok", true); renderSetup(); }
+});
+
+/* ---- minuteur de fractionné ---- */
+const FR = {state: "idle", steps: [], i: 0, t0: 0, stepStart: 0, raf: null, lastBeep: -1};
+function fracToday(){
+  const now = new Date(), sl = slotsOn(now).find(s => s.t === "course_frac");
+  return (session("course_frac", now).timer) || {sets: 1, reps: 8, work: 30, rest: 30, setRest: 0};
+}
+function frSettings(){ return lsGet("phm-fr-custom", null) || fracToday(); }
+function frFill(){
+  const t = frSettings();
+  $("fr-sets").value = t.sets || 1; $("fr-reps").value = t.reps; $("fr-work").value = t.work; $("fr-rest").value = t.rest; $("fr-setrest").value = t.setRest || 0;
+  $("fr-presc").innerHTML = `${lsGet("phm-fr-custom", null) ? "Ta séance modifiée" : "Séance du programme"} : <b style="color:var(--ink)">${fmtTimer(t)}</b>`;
+}
+function fmtTimer(t){
+  const sec = s => s >= 60 ? (s % 60 ? `${Math.floor(s / 60)} min ${s % 60}` : `${s / 60} min`) : `${s} s`;
+  const core = `${t.reps} × (${sec(t.work)} vite / ${sec(t.rest)} lent)`;
+  return (t.sets || 1) > 1 ? `${t.sets} séries de ${core}, ${sec(t.setRest || 0)} entre les séries` : core;
+}
+["fr-sets", "fr-reps", "fr-work", "fr-rest", "fr-setrest"].forEach(id => $(id).addEventListener("change", () => {
+  lsSet("phm-fr-custom", {sets: +$("fr-sets").value || 1, reps: +$("fr-reps").value || 1, work: +$("fr-work").value || 30, rest: +$("fr-rest").value || 30, setRest: +$("fr-setrest").value || 0}); frFill();
+}));
+$("fr-reset").addEventListener("click", () => { lsSet("phm-fr-custom", null); frFill(); });
+function frBuild(t){
+  const st = [];
+  for (let s = 1; s <= (t.sets || 1); s++){
+    for (let r = 1; r <= t.reps; r++){
+      st.push({k: "vite", d: t.work, r, s});
+      if (r < t.reps || s === (t.sets || 1)) st.push({k: "lent", d: t.rest, r, s});
+    }
+    if (s < (t.sets || 1) && t.setRest) st.push({k: "pause", d: t.setRest, r: t.reps, s});
+  }
+  return st;
+}
+function frSpeak(txt){ try { const u = new SpeechSynthesisUtterance(txt); u.lang = "fr-FR"; speechSynthesis.cancel(); speechSynthesis.speak(u); } catch(e){} }
+function frLoop(){
+  const now = performance.now(), cur = FR.steps[FR.i], t = FR.steps.length ? frSettings() : null;
+  const el = (now - FR.stepStart) / 1000, left = cur.d - el;
+  if (left <= 0){
+    FR.i++; FR.lastBeep = -1;
+    if (FR.i >= FR.steps.length){ frEnd(true); return; }
+    FR.stepStart = now; const nx = FR.steps[FR.i];
+    if (LL.ctx) tone(nx.k === "vite" ? 1200 : 600, .35, LL.ctx.currentTime);
+    frSpeak(nx.k === "vite" ? "Vite" : nx.k === "lent" ? "Lent" : "Pause");
+  } else {
+    const s = Math.ceil(left);
+    if (s <= 3 && s !== FR.lastBeep){ FR.lastBeep = s; if (LL.ctx) tone(900, .08, LL.ctx.currentTime); }
+  }
+  const c = FR.steps[FR.i], l2 = Math.max(0, c.d - (performance.now() - FR.stepStart) / 1000);
+  $("fr-phase").textContent = c.k === "vite" ? "Vite" : c.k === "lent" ? "Lent" : "Pause";
+  $("fr-phase").className = "fr-phase " + c.k;
+  $("fr-time").textContent = fmtS(Math.ceil(l2));
+  $("fr-bar").style.width = Math.min(100, (1 - l2 / c.d) * 100) + "%";
+  const tt = frSettings();
+  $("fr-rep").textContent = `${c.r}/${tt.reps}`; $("fr-set").textContent = `${c.s}/${tt.sets || 1}`;
+  const rem = FR.steps.slice(FR.i + 1).reduce((a, x) => a + x.d, 0) + l2; $("fr-left").textContent = fmtS(Math.ceil(rem));
+  FR.raf = requestAnimationFrame(frLoop);
+}
+async function frStart(){
+  try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch(e){}
+  try { LL.ctx = LL.ctx || new (window.AudioContext || window.webkitAudioContext)(); await LL.ctx.resume(); } catch(e){ LL.ctx = null; }
+  FR.steps = frBuild(frSettings()); FR.i = 0; FR.stepStart = performance.now(); FR.state = "run"; FR.lastBeep = -1;
+  $("fr-go").textContent = "En cours…"; $("fr-go").disabled = true;
+  if (LL.ctx) tone(1200, .35, LL.ctx.currentTime); frSpeak("Vite");
+  grabWake(); cancelAnimationFrame(FR.raf); frLoop();
+}
+function frEnd(finished){
+  cancelAnimationFrame(FR.raf); dropWake(); FR.state = "idle";
+  $("fr-go").disabled = false; $("fr-go").textContent = finished ? "Recommencer" : "Lancer le fractionné";
+  $("fr-phase").textContent = finished ? "Terminé, bravo !" : "Arrêté"; $("fr-phase").className = "fr-phase";
+  if (finished){
+    if (LL.ctx){ const t = LL.ctx.currentTime; tone(800, .15, t); tone(1000, .15, t + .2); tone(1300, .3, t + .4); }
+    frSpeak("Terminé. Bravo !");
+    const now = new Date(), s = slotsOn(now).find(x => x.t === "course_frac");
+    if (s && !isDone(now, s)){ const o = JSON.parse(JSON.stringify(S.fait || {})); o[ymd(now)] = o[ymd(now)] || {}; o[ymd(now)][slotKey(s)] = Date.now(); saveFait(o); }
+  }
+}
+$("fr-go").addEventListener("click", () => { if (FR.state !== "run") frStart(); });
+$("fr-stop").addEventListener("click", () => { if (FR.state === "run") frEnd(false); });
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && FR.state === "run") grabWake(); });
+
+
 /* ======================= INSTALLATION ======================= */
 let deferredInstall = null;
 const isStandalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
@@ -2186,7 +2500,7 @@ function iosSteps(){
   return `<p><b>Avec Safari</b> :</p>
     <ol><li>Ouvre ce site dans <b>Safari</b>.</li><li>Touche le bouton <b>Partager</b> en bas de l'écran (le carré avec une flèche vers le haut).</li><li>Fais défiler et touche <b>Sur l'écran d'accueil</b>.</li><li>Touche <b>Ajouter</b> en haut à droite.</li></ol>
     <p class="note">Avec Chrome sur iPhone : bouton <b>Partager</b> dans la barre d'adresse › <b>Sur l'écran d'accueil</b>. Si tu ne le trouves pas, passe par Safari.</p>
-    <p class="note"><b>Important sur iPhone :</b> installe l'appli <b>avant</b> de saisir tes résultats, puis utilise toujours l'icône « Parcours » (ce qui est saisi dans le navigateur n'apparaît pas dans l'appli). Pour le partage, colle le lien dans l'appli : Réglages › Partage entre téléphones.</p>`;
+    <p class="note"><b>Important sur iPhone :</b> installe l'appli <b>avant</b> de saisir tes résultats, puis utilise toujours l'icône « Parcours » (ce qui est saisi dans le navigateur n'apparaît pas dans l'appli). Pour le partage, colle le lien dans l'appli : roue dentée en haut › Partage entre téléphones.</p>`;
 }
 function installSteps(){
   const tab = (k, l) => `<button type="button" data-itab="${k}" aria-pressed="${installTab === k}">${l}</button>`;
@@ -2230,7 +2544,7 @@ $("theme-seg").addEventListener("click", e => { const b = e.target.closest("[dat
 applyTheme(lsGet("phm-theme", "auto"));
 
 /* ======================= DÉMARRAGE ======================= */
-function renderAll(){ renderLove(); renderHome(); renderPlanAll(); renderSplits(); renderRecos(); renderWeek(); if (!$("v-progres").hidden) renderProg(); }
+function renderAll(){ renderLove(); renderHome(); renderPlanAll(); renderHello(); renderTiles(); renderSetup(); renderSplits(); renderRecos(); renderWeek(); if (!$("v-progres").hidden) renderProg(); }
 setStatus(); renderChrono(); renderSeance(); renderLucBareme(); renderAteliers(); renderAll();
 show((location.hash || "#accueil").slice(1), true);
 initStore();
