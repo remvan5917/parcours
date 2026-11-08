@@ -2029,7 +2029,7 @@ function poutrePalier(){
   return {p: 5, t: "palier 5 : 1 m sans les tapis surélevés"};
 }
 // contenu de chaque séance selon le bloc et la semaine
-function session(type, d){
+function session(type, d, h){
   const m = mesoAt(d), w = Math.min(m.wk, 3), L = [];
   let lieu = "";
   const warm = "Échauffement : 15 min de footing + 3 accélérations. Retour au calme : 10 min très lent.";
@@ -2088,8 +2088,13 @@ function session(type, d){
   } else if (type === "krav" || type === "jjb"){
     L.push("Ton cours, sans rien changer : c'est aussi du cardio et du gainage. Pense à bien boire.");
   } else if (type === "ensemble"){
-    L.push("Votre moment à deux ♥");
-    L.push("Si tu as un parcours ou un Luc Léger à faire cette semaine, c'est aussi le bon moment pour que Rémy te chronomètre.");
+    const matin = !h || Number(String(h).split(":")[0]) < 14;
+    const MATIN = ["Premier café ensemble ☕", "Bien dormi, la guerrière ?", "La journée commence bien ♥", "Réveil en douceur, je suis là", "Un bisou avant d'attaquer la journée", "Bonne journée, je pense à toi ♥"];
+    const SOIR = ["J'ai hâte de te retrouver ♥", "Ce soir, on souffle un peu", "Après l'effort, le réconfort", "Raconte-moi ta journée", "Ce soir, c'est nous deux ♥", "Repose-toi, tu l'as bien mérité"];
+    const perso = (plan().mots || {})[matin ? "matin" : "soir"] || [];
+    const pool = (matin ? MATIN : SOIR).concat(Array.isArray(perso) ? perso : []);
+    const n = Math.floor(new Date(d).setHours(12, 0, 0, 0) / 86400000);
+    L.push(`<b>${matin ? "Réveil à deux" : "Soirée à deux"}</b> · ${esc(pool[n % pool.length])}`);
   } else if (type === "repos"){
     L.push("Repos complet. C'est pendant le repos que le corps progresse.");
   }
@@ -2208,7 +2213,7 @@ function agendaEvents(){
   for (let d = new Date(new Date().setHours(12, 0, 0, 0)); d <= exam && out.length < 500; d = addDays(d, 1)){
     slotsOn(d).forEach(s => {
       if (s.t === "repos") return;
-      const x = session(s.t, d), m = x.m;
+      const x = session(s.t, d, s.h), m = x.m;
       out.push({d: ymd(d), h: s.h || "18:00", dur: s.t.startsWith("course") ? 60 : 90, t: typeLabel(s.t),
         desc: [`Bloc ${m.n}${m.deload ? " (semaine allégée + tests)" : ""} · semaine ${weekType(d)}`, x.lieu ? "Lieu : " + x.lieu : "", ...x.L.map(stripTags), "", "Détails et chrono : " + location.origin + location.pathname].filter((l, i) => l || i > 0).join("\n")});
     });
@@ -2345,7 +2350,7 @@ function renderToday(){
   }
   const sl = slotsOn(d);
   const cards = sl.map(s => {
-    const T = TYPES[s.t] || {l: s.t, ic: "daily"}, x = session(s.t, d), a = actionFor(s, d, x), done = isDone(d, s);
+    const T = TYPES[s.t] || {l: s.t, ic: "daily"}, x = session(s.t, d, s.h), a = actionFor(s, d, x), done = isDone(d, s);
     const main = x.L[0] || "", more = x.L.slice(1);
     return `<div class="sess${done ? " done" : ""}"><span class="ic ${T.ic}">${ICONS[T.ic] || ICONS.daily}</span><div>
       <h3>${esc(typeLabel(s.t))}</h3><div class="when">${s.h ? s.h.replace(":", " h ") : "Quand tu veux"}${x.lieu ? " · " + esc(x.lieu) : ""}</div>
