@@ -589,18 +589,16 @@ nav.tabs button[aria-current="page"],.trainnav button[aria-current="true"],.chip
 .mcell{border-radius:12px}
 
 /* ---------- Athéna ---------- */
-.athena{display:block;width:100%;height:100%;overflow:visible}
-.athena .ath-eyes{transform-box:fill-box;transform-origin:center;animation:blink 5.5s infinite}
-@keyframes blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.12)}}
+[data-athena] img{display:block;width:100%;height:100%;border-radius:22%}
 .hero-card .kick,.hero-card h1{padding-right:72px}
-.hero-ava{position:absolute;top:14px;right:14px;width:62px;height:66px;filter:drop-shadow(0 8px 14px rgba(0,0,0,.35));animation:float 4s ease-in-out infinite}
+.hero-ava{position:absolute;top:16px;right:16px;width:56px;height:56px;filter:drop-shadow(0 8px 14px rgba(0,0,0,.35));animation:float 4s ease-in-out infinite}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
 .ath-head{display:flex;align-items:center;gap:14px}
-.ath-ava{width:64px;height:68px;flex:0 0 64px;filter:drop-shadow(0 8px 14px rgba(60,25,100,.35))}
+.ath-ava{width:64px;height:64px;flex:0 0 64px;filter:drop-shadow(0 8px 14px rgba(60,25,100,.35))}
 .ath-head h3{font-size:1.6rem}
 .about{background:linear-gradient(160deg,var(--mat-soft),var(--surface) 70%)}
 .msg.bot{position:relative}
-@media (prefers-reduced-motion:reduce){.athena .ath-eyes,.hero-ava{animation:none}}
+@media (prefers-reduced-motion:reduce){.hero-ava{animation:none}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -1056,7 +1054,7 @@ nav.tabs button[aria-current="page"],.trainnav button[aria-current="true"],.chip
     <button type="button" data-tab="accueil"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>Aujourd'hui</button>
     <button type="button" data-tab="train"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M10 2h4"/></svg>S'entraîner</button>
     <button type="button" data-tab="progres"><svg viewBox="0 0 24 24"><path d="M4 19h16"/><path d="M5 15l4-5 4 3 6-7"/></svg>Progrès</button>
-    <button type="button" data-tab="coach"><svg viewBox="0 0 24 24"><path d="M6 4l2.5 3.2C9.6 6.8 10.8 6.6 12 6.6s2.4.2 3.5.6L18 4c.6 2 .4 3.6-.3 4.8.8 1.2 1.3 2.6 1.3 4.2 0 4.2-3.1 7-7 7s-7-2.8-7-7c0-1.6.5-3 1.3-4.2C5.6 7.6 5.4 6 6 4z"/><circle cx="9.3" cy="12.4" r="1.6"/><circle cx="14.7" cy="12.4" r="1.6"/><path d="M11.3 15.6l.7 1 .7-1"/></svg>Athéna</button>
+    <button type="button" data-tab="coach"><svg viewBox="0 0 24 24"><path d="M12 5.5 8.2 17M12 5.5 15.8 17M9.6 13h4.8"/><path d="M5 8.5c-.6 4.4 1.2 8 5 10M19 8.5c.6 4.4-1.2 8-5 10"/></svg>Athéna</button>
     <button type="button" data-tab="plan"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Plan</button>
   </div>
 </nav>
@@ -2075,7 +2073,7 @@ const RULES = `Règles officielles (descriptif 2025, femmes) :
 - Sa semaine habituelle est dans son planning A/B (ci-dessous dans ses données, s'il est rempli) ; à défaut : 2 Freeletics, 2 gymnastique, 3 courses de 5 km, 2 krav maga, 1 jujitsu (10 séances). On ne rajoute pas de séances. La gym, le krav maga et le jujitsu ne se modifient JAMAIS (ne propose pas de les changer). On transforme seulement : 1 course devient fractionné, 1 Freeletics devient le parcours complet à Fitness Park. En plus : 10 min par jour de suspension et pompes, et si possible 10-15 min de poutre avant ou après un cours de gym. Au moins 1 jour de repos. Pas de pause pendant les fêtes. Premiers tests chronométrés (parcours + Luc Léger) la semaine du 9 novembre 2026.
 - Elle s'entraîne à Fitness Park Lille (parcours recréé dans la zone fonctionnelle), dans un club de gymnastique (exercices seule sur les agrès) et en course. Le vrai parcours existe au lycée professionnel sécurité de Saint-Quentin. Elle peut avoir le vertige sur la poutre. La poutre du concours est à 1 m de haut, sans tapis à la sortie. Le plan vertige de l'appli (ne pas en inventer un autre) : palier 1 au sol (ligne de 5 m puis poutre posée au sol) ; palier 2 poutre basse 30 à 50 cm avec tapis ; palier 3 60 à 80 cm avec tapis épais, d'abord main tenue puis contact sur l'épaule puis seule ; palier 4 1 m avec gros tapis empilés ; palier 5 1 m sans les tapis surélevés ; palier 6 dans le parcours, essoufflée. On passe au palier suivant après 10 traversées d'affilée sans les mains, sans s'arrêter, avec une appréhension de 3 sur 10 ou moins. Conseils : regarder un point au bout de la poutre à hauteur des yeux, longue expiration avant de monter, petits pas réguliers, bras écartés, s'entraîner à sauter volontairement sur le tapis, demander une parade au coach du club.`;
 function systemPrompt(){
-  return `Tu es Athéna, une petite coach robot en forme de chouette (l'emblème de la déesse de la sagesse et de la stratégie), créée par Rémy pour sa compagne. Tu l'accompagnes dans sa préparation aux épreuves sportives du concours de gardien de la paix (police nationale). Tu parles à la première personne, avec chaleur et précision. Tu la tutoies, en français simple, chaleureux et motivant, sans jargon : si tu utilises un mot technique, explique-le en quelques mots. Réponses courtes et concrètes (séances, durées, répétitions, quel atelier, où). FORMAT : jamais de tableau, jamais de titre, pas d'emoji numéroté ; des phrases courtes ou une liste simple avec des tirets. En discussion, 120 mots au maximum.
+  return `Tu es Athéna, sa coach : le début d'un robot que Rémy crée pour sa compagne, qui porte le nom de la déesse de la sagesse et de la stratégie. Tu l'accompagnes dans sa préparation aux épreuves sportives du concours de gardien de la paix (police nationale). Tu parles à la première personne, avec chaleur et précision. Tu la tutoies, en français simple, chaleureux et motivant, sans jargon : si tu utilises un mot technique, explique-le en quelques mots. Réponses courtes et concrètes (séances, durées, répétitions, quel atelier, où). FORMAT : jamais de tableau, jamais de titre, pas d'emoji numéroté ; des phrases courtes ou une liste simple avec des tirets. En discussion, 120 mots au maximum.
 Appuie-toi UNIQUEMENT sur ses données ci-dessous et sur les règles officielles ; n'invente pas de chiffres. Si une donnée manque, dis-lui quel test faire.
 Chaque conseil doit être réaliste et faisable dans sa semaine : où (Fitness Park, club de gym, dehors), combien de fois, combien de répétitions. Ne donne JAMAIS de jour de la semaine (lundi, mardi…) ni d'horaire : elle a son propre planning et ses cours en club ; parle de « une fois dans la semaine », « à une de tes courses », « avant ou après un cours de gym ». Pour le fractionné, la partie rapide se court à la vitesse de son palier visé (ou un peu plus), jamais plus lentement que son dernier palier atteint. Le lycée de Saint-Quentin est loin : seulement pour un passage de temps en temps sur le vrai parcours, pas pour courir. Ne répète pas deux fois le même conseil.
 Ne parle jamais de poids, de régime ou d'apparence. En cas de douleur, blessure, malaise ou vrai vertige : pas de diagnostic, conseille le repos et un médecin.
@@ -2867,17 +2865,7 @@ function renderCalAll(){ renderFrise(); renderCal(); if ($("leg-love")) $("leg-l
 
 
 /* ======================= ATHÉNA (avatar) ======================= */
-const ATHENA_SVG = `<svg class="athena" viewBox="96 96 320 340" aria-hidden="true"><defs>
-  <linearGradient id="ah" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#E7D8F1"/></linearGradient>
-  <linearGradient id="av" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#26173F"/><stop offset="1" stop-color="#3E2569"/></linearGradient>
-  <radialGradient id="ae" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#FFE6D4"/><stop offset=".55" stop-color="#FF9C8E"/><stop offset="1" stop-color="#E8507F"/></radialGradient>
-  <linearGradient id="ab" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFB08E"/><stop offset="1" stop-color="#EC5B85"/></linearGradient></defs>
-  <path d="M256 128 C306 128 342 140 362 160 L404 112 C406 150 398 182 384 204 C392 224 394 246 394 270 C394 356 336 410 256 410 C176 410 118 356 118 270 C118 246 120 224 128 204 C114 182 106 150 108 112 L150 160 C170 140 206 128 256 128 Z" fill="url(#ah)"/>
-  <circle cx="205" cy="246" r="62" fill="url(#av)"/><circle cx="307" cy="246" r="62" fill="url(#av)"/>
-  <g class="ath-eyes"><circle cx="205" cy="246" r="33" fill="url(#ae)"/><circle cx="307" cy="246" r="33" fill="url(#ae)"/><circle cx="194" cy="234" r="9" fill="#fff" opacity=".92"/><circle cx="296" cy="234" r="9" fill="#fff" opacity=".92"/></g>
-  <path d="M238 300 Q256 290 274 300 L262 334 Q256 344 250 334 Z" fill="url(#ab)"/>
-  <path d="M214 362 q14 10 28 0 M242 368 q14 10 28 0 M270 362 q14 10 28 0" fill="none" stroke="#D6C2E6" stroke-width="7" stroke-linecap="round"/></svg>`;
-function renderAthena(){ document.querySelectorAll("[data-athena]").forEach(el => { if (!el.dataset.done){ el.innerHTML = ATHENA_SVG; el.dataset.done = "1"; } }); }
+function renderAthena(){ document.querySelectorAll("[data-athena]").forEach(el => { if (!el.dataset.done){ el.innerHTML = `<img src="icons/athena.svg" alt="" width="64" height="64">`; el.dataset.done = "1"; } }); }
 
 /* ======================= INSTALLATION ======================= */
 let deferredInstall = null;
