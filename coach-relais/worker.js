@@ -6,8 +6,42 @@ const MAX_CHARS = 24000; // taille totale maximale d'une demande
 
 const json = (data, status, headers) => new Response(JSON.stringify(data), { status, headers: { ...headers, "Content-Type": "application/json" } });
 
+// Agenda abonné : l'appli dépose les séances calculées dans Firestore (equipes/<code>/reglages/agenda),
+// le relais les publie au format agenda (.ics). Lecture seule, protégée par le code secret d'équipe.
+const FB_PROJECT = "parcours-gpx-2027";
+const FB_WEB_KEY = "AIzaSyDwb_C6B_LDUCgiY_r6ljIChmZzo_9dkJ8"; // clé web Firebase (publique par nature, déjà dans config.js)
+const icsEsc = t => String(t || "").replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
+function fold(line){ const out = []; let l = line; while (l.length > 74){ out.push(l.slice(0, 74)); l = " " + l.slice(74); } out.push(l); return out.join("\r\n"); }
+async function agenda(team){
+  const r = await fetch(`https://firestore.googleapis.com/v1/projects/${FB_PROJECT}/databases/(default)/documents/equipes/${team}/reglages/agenda?key=${FB_WEB_KEY}`);
+  let data = {alarm: 30, ev: []};
+  if (r.ok){ const d = await r.json(); try { data = JSON.parse(d.fields.json.stringValue); } catch (e) {} }
+  const alarm = Math.min(240, Math.max(0, Number(data.alarm) || 30));
+  const stamp = new Date().toISOString().replace(/[-:]/g, "").slice(0, 15) + "Z";
+  const L = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Parcours//Entrainement//FR", "CALSCALE:GREGORIAN", "METHOD:PUBLISH",
+    "X-WR-CALNAME:Entraînement concours", "X-WR-TIMEZONE:Europe/Paris", "REFRESH-INTERVAL;VALUE=DURATION:PT1H", "X-PUBLISHED-TTL:PT1H"];
+  (Array.isArray(data.ev) ? data.ev : []).slice(0, 600).forEach((e, i) => {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(e.d) || !/^\d{2}:\d{2}$/.test(e.h)) return;
+    const [hh, mm] = e.h.split(":").map(Number), dur = Math.min(240, Number(e.dur) || 60);
+    const endMin = hh * 60 + mm + dur, eh = Math.min(23, Math.floor(endMin / 60)), em = endMin >= 24 * 60 ? 59 : endMin % 60;
+    const day = e.d.replace(/-/g, "");
+    L.push("BEGIN:VEVENT", `UID:${day}-${e.h.replace(":", "")}-${i}-${team.slice(0, 6)}@parcours`, `DTSTAMP:${stamp}`,
+      `DTSTART:${day}T${e.h.replace(":", "")}00`, `DTEND:${day}T${String(eh).padStart(2, "0")}${String(em).padStart(2, "0")}00`,
+      fold("SUMMARY:" + icsEsc(e.t)), fold("DESCRIPTION:" + icsEsc(e.desc)));
+    if (alarm > 0) L.push("BEGIN:VALARM", "ACTION:DISPLAY", fold("DESCRIPTION:" + icsEsc(e.t)), `TRIGGER:-PT${alarm}M`, "END:VALARM");
+    L.push("END:VEVENT");
+  });
+  L.push("END:VCALENDAR");
+  return new Response(L.join("\r\n") + "\r\n", { headers: { "Content-Type": "text/calendar; charset=utf-8", "Cache-Control": "public, max-age=900", "Access-Control-Allow-Origin": "*" } });
+}
+
 export default {
   async fetch(req, env) {
+    if (req.method === "GET"){
+      const m = new URL(req.url).pathname.match(/^\/agenda\/([a-z0-9]{20,40})\.ics$/);
+      if (m) return agenda(m[1]);
+      return new Response("Relais du coach Parcours.", { status: 404 });
+    }
     const origin = req.headers.get("Origin") || "";
     const cors = {
       "Access-Control-Allow-Origin": ORIGINS.includes(origin) ? origin : ORIGINS[0],

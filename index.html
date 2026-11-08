@@ -577,13 +577,12 @@ footer{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padd
     <p class="note" style="font-size:.85rem">Exemple : lundi, « Course · endurance » à 17 h 15 puis « Gym » à 18 h. Une course avant la gym ? Mets-la juste avant.</p>
   </div>
 
-  <div class="panel">
-    <h3>Rappels dans ton agenda</h3>
-    <p class="note">Ajoute toutes tes séances (semaines A et B) à l'agenda de ton téléphone, avec une alerte avant chacune, jusqu'aux épreuves. Le contenu exact de chaque séance est dans l'appli, onglet Accueil. Si ton planning change, refais-le.</p>
+  <div class="panel" id="agenda-panel">
+    <h3>Ton agenda, mis à jour tout seul</h3>
+    <p class="note">Abonne l'agenda de ton téléphone une seule fois : toutes tes séances jusqu'aux épreuves y apparaissent, avec le contenu exact de chaque séance et une alerte avant. Ensuite tout se met à jour tout seul : si tu changes ton planning, si tu passes au bloc suivant ou si tes résultats changent la séance.</p>
     <div class="row"><label for="alarm-min" class="note" style="color:var(--ink)">Alerte</label>
       <select id="alarm-min"><option value="15">15 min avant</option><option value="30" selected>30 min avant</option><option value="60">1 h avant</option><option value="120">2 h avant</option></select></div>
-    <div class="row"><button type="button" class="btn small" id="ics-go">Ajouter à mon agenda (iPhone, Samsung, Outlook)</button></div>
-    <details class="more"><summary>Sur Android avec Google Agenda</summary><div class="in"><p class="note">Google Agenda n'importe pas de fichier sur téléphone : touche chaque séance ci-dessous, puis « Enregistrer ». Elle se répète toutes les deux semaines.</p><ul class="steps" id="gcal-links"></ul></div></details>
+    <div id="agenda-sub" class="col"></div>
   </div>
 
   <div class="panel">
@@ -980,6 +979,7 @@ async function connectFirebase(){
       renderAll();
     }, () => setSync("Le partage ne répond pas. Les résultats restent sur ce téléphone.", true));
   }
+  setTimeout(syncAgenda, 4000);
   F.onSnapshot(F.doc(db, "equipes", team, "reglages", "planning"), snap => {
     if (snap.exists()){ S.plan = snap.data(); lsSet("phm-plan", S.plan); renderPlanAll(); }
     else if (S.plan) F.setDoc(F.doc(db, "equipes", team, "reglages", "planning"), S.plan).catch(() => {});
@@ -1927,7 +1927,8 @@ function session(type, d){
         ["Navettes de 20 m avec l'appli au palier 8 : 3 × 2 min (2 min de repos), puis 8 × (30 s / 30 s)", "Navettes au palier 8 : 4 × 2 min, puis 10 × (30 s / 30 s)", "Navettes au palier 9 : 3 × 3 min, puis 8 × (30 s / 30 s)"],
         ["2 × 8 × (30 s / 30 s) vite", "1 × 10 × (30 s / 30 s)", "6 × (30 s / 30 s) léger, au plus tard 4 jours avant les épreuves"]][m.i];
       L.push(`<b>${F[Math.min(m.wk, F.length - 1)]}</b>`);
-      L.push("« Vite » = la vitesse de ton palier visé (palier 8 = 11,5 km/h), ou un peu plus. « Lent » = trot.");
+      const lv = bestLuc(), tp = lv == null ? 6 : Math.min(9, Math.max(6, Math.floor(lv) + 2));
+      L.push(`« Vite » = environ <b>${fr(speedOf(tp))} km/h</b> (la vitesse du palier ${tp}${lv == null ? ", à ajuster après ton premier Luc Léger" : ", deux paliers au-dessus de ton meilleur test"}). « Lent » = trot.`);
       L.push(warm);
     }
   } else if (type === "course_rec"){
@@ -2019,7 +2020,7 @@ function renderObjectifs(){
 }
 // éditeur de planning
 let planWk = "A";
-function savePlan(p){ S.plan = p; lsSet("phm-plan", p); if (FS) FS.setDoc(FS.doc(FS.db, "equipes", team, "reglages", "planning"), p).catch(writeErr); renderPlanning(); renderToday(); renderAgendaLinks(); }
+function savePlan(p){ S.plan = p; lsSet("phm-plan", p); if (FS) FS.setDoc(FS.doc(FS.db, "equipes", team, "reglages", "planning"), p).catch(writeErr); renderPlanAll(); }
 function renderPlanning(){
   if (!$("planning")) return;
   const p = plan();
@@ -2081,16 +2082,46 @@ function icsText(){
   lines.push("END:VCALENDAR");
   return lines.join("\r\n");
 }
-$("ics-go").addEventListener("click", async () => {
-  if (planEmpty()){ setSync("Remplis d'abord ton planning ci-dessus.", true); return; }
-  const blob = new Blob([icsText()], {type: "text/calendar"}), file = new File([blob], "entrainement-concours.ics", {type: "text/calendar"});
-  if (IS_IOS){
-    try { if (navigator.canShare && navigator.canShare({files: [file]})){ await navigator.share({files: [file], title: "Entraînement concours"}); return; } } catch(e){ if (e && e.name === "AbortError") return; }
-    location.href = URL.createObjectURL(blob); return;
+// abonnement : l'appli dépose les séances calculées dans l'espace partagé, le relais les publie en agenda
+const AGENDA_BASE = (window.PARCOURS_COACH_URL || "").replace(/\/$/, "");
+const stripTags = t => String(t).replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ");
+function agendaEvents(){
+  const out = []; if (planEmpty()) return out;
+  const exam = parseDay(S.exam || "2027-03-29");
+  for (let d = new Date(new Date().setHours(12, 0, 0, 0)); d <= exam && out.length < 500; d = addDays(d, 1)){
+    slotsOn(d).forEach(s => {
+      if (s.t === "repos") return;
+      const x = session(s.t, d), m = x.m;
+      out.push({d: ymd(d), h: s.h || "18:00", dur: s.t.startsWith("course") ? 60 : 90, t: (TYPES[s.t] || {l: s.t}).l,
+        desc: [`Bloc ${m.n}${m.deload ? " (semaine allégée + tests)" : ""} · semaine ${weekType(d)}`, x.lieu ? "Lieu : " + x.lieu : "", ...x.L.map(stripTags), "", "Détails et chrono : " + location.origin + location.pathname].filter((l, i) => l || i > 0).join("\n")});
+    });
   }
-  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "entrainement-concours.ics"; document.body.appendChild(a); a.click(); a.remove();
-  setSync("Fichier créé : ouvre-le (Téléchargements) pour l'ajouter à ton agenda.");
-});
+  return out;
+}
+let agendaTimer = null;
+function scheduleAgenda(){ clearTimeout(agendaTimer); agendaTimer = setTimeout(syncAgenda, 2500); }
+function syncAgenda(){
+  if (!FS || !team) return;
+  const payload = JSON.stringify({alarm: Number(lsGet("phm-alarm", 30)) || 30, ev: agendaEvents()});
+  let h = 0; for (let i = 0; i < payload.length; i++) h = (h * 31 + payload.charCodeAt(i)) | 0;
+  if (lsGet("phm-agenda-hash-" + team, null) === h) return;
+  FS.setDoc(FS.doc(FS.db, "equipes", team, "reglages", "agenda"), {at: Date.now(), json: payload}).then(() => lsSet("phm-agenda-hash-" + team, h)).catch(writeErr);
+}
+function renderAgendaSub(){
+  const el = $("agenda-sub"); if (!el) return;
+  $("alarm-min").value = String(lsGet("phm-alarm", 30));
+  if (!team || !FB){ el.innerHTML = `<p class="note">D'abord, active le partage (Accueil › Réglages › Partage entre téléphones) : l'agenda en ligne utilise votre espace partagé.</p>`; return; }
+  if (planEmpty()){ el.innerHTML = `<p class="note">Remplis d'abord ton planning ci-dessus.</p>`; return; }
+  const https = `${AGENDA_BASE}/agenda/${team}.ics`, webcal = https.replace(/^https:/, "webcal:");
+  el.innerHTML = `<p><b>Sur iPhone :</b></p>
+    <a class="btn small" style="text-decoration:none;display:inline-block;padding:9px 14px;border-radius:9px;align-self:flex-start" href="${webcal}">S'abonner dans l'agenda de l'iPhone</a>
+    <p class="note">Touche « S'abonner », puis <b>désactive « Supprimer les alertes »</b> pour garder les rappels, et « Ajouter ».</p>
+    <p><b>Sur Android (Google Agenda) :</b></p>
+    <a class="ghost small" style="text-decoration:none;display:inline-block;padding:8px 13px;border:1px solid var(--line);border-radius:9px;color:var(--ink);align-self:flex-start" href="https://calendar.google.com/calendar/r?cid=${encodeURIComponent(webcal)}" target="_blank" rel="noopener">Ajouter à Google Agenda</a>
+    <p class="note">Confirme « Ajouter ». Puis, dans l'appli Google Agenda : Paramètres › « Entraînement concours » › Notifications, choisis une alerte. Google met à jour un agenda abonné toutes les quelques heures.</p>
+    <details class="more"><summary>Autre agenda (Samsung, Outlook…)</summary><div class="in"><p class="note">Ajoute un agenda « par adresse / abonnement » avec ce lien :</p><input type="text" readonly value="${esc(https)}" style="font:inherit;font-size:.82rem;width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:7px;background:var(--floor);color:var(--ink)"></div></details>`;
+}
+$("alarm-min").addEventListener("change", () => { lsSet("phm-alarm", Number($("alarm-min").value)); syncAgenda(); });
 function renderAgendaLinks(){
   const el = $("gcal-links"); if (!el) return;
   if (planEmpty()){ el.innerHTML = `<li><div class="s-d">Remplis d'abord ton planning.</div></li>`; return; }
@@ -2133,7 +2164,7 @@ $("lieux").addEventListener("click", e => {
   if (n.dataset.lieuNo) o[k][ik] = false; else delete o[k][ik];
   const open = n.closest("details"); saveLieux(o); if (open){ const d = [...$("lieux").querySelectorAll("details")].find(x => x.querySelector("summary").textContent === open.querySelector("summary").textContent); if (d) d.open = true; }
 });
-function renderPlanAll(){ renderToday(); renderObjectifs(); renderPlanning(); renderAgendaLinks(); renderLieux(); }
+function renderPlanAll(){ renderToday(); renderObjectifs(); renderPlanning(); renderAgendaSub(); renderLieux(); scheduleAgenda(); }
 
 
 /* ======================= INSTALLATION ======================= */
