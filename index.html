@@ -1463,11 +1463,11 @@ async function connectFirebase(){
   }
   setTimeout(syncAgenda, 4000);
   F.onSnapshot(F.doc(db, "equipes", team, "reglages", "planning"), snap => {
-    if (snap.exists()){ S.plan = snap.data(); lsSet("phm-plan", S.plan); renderPlanAll(); }
+    if (snap.exists()){ S.plan = snap.data(); lsSet("phm-plan", S.plan); renderAll(); }
     else if (S.plan) F.setDoc(F.doc(db, "equipes", team, "reglages", "planning"), S.plan).catch(() => {});
   }, () => {});
   F.onSnapshot(F.doc(db, "equipes", team, "reglages", "fait"), snap => {
-    if (snap.exists()){ S.fait = snap.data(); lsSet("phm-fait", S.fait); renderToday(); renderTiles(); }
+    if (snap.exists()){ S.fait = snap.data(); lsSet("phm-fait", S.fait); renderToday(); renderTiles(); renderSetup(); }
     else if (S.fait) F.setDoc(F.doc(db, "equipes", team, "reglages", "fait"), S.fait).catch(() => {});
   }, () => {});
   F.onSnapshot(F.doc(db, "equipes", team, "reglages", "lieux"), snap => {
@@ -1475,7 +1475,7 @@ async function connectFirebase(){
     else if (S.lieux) F.setDoc(F.doc(db, "equipes", team, "reglages", "lieux"), S.lieux).catch(() => {});
   }, () => {});
   F.onSnapshot(F.doc(db, "equipes", team, "reglages", "concours"), snap => {
-    if (snap.exists()){ const d = snap.data(); S.exam = d.date || null; S.examLabel = d.label || null; lsSet("phm-exam-obj", {date: S.exam, label: S.examLabel}); renderHome(); }
+    if (snap.exists()){ const d = snap.data(); S.exam = d.date || null; S.examLabel = d.label || null; lsSet("phm-exam-obj", {date: S.exam, label: S.examLabel}); renderAll(); }
   }, () => {});
 }
 async function initStore(){
@@ -1515,7 +1515,7 @@ async function delDoc(coll, id){
   renderAll();
 }
 async function saveExam(date){
-  S.exam = date || null; S.examLabel = null; lsSet("phm-exam-obj", {date: S.exam, label: null}); renderHome();
+  S.exam = date || null; S.examLabel = null; lsSet("phm-exam-obj", {date: S.exam, label: null}); renderAll();
   if (FS) FS.setDoc(FS.doc(FS.db, "equipes", team, "reglages", "concours"), {date: S.exam, label: null}).catch(writeErr);
 }
 /* ---- partage entre téléphones ---- */
@@ -1549,7 +1549,7 @@ document.addEventListener("click", async e => {
     renderShare(); setSync("Partage activé. Envoie le lien à l'autre téléphone (Réglages).");
   }
   if (t.id === "join-go"){
-    const m = ($("join-in").value || "").match(/(?:equipe=)?([a-z0-9]{20,40})\s*$/);
+    const raw = ($("join-in").value || "").trim(), m = raw.match(/equipe=([a-z0-9]{20,40})/) || raw.match(/^([a-z0-9]{20,40})$/);
     if (!m){ setSync("Ce lien de partage n'est pas reconnu. Copie-le en entier depuis le message reçu.", true); return; }
     team = m[1]; lsSet("phm-team", team);
     try { await connectFirebase(); } catch(err){ setSync("Impossible de joindre le partage. Réessaie avec du réseau.", true); team = null; lsSet("phm-team", null); renderShare(); return; }
@@ -1557,7 +1557,7 @@ document.addEventListener("click", async e => {
   }
   if (t.id === "share-send"){
     const link = shareLink();
-    try { if (navigator.share){ await navigator.share({title: "Parcours", text: "Rejoins le suivi du parcours", url: link}); return; } } catch(err){ return; }
+    try { if (navigator.share){ await navigator.share({title: "Athéna", text: "Rejoins notre espace d'entraînement", url: link}); return; } } catch(err){ return; }
     try { await navigator.clipboard.writeText(link); t.textContent = "Lien copié"; } catch(err){ $("share-link").select(); }
   }
   if (t.id === "share-off"){
@@ -2523,7 +2523,7 @@ function renderObjectifs(){
 }
 // éditeur de planning
 let planWk = "A";
-function savePlan(p){ S.plan = p; lsSet("phm-plan", p); if (FS) FS.setDoc(FS.doc(FS.db, "equipes", team, "reglages", "planning"), p).catch(writeErr); renderPlanAll(); }
+function savePlan(p){ S.plan = p; lsSet("phm-plan", p); if (FS) FS.setDoc(FS.doc(FS.db, "equipes", team, "reglages", "planning"), p).catch(writeErr); renderAll(); }
 function renderPlanning(){
   if (!$("planning")) return;
   const p = plan();
@@ -2532,7 +2532,7 @@ function renderPlanning(){
   const W = p[planWk] || {};
   $("planning").innerHTML = `<ul class="steps">${[1, 2, 3, 4, 5, 6, 7].map(d => {
     const l = (W[d] || []).slice().sort((a, b) => (a.h || "").localeCompare(b.h || ""));
-    return `<li><div style="flex:1"><div class="s-t" style="text-transform:capitalize">${DAYS[d]}</div><div class="chips" style="margin-top:4px">${l.length ? l.map((s, i) => `<span class="chip">${s.h ? esc(s.h) + " · " : ""}${s.duo ? "♥ " : ""}${esc(typeLabel(s.t))} <button type="button" class="ghost tiny" data-slot-del="${d}:${esc(s.t)}:${esc(s.h || "")}" aria-label="Retirer" style="padding:0 6px;margin-left:4px">×</button></span>`).join("") : `<span class="note">rien</span>`}</div></div></li>`;
+    return `<li><div style="flex:1"><div class="s-t" style="text-transform:capitalize">${DAYS[d]}</div><div class="chips" style="margin-top:4px">${l.length ? l.map((s, i) => `<span class="chip">${s.h ? fmtH(s.h) + " · " : ""}${s.duo ? "♥ " : ""}${esc(typeLabel(s.t))} <button type="button" class="ghost tiny" data-slot-del="${d}:${esc(s.t)}:${esc(s.h || "")}" aria-label="Retirer" style="padding:0 6px;margin-left:4px">×</button></span>`).join("") : `<span class="note">rien</span>`}</div></div></li>`;
   }).join("")}</ul>`;
 }
 $("slot-type").innerHTML = Object.entries(TYPES).map(([k, t]) => `<option value="${k}">${t.l}</option>`).join("");
@@ -2723,10 +2723,10 @@ function renderToday(){
   // bandeau de la semaine
   const st = weekStart(d), en = addDays(st, 6), curWk = ymd(st) === ymd(weekStart(now));
   const f = x => x.toLocaleDateString("fr-FR", {day: "numeric", month: "short"});
-  $("weeknav").innerHTML = `<button type="button" class="wk-arrow" data-wk="-1" aria-label="Semaine précédente">‹</button>
+  $("weeknav").innerHTML = `<button type="button" class="wk-arrow" data-wknav="-1" aria-label="Semaine précédente">‹</button>
     <div class="wk-lab"><b>${curWk ? "Cette semaine" : ymd(st) === ymd(addDays(weekStart(now), 7)) ? "Semaine prochaine" : "Semaine " + weekType(st)}</b><span>${st.getDate()}${st.getMonth() === en.getMonth() ? "" : " " + f(st).split(" ")[1]} – ${f(en)}${curWk ? "" : " · semaine " + weekType(st)}</span></div>
-    <button type="button" class="wk-arrow" data-wk="1" aria-label="Semaine suivante">›</button>`
-    + (isToday ? "" : `<button type="button" class="link wk-today" data-wk="0">Revenir à aujourd'hui</button>`);
+    <button type="button" class="wk-arrow" data-wknav="1" aria-label="Semaine suivante">›</button>`
+    + (isToday ? "" : `<button type="button" class="link wk-today" data-wknav="0">Revenir à aujourd'hui</button>`);
   $("daystrip").innerHTML = [0, 1, 2, 3, 4, 5, 6].map(i => {
     const day = addDays(st, i), sl = slotsOn(day).filter(s => s.t !== "repos"), tr = sl.filter(s => s.t !== "ensemble"), all = tr.length && tr.every(s => isDone(day, s));
     return `<button type="button" class="day${ymd(day) === ymd(now) ? " is-today" : ""}${all ? " all-done" : ""}" role="tab" aria-selected="${ymd(day) === ymd(d)}" data-day="${ymd(day)}"><small>${DAYS[i + 1].slice(0, 3)}</small><b>${day.getDate()}</b><span class="dots">${sl.slice(0, 4).map(s => `<i class="${(TYPES[s.t] || {ic: "daily"}).ic}${isDone(day, s) ? " ok" : ""}"></i>`).join("")}</span></button>`;
@@ -2754,9 +2754,9 @@ function renderToday(){
 document.addEventListener("click", e => {
   const day = e.target.closest("[data-day]");
   if (day){ selDay = day.dataset.day === ymd(new Date()) ? null : day.dataset.day; renderToday(); return; }
-  const wk = e.target.closest("[data-wk]");
+  const wk = e.target.closest("[data-wknav]");
   if (wk){
-    const n = Number(wk.dataset.wk), now = new Date(); now.setHours(12, 0, 0, 0);
+    const n = Number(wk.dataset.wknav), now = new Date(); now.setHours(12, 0, 0, 0);
     if (!n){ selDay = null; renderToday(); return; }
     const cur = selDay ? parseDay(selDay) : now, tgt = weekStart(addDays(cur, 7 * n));
     selDay = ymd(tgt) === ymd(weekStart(now)) ? null : ymd(tgt); renderToday(); return;
@@ -3072,7 +3072,7 @@ $("theme-seg").addEventListener("click", e => { const b = e.target.closest("[dat
 applyTheme(lsGet("phm-theme", "auto"));
 
 /* ======================= DÉMARRAGE ======================= */
-function renderAll(){ renderAthena(); renderLove(); renderHome(); renderPlanAll(); renderHello(); renderTiles(); renderSetup(); renderSplits(); renderRecos(); renderWeek(); if (!$("v-progres").hidden) renderProg(); }
+function renderAll(){ renderAthena(); renderLove(); renderHome(); renderPlanAll(); renderHello(); renderTiles(); renderSetup(); renderSplits(); renderRecos(); renderWeek(); renderMesures(); if (!$("v-progres").hidden) renderProg(); }
 setStatus(); renderChrono(); renderSeance(); renderLucBareme(); renderAteliers(); renderAll();
 show((location.hash || "#accueil").slice(1), true);
 initStore();
