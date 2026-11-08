@@ -912,7 +912,7 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--accent)}
         <option value="poutre">Poutre : hauteur maîtrisée (cm)</option>
         <option value="course">Course sans t'arrêter (km)</option>
       </select>
-      <input type="number" id="mes-val" min="0" step="0.5" required aria-label="Valeur" placeholder="Valeur" inputmode="decimal">
+      <input type="number" id="mes-val" min="0" step="any" required aria-label="Valeur" placeholder="Valeur" inputmode="decimal">
       <input type="date" id="mes-date" aria-label="Date">
       <button class="go" type="submit">Ajouter</button>
     </form>
@@ -1442,7 +1442,7 @@ function show(v, noScroll){
   if (v === "plan") renderPlanAll();
 }
 document.querySelectorAll("[data-tab]").forEach(b => b.addEventListener("click", () => show(b.dataset.tab === "train" ? lsGet("phm-train", "parcours") : b.dataset.tab)));
-document.addEventListener("click", e => { const g = e.target.closest("[data-goto]"); if (g){ show(g.dataset.goto); if (g.dataset.mode) setMode(g.dataset.mode); if (g.dataset.anchor && $(g.dataset.anchor)) setTimeout(() => $(g.dataset.anchor).scrollIntoView({block: "start"}), 50); } });
+document.addEventListener("click", e => { const g = e.target.closest("[data-goto]"); if (g){ show(g.dataset.goto); if (g.dataset.mode) setMode(g.dataset.mode); if (g.dataset.mes && $("mes-type")){ $("mes-type").value = g.dataset.mes; setTimeout(() => { $("mes-val").focus(); }, 80); } if (g.dataset.anchor && $(g.dataset.anchor)) setTimeout(() => $(g.dataset.anchor).scrollIntoView({block: "start"}), 50); } });
 
 /* ======================= STOCKAGE =======================
    Toujours sur ce téléphone. Si le partage est activé (config.js + code d'équipe),
@@ -2826,7 +2826,7 @@ function actionFor(s, d, x){
   const test = /Test Luc Léger complet/.test(x.L.join(" "));
   if (s.t === "course_frac" || s.t === "luc") return test ? {l: "Lancer le Luc Léger", go: "luc"} : x.timer ? {l: "Lancer le minuteur", go: "frac"} : null;
   if (s.t === "parcours") return {l: "Lancer le chrono", go: "parcours"};
-  if (s.t === "course_end") return {l: "Noter ma distance", go: "tests"};
+  if (s.t === "course_end") return {l: "Noter ma distance", go: "tests", mes: "course"};
   if (s.t === "gym") return {l: "Plan vertige", go: "ateliers", mode: "club"};
   return null;
 }
@@ -2860,7 +2860,7 @@ function renderToday(){
       <h3>${esc(slotTitle(s, d))}</h3><div class="when">${s.h ? slotHours(s) : "Quand tu veux"}${x.lieu ? " · " + esc(x.lieu) : ""}</div>
       <p class="what">${main}</p>
       ${more.length ? `<details><summary>Détails</summary>${more.map(l => `<p>${l}</p>`).join("")}</details>` : ""}
-      ${s.t === "repos" || s.t === "ensemble" ? "" : `<div class="acts">${a ? `<button type="button" class="btn" data-goto="${a.go}"${a.mode ? ` data-mode="${a.mode}"` : ""}>${a.l}</button>` : ""}<button type="button" class="ghost done-btn" data-done="${ymd(d)}|${esc(slotKey(s))}" aria-pressed="${done}">${done ? "Fait ✓" : "Fait"}</button></div>`}
+      ${s.t === "repos" || s.t === "ensemble" ? "" : `<div class="acts">${a ? `<button type="button" class="btn" data-goto="${a.go}"${a.mode ? ` data-mode="${a.mode}"` : ""}${a.mes ? ` data-mes="${a.mes}"` : ""}>${a.l}</button>` : ""}<button type="button" class="ghost done-btn" data-done="${ymd(d)}|${esc(slotKey(s))}" aria-pressed="${done}">${done ? "Fait ✓" : "Fait"}</button></div>`}
     </div></div>`;
   });
   if (!sl.some(s => s.t === "repos")) cards.push(`<div class="sess"><span class="ic daily">${ICONS.daily}</span><div><h3>Routine 10 min</h3><div class="when">Quand tu veux</div><p class="what">3 suspensions à la barre, 3 × 5 pompes, mobilité des poignets.</p></div></div>`);
