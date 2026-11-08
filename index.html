@@ -2731,8 +2731,8 @@ function renderToday(){
     const day = addDays(st, i), sl = slotsOn(day).filter(s => s.t !== "repos"), tr = sl.filter(s => s.t !== "ensemble"), all = tr.length && tr.every(s => isDone(day, s));
     return `<button type="button" class="day${ymd(day) === ymd(now) ? " is-today" : ""}${all ? " all-done" : ""}" role="tab" aria-selected="${ymd(day) === ymd(d)}" data-day="${ymd(day)}"><small>${DAYS[i + 1].slice(0, 3)}</small><b>${day.getDate()}</b><span class="dots">${sl.slice(0, 4).map(s => `<i class="${(TYPES[s.t] || {ic: "daily"}).ic}${isDone(day, s) ? " ok" : ""}"></i>`).join("")}</span></button>`;
   }).join("");
-  const title = isToday ? "Aujourd'hui" : d.toLocaleDateString("fr-FR", {weekday: "long", day: "numeric", month: "long"});
-  const head = `<div class="today-head"><h2 style="text-transform:${isToday ? "none" : "capitalize"}">${title}</h2><span class="note">Semaine ${weekType(d)} · bloc ${m.n}${m.deload ? " · semaine allégée" : ""}</span></div>`;
+  const title = isToday ? "Aujourd'hui" : d.toLocaleDateString("fr-FR", {weekday: "long", day: "numeric", month: "long"}).replace(/^./, c => c.toUpperCase());
+  const head = `<div class="today-head"><h2>${title}</h2><span class="note">Semaine ${weekType(d)} · bloc ${m.n}${m.deload ? " · semaine allégée" : ""}</span></div>`;
   if (planEmpty()){
     el.innerHTML = head + `<div class="sess"><span class="ic daily">${ICONS.daily}</span><div><h3>Ton planning est vide</h3><p class="what">Indique tes séances habituelles (semaine A et semaine B) : l'appli te dira ensuite chaque jour quoi faire, où, et combien de temps.</p><div class="acts"><button type="button" class="btn" data-goto="plan" data-anchor="planning-panel">Remplir mon planning</button></div></div></div>`;
     return;
