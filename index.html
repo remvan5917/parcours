@@ -728,6 +728,11 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--accent)}
 #gcal .gbtns a{display:flex;align-items:center;justify-content:center;text-decoration:none;color:var(--ink);border:1px solid var(--line);border-radius:10px}
 #gcal .gbtns a,#gcal .gbtns button{font-size:.88rem;white-space:nowrap;padding:9px 6px;min-height:42px}
 #gcal .gbtns+.note{margin-top:10px}
+.mcal{grid-template-columns:16px repeat(7,1fr)}
+.mcal .mwk{display:flex;align-items:center;justify-content:center;font-size:.66rem;font-weight:800;color:var(--muted);letter-spacing:0}
+.mcal .mwk.wA{color:var(--accent)}
+.mcell .lv{position:absolute;top:2px;left:4px;font-size:.62rem;line-height:1;color:#E0567F}
+.mcell.love{background:color-mix(in srgb,#E0567F 9%,transparent)}
 </style>
 </head>
 <body>
@@ -1039,7 +1044,7 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--accent)}
     <div class="mcal" id="mcal"></div>
     <div class="legend2">
       <span><i class="sq" style="background:var(--run)"></i>Fondations</span><span><i class="sq" style="background:var(--mat)"></i>Dév. 1</span><span><i class="sq" style="background:var(--gym)"></i>Dév. 2</span><span><i class="sq" style="background:var(--cone)"></i>Spécifique</span><span><i class="sq" style="background:var(--warn)"></i>Affûtage</span>
-      <span><i style="background:var(--run)"></i>Course</span><span><i style="background:var(--cone)"></i>Parcours / Freeletics</span><span><i style="background:var(--gym)"></i>Club</span><span><i style="background:#E0567F"></i><span id="leg-love">Moments à deux</span></span>
+      <span><i style="background:var(--run)"></i>Course</span><span><i style="background:var(--cone)"></i>Parcours</span><span><i style="background:var(--gym)"></i>Club</span><span><i style="background:#E0567F"></i><span id="leg-love">Moments à deux</span></span><span><b style="color:#E0567F;margin-right:4px">♥</b>On se voit</span><span><b style="color:var(--accent);margin-right:4px">A</b>/ B : semaine</span>
       <span><b style="color:var(--cone)">T</b> test</span><span><b style="color:var(--warn)">◆</b> échéance</span>
     </div>
     <div id="cal-day"></div>
@@ -2621,10 +2626,11 @@ function agendaEvents(){
   const out = []; if (planEmpty()) return out;
   const exam = parseDay(S.exam || "2027-03-29");
   for (let d = new Date(new Date().setHours(12, 0, 0, 0)); d <= exam && out.length < 500; d = addDays(d, 1)){
+    if (dow(d) === 1 || ymd(d) === ymd(new Date())){ const w0 = dow(d) === 1 ? d : addDays(d, 1 - dow(d)); out.push({d: ymd(w0), allDay: true, days: 7, t: "Semaine " + weekType(w0), desc: `Semaine ${weekType(w0)} de ton planning · bloc ${mesoAt(w0).n}${mesoAt(w0).deload ? " (semaine allégée + tests)" : ""}.`}); }
     slotsOn(d).forEach(s => {
       if (s.t === "repos") return;
       const x = session(s.t, d, s.h), m = x.m;
-      out.push({d: ymd(d), h: s.h || "18:00", dur: ({gym: 120, krav: 60, jjb: 180})[s.t] || (s.t.startsWith("course") ? 60 : 90), t: slotTitle(s, d),
+      out.push({d: ymd(d), h: s.h || "18:00", dur: ({gym: 120, krav: 60, jjb: 180})[s.t] || (s.t.startsWith("course") ? 60 : 90), t: slotTitle(s, d), love: s.t === "ensemble" || !!s.duo,
         desc: [`Bloc ${m.n}${m.deload ? " (semaine allégée + tests)" : ""} · semaine ${weekType(d)}`, x.lieu ? "Lieu : " + x.lieu : "", ...x.L.map(stripTags), "", "Détails et chrono : " + location.origin + location.pathname].filter((l, i) => l || i > 0).join("\n")});
     });
   }
@@ -3061,12 +3067,15 @@ function renderCal(){
   $("cal-prev").disabled = first <= new Date(minM.getFullYear(), minM.getMonth(), 1, 12);
   $("cal-next").disabled = first >= new Date(maxM.getFullYear(), maxM.getMonth(), 1, 12);
   const lead = (first.getDay() + 6) % 7, today = ymd(new Date());
-  let h = ["L", "M", "M", "J", "V", "S", "D"].map(x => `<span class="dh">${x}</span>`).join("");
+  const wkCell = d => { const inR = d >= addDays(calStart(), -6) && d <= calEnd(); return `<span class="mwk ${inR ? "w" + weekType(d) : ""}" title="${inR ? "Semaine " + weekType(d) : ""}">${inR && !planEmpty() ? weekType(d) : ""}</span>`; };
+  let h = `<span class="dh"></span>` + ["L", "M", "M", "J", "V", "S", "D"].map(x => `<span class="dh">${x}</span>`).join("") + wkCell(first);
   for (let i = 0; i < lead; i++) h += `<span class="mcell out"></span>`;
   for (let n = 1; n <= days; n++){
     const d = new Date(y, mo, n, 12), k = ymd(d), I = dayInfo(d);
+    if (n > 1 && dow(d) === 1) h += wkCell(d);
+    const love = I.sl.some(s => s.t === "ensemble" || s.duo);
     const tag = I.exam ? `<span class="tag j">J</span>` : I.test ? `<span class="tag t">T</span>` : I.obj.length ? `<span class="tag o">◆</span>` : "";
-    h += `<button type="button" class="mcell ${I.m ? "b" + I.m.i : ""}${k < today ? " past" : ""}${k === today ? " today" : ""}" data-cal="${k}" aria-selected="${calSel === k}" aria-label="${d.toLocaleDateString("fr-FR", {weekday: "long", day: "numeric", month: "long"})}">${tag}<span class="n">${n}</span><span class="pts">${I.sl.slice(0, 6).map(s => `<i class="${(TYPES[s.t] || {ic: "daily"}).ic}${s.t !== "ensemble" && isDone(d, s) ? " ok" : ""}"></i>`).join("")}</span></button>`;
+    h += `<button type="button" class="mcell ${I.m ? "b" + I.m.i : ""}${k < today ? " past" : ""}${k === today ? " today" : ""}${love ? " love" : ""}" data-cal="${k}" aria-selected="${calSel === k}" aria-label="${d.toLocaleDateString("fr-FR", {weekday: "long", day: "numeric", month: "long"})}${love ? ", " + typeLabel("ensemble") : ""}">${tag}${love ? `<span class="lv" aria-hidden="true">♥</span>` : ""}<span class="n">${n}</span><span class="pts">${I.sl.slice(0, 6).map(s => `<i class="${(TYPES[s.t] || {ic: "daily"}).ic}${s.t !== "ensemble" && isDone(d, s) ? " ok" : ""}"></i>`).join("")}</span></button>`;
   }
   el.innerHTML = h;
   renderCalDay();

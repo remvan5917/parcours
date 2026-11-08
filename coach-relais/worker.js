@@ -20,7 +20,13 @@ async function agenda(team){
   const stamp = new Date().toISOString().replace(/[-:]/g, "").slice(0, 15) + "Z";
   const L = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Athena//Entrainement//FR", "CALSCALE:GREGORIAN", "METHOD:PUBLISH",
     "X-WR-CALNAME:Athéna · entraînement", "X-WR-TIMEZONE:Europe/Paris", "REFRESH-INTERVAL;VALUE=DURATION:PT1H", "X-PUBLISHED-TTL:PT1H"];
+  const addD = (d, n) => { const x = new Date(d + "T12:00:00Z"); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); };
   (Array.isArray(data.ev) ? data.ev : []).slice(0, 600).forEach((e, i) => {
+    if (e.allDay && /^\d{4}-\d{2}-\d{2}$/.test(e.d)){ // bande « Semaine A / B » sur toute la semaine
+      L.push("BEGIN:VEVENT", `UID:${e.d.replace(/-/g, "")}-sem-${team.slice(0, 6)}@parcours`, `DTSTAMP:${stamp}`, `DTSTART;VALUE=DATE:${e.d.replace(/-/g, "")}`,
+        `DTEND;VALUE=DATE:${addD(e.d, Math.min(7, Number(e.days) || 1)).replace(/-/g, "")}`, fold("SUMMARY:" + icsEsc(e.t)), fold("DESCRIPTION:" + icsEsc(e.desc)), "TRANSP:TRANSPARENT", "END:VEVENT");
+      return;
+    }
     if (!/^\d{4}-\d{2}-\d{2}$/.test(e.d) || !/^\d{2}:\d{2}$/.test(e.h)) return;
     const [hh, mm] = e.h.split(":").map(Number), dur = Math.min(240, Number(e.dur) || 60);
     const endMin = hh * 60 + mm + dur, eh = Math.min(23, Math.floor(endMin / 60)), em = endMin >= 24 * 60 ? 59 : endMin % 60;
@@ -125,7 +131,15 @@ async function gSyncKey(env, k, team, force){
   if (token === "REVOKED"){ st.revoked = true; await env.GKV.put(k, JSON.stringify(st)); return {connected: true, revoked: true}; }
   if (!token) return {connected: true, error: "jeton"};
   const alarm = Math.min(240, Math.max(0, Number(data.alarm) || 30)), want = {};
+  const addD = (d, n) => { const x = new Date(d + "T12:00:00Z"); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); };
   for (const e of (Array.isArray(data.ev) ? data.ev : []).slice(0, 600)){
+    if (e.allDay && /^\d{4}-\d{2}-\d{2}$/.test(e.d)){
+      const key = `${e.d}|semaine|${String(e.t || "").slice(0, 40)}`;
+      const body = {summary: String(e.t || "Semaine"), description: String(e.desc || ""), start: {date: e.d}, end: {date: addD(e.d, Math.min(7, Number(e.days) || 1))},
+        transparency: "transparent", colorId: /A$/.test(e.t) ? "9" : "8", reminders: {useDefault: false}, status: "confirmed"};
+      want[key] = {body, hash: JSON.stringify(body).length + ":" + [...JSON.stringify(body)].reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 0)};
+      continue;
+    }
     if (!/^\d{4}-\d{2}-\d{2}$/.test(e.d) || !/^\d{2}:\d{2}$/.test(e.h)) continue;
     const [hh, mm] = e.h.split(":").map(Number), endMin = Math.min(23 * 60 + 59, hh * 60 + mm + Math.min(240, Number(e.dur) || 60));
     const key = `${e.d}|${e.h}|${String(e.t || "").slice(0, 80)}`;
@@ -133,6 +147,7 @@ async function gSyncKey(env, k, team, force){
       start: {dateTime: `${e.d}T${e.h}:00`, timeZone: "Europe/Paris"},
       end: {dateTime: `${e.d}T${String(Math.floor(endMin / 60)).padStart(2, "0")}:${String(endMin % 60).padStart(2, "0")}:00`, timeZone: "Europe/Paris"},
       reminders: alarm > 0 ? {useDefault: false, overrides: [{method: "popup", minutes: alarm}]} : {useDefault: false}, status: "confirmed"};
+    if (e.love) body.colorId = "4"; // moments à deux en rose (Flamingo)
     want[key] = {body, hash: JSON.stringify(body).length + ":" + [...JSON.stringify(body)].reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 0)};
   }
   const calP = `/calendar/v3/calendars/${encodeURIComponent(st.cal)}/events`, today = parisToday(), ops = [];
