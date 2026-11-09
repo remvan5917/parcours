@@ -751,6 +751,14 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--accent)}
 .ev.love{background:color-mix(in srgb,#E5383B 18%,transparent);color:var(--ink);border-left:3px solid #E5383B}
 .weeklist .wl-leg{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:2px}
 .weeklist .wl-leg .ev{display:inline-block;font-size:.76rem;padding:2px 8px}
+.extra-add{margin-top:10px}
+.extra-add summary{cursor:pointer;font-weight:600;color:var(--accent);list-style:none;padding:8px 0}
+.extra-add summary::-webkit-details-marker{display:none}
+.extra-form{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
+.extra-form select,.extra-form .ex-cont,.extra-form button{grid-column:1/-1}
+.extra-form>*{width:100%;min-width:0;margin:0}
+.extra-form .ex-cont{display:flex;gap:8px;align-items:center;color:var(--ink)}
+.extra-form .ex-cont input{width:auto}
 </style>
 </head>
 <body>
@@ -2278,7 +2286,7 @@ function weekBilan(start){
   const pk = Object.keys(pens);
   if (W.essais.length) facts.push({t: pk.length ? `Pénalités : ${pk.map(n => byN(Number(n)).short + " +" + pens[n] + " s").join(", ")}` : "Aucune pénalité cette semaine", d: pk.length ? "Ce sont les ateliers à travailler en priorité." : "Bravo : c'est là qu'on gagne le plus de temps."});
   if (bl) facts.push({t:`Luc Léger : ${palTxt(bl.palier, bl.sec)} (${fr(withBonus(lucBase(bl.palier, bl.sec)))}/20)`, d: pbl ? `Semaine d'avant : ${palTxt(pbl.palier, pbl.sec)}.` : "Objectif : palier " + LUC_TARGET + "."});
-  const wc = weekCount(start); if (wc.plan) facts.push({t:`Séances faites : ${wc.done} sur ${wc.plan}`, d: wc.done >= wc.plan ? "Semaine complète, bravo." : "Coche « Fait » dans Aujourd'hui après chaque séance."});
+  const wc = weekCount(start); if (wc.plan) facts.push({t:`Séances faites : ${wc.done} sur ${wc.plan}${wc.extra ? ` + ${wc.extra} en plus` : ""}`, d: wc.done >= wc.plan ? "Semaine complète, bravo." : "Coche « Fait » dans Aujourd'hui après chaque séance."});
   if (W.mesures.length) facts.push({t:"Tests notés", d: W.mesures.map(m => `${MES[m.type].label} : ${fr(m.value)}${MES[m.type].unit ? " " + MES[m.type].unit : ""}`).join(" · ")});
   return {W, b, bl, facts, pens};
 }
@@ -2807,10 +2815,13 @@ function saveFait(o){ S.fait = o; lsSet("phm-fait", o); if (FS) FS.setDoc(FS.doc
 const slotKey = s => s.t + "@" + (s.h || "");
 const slotTitle = (s, d) => (s.duo ? typeLabel("ensemble") + " · " : "") + ((d && s.t !== "ensemble" && session(s.t, d, s.h).titre) || typeLabel(s.t));
 const isDone = (d, s) => !!((S.fait || {})[ymd(d)] || {})[slotKey(s)];
+// séances faites en plus du programme : rangées avec les « Fait », clé « +id »
+const EXTRA = {course: "Course", freeletics: "Freeletics / renforcement", parcours: "Parcours", gym: "Gym", autre: "Autre séance"};
+const extrasOn = d => Object.entries(((S.fait || {})[ymd(d)]) || {}).filter(([k, v]) => k[0] === "+" && v && typeof v === "object").map(([k, v]) => Object.assign({id: k}, v));
 function weekCount(d){
-  const st = weekStart(d || Date.now()); let plan_ = 0, done = 0;
-  for (let i = 0; i < 7; i++){ const day = addDays(st, i); slotsOn(day).forEach(s => { if (s.t === "repos" || s.t === "ensemble") return; plan_++; if (isDone(day, s)) done++; }); }
-  return {plan: plan_, done};
+  const st = weekStart(d || Date.now()); let plan_ = 0, done = 0, extra = 0;
+  for (let i = 0; i < 7; i++){ const day = addDays(st, i); extra += extrasOn(day).length; slotsOn(day).forEach(s => { if (s.t === "repos" || s.t === "ensemble") return; plan_++; if (isDone(day, s)) done++; }); }
+  return {plan: plan_, done, extra};
 }
 
 /* ---- aujourd'hui ---- */
@@ -2864,8 +2875,35 @@ function renderToday(){
     </div></div>`;
   });
   if (!sl.some(s => s.t === "repos")) cards.push(`<div class="sess"><span class="ic daily">${ICONS.daily}</span><div><h3>Routine 10 min</h3><div class="when">Quand tu veux</div><p class="what">3 suspensions à la barre, 3 × 5 pompes, mobilité des poignets.</p></div></div>`);
-  el.innerHTML = head + `<div class="sess-list">${sl.length ? cards.join("") : `<div class="sess"><span class="ic daily">${ICONS.daily}</span><div><h3>Rien de prévu</h3><p class="what">Repos, ou la routine 10 min si tu as envie.</p></div></div>`}</div>`;
+  const ex = extrasOn(d).map(x => `<div class="sess done extra"><span class="ic run">${ICONS[x.t === "course" ? "run" : "daily"] || ICONS.daily}</span><div>
+      <h3>${esc(EXTRA[x.t] || "Séance")} <span class="verdict ok">en plus</span></h3><div class="when">${[x.km ? fr(x.km) + " km" : "", x.min ? x.min + " min" : ""].filter(Boolean).join(" · ") || "Bien joué"}</div>
+      <div class="acts"><button type="button" class="ghost small" data-extra-del="${ymd(d)}|${esc(x.id)}">Retirer</button></div></div></div>`).join("");
+  const addForm = `<details class="extra-add"><summary>+ Ajouter une séance faite en plus</summary>
+      <form class="extra-form" data-extra-day="${ymd(d)}">
+        <select name="t" aria-label="Type de séance">${Object.entries(EXTRA).map(([k, v]) => `<option value="${k}">${v}</option>`).join("")}</select>
+        <input name="km" type="number" min="0" step="any" inputmode="decimal" placeholder="Distance (km)" aria-label="Distance en km">
+        <input name="min" type="number" min="0" step="1" inputmode="numeric" placeholder="Durée (min)" aria-label="Durée en minutes">
+        <label class="note ex-cont"><input type="checkbox" name="cont" checked> Courue sans m'arrêter (compte pour l'objectif 8 / 10 km)</label>
+        <button type="submit" class="btn">Enregistrer</button>
+      </form></details>`;
+  el.innerHTML = head + `<div class="sess-list">${sl.length ? cards.join("") : `<div class="sess"><span class="ic daily">${ICONS.daily}</span><div><h3>Rien de prévu</h3><p class="what">Repos, ou la routine 10 min si tu as envie.</p></div></div>`}${ex}</div>` + addForm;
 }
+document.addEventListener("change", e => { const f = e.target.closest(".extra-form"); if (f && e.target.name === "t") f.querySelector(".ex-cont").hidden = e.target.value !== "course"; });
+document.addEventListener("submit", e => {
+  const f = e.target.closest(".extra-form"); if (!f) return; e.preventDefault();
+  const day = f.dataset.extraDay, t = f.t.value, km = parseFloat(String(f.km.value).replace(",", ".")), min = parseInt(f.min.value, 10);
+  const o = JSON.parse(JSON.stringify(S.fait || {})); o[day] = o[day] || {};
+  o[day]["+" + newId()] = Object.assign({t, at: Date.now()}, km > 0 ? {km} : {}, min > 0 ? {min} : {});
+  saveFait(o);
+  if (t === "course" && km > 0 && f.cont.checked) addDoc("mesures", {at: day === ymd(new Date()) ? Date.now() : new Date(day + "T12:00:00").getTime(), type: "course", value: km});
+  renderToday(); renderTiles(); renderWeek(); setSync("Séance en plus enregistrée. Bravo !");
+});
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-extra-del]"); if (!b) return;
+  if (!confirm("Retirer cette séance en plus ?")) return;
+  const [day, id] = b.dataset.extraDel.split("|"), o = JSON.parse(JSON.stringify(S.fait || {}));
+  if (o[day]) delete o[day][id]; saveFait(o); renderToday(); renderTiles(); renderWeek();
+});
 document.addEventListener("click", e => {
   const day = e.target.closest("[data-day]");
   if (day){ selDay = day.dataset.day === ymd(new Date()) ? null : day.dataset.day; renderToday(); return; }
