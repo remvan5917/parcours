@@ -2992,18 +2992,18 @@ function saveFait(o){ S.fait = o; lsSet("phm-fait", o); if (FS) FS.setDoc(FS.doc
 const slotKey = s => s.t + "@" + (s.h || "");
 const slotTitle = (s, d) => (s.duo ? typeLabel("ensemble") + " · " : "") + ((d && s.t !== "ensemble" && session(s.t, d, s.h).titre) || typeLabel(s.t));
 const isDone = (d, s) => !!((S.fait || {})[ymd(d)] || {})[slotKey(s)];
-// dépense estimée (MET × poids × durée) et ce qui est travaillé, par type de séance
+// dépense estimée (MET × poids × durée ; cours longs avec pauses et technique → MET modérés) et ce qui est travaillé, par type de séance
 const WORK = {
   course_end: {met: 8.3, w: ["endurance", "cardio", "jambes"]},
   course_frac: {met: 9.5, w: ["vitesse (VMA)", "cardio", "jambes"]},
   course_rec: {met: 7, w: ["récupération active", "foulée"]},
   luc: {met: 9.5, w: ["cardio maximal", "changements de direction"]},
-  parcours: {met: 6.5, w: ["explosivité", "coordination", "force", "équilibre"]},
-  gym: {met: 4, w: ["force", "gainage", "souplesse", "équilibre"]},
+  parcours: {met: 5, w: ["explosivité", "coordination", "force", "équilibre"]},
+  gym: {met: 3.2, w: ["force", "gainage", "souplesse", "équilibre"]},
   freeletics: {met: 8, w: ["force", "cardio", "gainage"]},
   renfo: {met: 3.5, w: ["force", "gainage"]},
-  krav: {met: 9, w: ["cardio", "combat", "gainage", "réflexes"]},
-  jjb: {met: 9, w: ["force", "gainage", "souplesse", "combat"]}
+  krav: {met: 7, w: ["cardio", "combat", "gainage", "réflexes"]},
+  jjb: {met: 4.5, w: ["force", "gainage", "souplesse", "combat"]}
 };
 const poids = () => Number((S.profil || {}).poids) || 0;
 function sessEnergy(s, d){
