@@ -759,6 +759,34 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--accent)}
 .extra-form>*{width:100%;min-width:0;margin:0}
 .extra-form .ex-cont{display:flex;gap:8px;align-items:center;color:var(--ink)}
 .extra-form .ex-cont input{width:auto}
+.energy{margin:4px 0 0;font-size:.84rem;color:var(--muted)}
+.energy b{color:var(--ink)}
+.rt-list{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.rt{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:1px solid var(--line);border-radius:10px;padding:8px 10px;color:var(--ink);font:inherit;cursor:pointer}
+.rt .rt-box{width:22px;height:22px;flex:0 0 22px;border-radius:6px;border:2px solid var(--line);display:grid;place-items:center;font-weight:800;font-size:.8rem}
+.rt.on .rt-box{background:var(--ok);border-color:var(--ok);color:#fff}
+.rt.on{color:var(--muted)}
+.nu-bar{margin:6px 0}
+.nu-bl{display:flex;justify-content:space-between;font-size:.84rem;margin-bottom:3px}
+.nu-bl span{color:var(--muted)}
+.nu-track{height:8px;border-radius:999px;background:var(--floor);overflow:hidden}
+.nu-track i{display:block;height:100%;border-radius:999px;background:#1E9E5A}
+.nu-track i.over{background:var(--warn)}
+.nu-form{display:flex;flex-direction:column;gap:8px}
+.nu-form textarea{font:inherit;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);resize:vertical}
+.nu-prev{border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:10px;display:flex;flex-direction:column;gap:6px}
+.nu-it{display:flex;justify-content:space-between;gap:8px;font-size:.9rem}
+.nu-tot{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.nu-tot label{display:flex;flex-direction:column;font-size:.72rem;color:var(--muted);gap:2px}
+.nu-tot input{width:100%;min-width:0;font:inherit;padding:6px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
+.nu-meal{display:flex;justify-content:space-between;gap:8px;border-top:1px solid var(--line);padding:8px 0}
+.nu-meal p{margin:2px 0 0}
+.nu-pform{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.nu-pform label{display:flex;flex-direction:column;gap:3px;font-size:.82rem;color:var(--muted)}
+.nu-pform .wide{grid-column:1/-1}
+.nu-pform input,.nu-pform select{width:100%;min-width:0}
+.nu-adv{margin-top:10px;line-height:1.5}
+.nu-home .btn{margin-top:6px}
 </style>
 </head>
 <body>
@@ -787,6 +815,7 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--accent)}
     <button type="button" class="link" data-goto="plan" data-anchor="cal-panel" style="align-self:flex-end;margin-top:-6px">Calendrier jusqu'au concours ›</button>
     <div id="today"></div>
   </div>
+  <div class="panel nu-home" id="nu-home"></div>
 
   <div class="tiles" id="home-tiles"></div>
 
@@ -805,6 +834,42 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--accent)}
 </section>
 
 <!-- =================== RÉGLAGES =================== -->
+<!-- =================== NUTRITION =================== -->
+<section class="view" id="v-nutrition" data-view="nutrition" hidden>
+  <h2>Nutrition</h2>
+  <div class="panel" id="nu-day"></div>
+  <div class="panel">
+    <h3>Noter un repas</h3>
+    <p class="note">Écris ce que tu as mangé, avec les quantités si tu les connais. Athéna estime les calories et les macros, tu vérifies, puis tu enregistres.</p>
+    <form id="nu-form" class="nu-form">
+      <select id="nu-meal" aria-label="Repas"><option>Petit-déjeuner</option><option>Déjeuner</option><option>Collation</option><option>Dîner</option></select>
+      <textarea id="nu-text" rows="3" maxlength="600" placeholder="Ex : 2 œufs, 1 tranche de pain complet, 1 yaourt grec, 1 café"></textarea>
+      <button type="submit" class="btn" id="nu-go">Calculer</button>
+    </form>
+    <div id="nu-preview"></div>
+  </div>
+  <div class="panel" id="nu-list"></div>
+  <div class="panel">
+    <h3>Le conseil d'Athéna</h3>
+    <p class="note">D'après ce que tu as mangé, ton objectif et tes séances du jour.</p>
+    <button type="button" class="ghost small" id="nu-advice">Demander un conseil pour aujourd'hui</button>
+    <div id="nu-advice-out" class="nu-advice"></div>
+  </div>
+  <div class="panel" id="nu-profil">
+    <h3>Ton profil</h3>
+    <p class="note">Sert à calculer tes besoins et les calories de tes séances. Reste privé, dans votre espace.</p>
+    <form id="nu-pform" class="nu-pform">
+      <label>Poids (kg)<input type="number" id="pf-poids" min="35" max="150" step="0.1" inputmode="decimal"></label>
+      <label>Taille (cm)<input type="number" id="pf-taille" min="130" max="210" step="1" inputmode="numeric"></label>
+      <label>Âge<input type="number" id="pf-age" min="16" max="70" step="1" inputmode="numeric"></label>
+      <label>Sexe<select id="pf-sexe"><option value="f">Femme</option><option value="h">Homme</option></select></label>
+      <label class="wide">Objectif<select id="pf-obj"><option value="seche">Sécher en douceur (−15 % max)</option><option value="maintien">Garder mon poids</option><option value="muscle">Prendre du muscle</option></select></label>
+      <button type="submit" class="btn wide">Enregistrer mon profil</button>
+    </form>
+  </div>
+  <p class="note">Les calories et les macros sont des estimations. Pour sécher en préparant un concours sportif, Athéna garde un déficit modéré pour que tu aies l'énergie de t'entraîner. En cas de doute, demande l'avis d'un médecin ou d'un diététicien.</p>
+</section>
+
 <section class="view" id="v-reglages" data-view="reglages" hidden>
   <h2>Réglages</h2>
   <div class="panel about">
@@ -1432,16 +1497,17 @@ const palTxt = (p, s) => `palier ${p}${s ? " + " + s + " s" : ""}`;
 const palBig = (p, s) => `Palier ${p}${s ? " + " + s + " s" : ""}`;
 
 /* ======================= NAVIGATION ======================= */
-const VIEWS = ["accueil", "parcours", "luc", "frac", "tests", "ateliers", "plan", "coach", "progres", "reglages"];
+const VIEWS = ["accueil", "parcours", "luc", "frac", "tests", "ateliers", "plan", "coach", "progres", "reglages", "nutrition"];
 function show(v, noScroll){
   if (!VIEWS.includes(v)) v = "accueil";
   const cur = document.querySelector(".view:not([hidden])"); if (cur && cur.dataset.view !== v) prevView = cur.dataset.view;
   document.querySelectorAll(".view").forEach(el => el.hidden = el.dataset.view !== v);
-  const tab = TRAIN.includes(v) ? "train" : v === "ateliers" ? "plan" : v;
+  const tab = TRAIN.includes(v) ? "train" : v === "ateliers" ? "plan" : v === "nutrition" ? "accueil" : v;
   document.querySelectorAll("[data-tab]").forEach(b => b.setAttribute("aria-current", b.dataset.tab === tab ? "page" : "false"));
   chrome(v);
   if (v === "frac") frFill();
   if (v === "tests") renderMesures();
+  if (v === "nutrition" && typeof renderNutrition === "function") renderNutrition();
   if (v === "plan" && typeof renderGcal === "function") renderGcal(true);
   try { history.replaceState(null, "", "#" + v); } catch(e){}
   if (!noScroll) window.scrollTo(0, 0);
@@ -1456,8 +1522,8 @@ document.addEventListener("click", e => { const g = e.target.closest("[data-goto
    Toujours sur ce téléphone. Si le partage est activé (config.js + code d'équipe),
    aussi dans la base en ligne, visible sur tous les téléphones de l'équipe. */
 const S = { essais: [], mesures: [], luc: [], rapports: [], exam: null, examLabel: null, plan: null, lieux: null, fait: null };
-const LKEY = {essais:"phm-essais-v3", mesures:"phm-mesures-v1", luc:"phm-luc-v1", rapports:"phm-rapports-v1"};
-const COLLS = ["essais", "mesures", "luc", "rapports"];
+const LKEY = {essais:"phm-essais-v3", mesures:"phm-mesures-v1", luc:"phm-luc-v1", rapports:"phm-rapports-v1", repas:"phm-repas-v1"};
+const COLLS = ["essais", "mesures", "luc", "rapports", "repas"];
 const EXAM_DEFAULT = {date:"2027-03-29", label:"fin mars – début avril 2027"};
 const FB = window.PARCOURS_FIREBASE || null;
 let FS = null;
@@ -1467,7 +1533,7 @@ function setSync(msg, warn){ const el = $("sync"); el.textContent = msg; el.clas
 function loadLocal(){
   for (const k of COLLS) S[k] = lsGet(LKEY[k], []).filter(x => x && x.id).map(x => cleanItem(k, x));
   const ex = lsGet("phm-exam-obj", EXAM_DEFAULT); S.exam = ex.date; S.examLabel = ex.label;
-  S.plan = lsGet("phm-plan", null); S.lieux = lsGet("phm-lieux", null); S.fait = lsGet("phm-fait", null);
+  S.plan = lsGet("phm-plan", null); S.lieux = lsGet("phm-lieux", null); S.fait = lsGet("phm-fait", null); S.profil = lsGet("phm-profil", null);
 }
 function writeErr(){ setSync("Enregistrement en ligne impossible pour le moment. Le résultat est gardé sur ce téléphone et partira dès que possible.", true); }
 // rejoindre une équipe avec un lien ?equipe=CODE
@@ -1516,6 +1582,10 @@ async function connectFirebase(){
     if (snap.exists()){ S.fait = snap.data(); lsSet("phm-fait", S.fait); renderToday(); renderTiles(); renderSetup(); }
     else if (S.fait) F.setDoc(F.doc(db, "equipes", team, "reglages", "fait"), S.fait).catch(() => {});
   }, () => {});
+  F.onSnapshot(F.doc(db, "equipes", team, "reglages", "profil"), snap => {
+    if (snap.exists()){ S.profil = snap.data(); lsSet("phm-profil", S.profil); renderAll(); }
+    else if (S.profil) F.setDoc(F.doc(db, "equipes", team, "reglages", "profil"), S.profil).catch(() => {});
+  }, () => {});
   F.onSnapshot(F.doc(db, "equipes", team, "reglages", "lieux"), snap => {
     if (snap.exists()){ S.lieux = snap.data(); lsSet("phm-lieux", S.lieux); renderLieux(); }
     else if (S.lieux) F.setDoc(F.doc(db, "equipes", team, "reglages", "lieux"), S.lieux).catch(() => {});
@@ -1533,13 +1603,14 @@ async function initStore(){
     try { await connectFirebase(); } catch(e){ FS = null; clearTimeout(t); setSync("Partage indisponible (pas de réseau ?). Les résultats restent sur ce téléphone.", true); }
   } else setSync("");
 }
-const NUMS = {essais:["at","raw","pen","total","note","age"], mesures:["at","value"], luc:["at","palier","sec","note","age","navettes"], rapports:["at"]};
+const NUMS = {essais:["at","raw","pen","total","note","age"], mesures:["at","value"], luc:["at","palier","sec","note","age","navettes"], rapports:["at"], repas:["at","kcal","p","g","l"]};
 function cleanItem(k, x){
   const o = Object.assign({}, x);
   (NUMS[k] || []).forEach(f => { if (o[f] != null && typeof o[f] !== "boolean"){ const n = Number(o[f]); o[f] = isFinite(n) ? n : null; } });
   if (k === "essais"){ o.splits = Array.isArray(o.splits) ? o.splits.map(Number).filter(isFinite) : []; o.penBy = Array.isArray(o.penBy) ? o.penBy.map(p => ({n: Number(p.n), s: Number(p.s)})).filter(p => p.n >= 1 && p.n <= 10 && isFinite(p.s)) : []; o.lieu = String(o.lieu || ""); }
   if (k === "mesures") o.type = ["suspension", "pompes", "poutre", "course"].includes(o.type) ? o.type : "suspension";
   if (k === "rapports"){ o.conseils = String(o.conseils || ""); o.week = String(o.week || ""); }
+  if (k === "repas"){ o.text = String(o.text || "").slice(0, 600); o.meal = String(o.meal || ""); o.day = /^\d{4}-\d{2}-\d{2}$/.test(o.day || "") ? o.day : ymd(new Date(o.at || Date.now())); }
   if (typeof o.id !== "string") o.id = String(o.id || newId());
   return o;
 }
@@ -2286,7 +2357,9 @@ function weekBilan(start){
   const pk = Object.keys(pens);
   if (W.essais.length) facts.push({t: pk.length ? `Pénalités : ${pk.map(n => byN(Number(n)).short + " +" + pens[n] + " s").join(", ")}` : "Aucune pénalité cette semaine", d: pk.length ? "Ce sont les ateliers à travailler en priorité." : "Bravo : c'est là qu'on gagne le plus de temps."});
   if (bl) facts.push({t:`Luc Léger : ${palTxt(bl.palier, bl.sec)} (${fr(withBonus(lucBase(bl.palier, bl.sec)))}/20)`, d: pbl ? `Semaine d'avant : ${palTxt(pbl.palier, pbl.sec)}.` : "Objectif : palier " + LUC_TARGET + "."});
-  const wc = weekCount(start); if (wc.plan) facts.push({t:`Séances faites : ${wc.done} sur ${wc.plan}${wc.extra ? ` + ${wc.extra} en plus` : ""}`, d: wc.done >= wc.plan ? "Semaine complète, bravo." : "Coche « Fait » dans Aujourd'hui après chaque séance."});
+  const wc = weekCount(start); { const rc = ROUTINE.map(r => { let n = 0; for (let i = 0; i < 7; i++){ if (((S.fait || {})[ymd(addDays(start, i))] || {})["routine:" + r.k]) n++; } return `${r.l.replace(/^3 (× 5 )?/, "")} ${n} j`; }); facts.push({t: "Routine", d: rc.join(" · ")}); }
+  if (wc.kcal) facts.push({t: "Énergie dépensée à l'entraînement", d: `environ ${Math.round(wc.kcal / 10) * 10} kcal sur les séances faites (estimation)`});
+  if (wc.plan) facts.push({t:`Séances faites : ${wc.done} sur ${wc.plan}${wc.extra ? ` + ${wc.extra} en plus` : ""}`, d: wc.done >= wc.plan ? "Semaine complète, bravo." : "Coche « Fait » dans Aujourd'hui après chaque séance."});
   if (W.mesures.length) facts.push({t:"Tests notés", d: W.mesures.map(m => `${MES[m.type].label} : ${fr(m.value)}${MES[m.type].unit ? " " + MES[m.type].unit : ""}`).join(" · ")});
   return {W, b, bl, facts, pens};
 }
@@ -2792,9 +2865,113 @@ $("lieux").addEventListener("click", e => {
 function renderPlanAll(){ renderToday(); renderObjectifs(); renderPlanning(); renderAgendaSub(); renderLieux(); renderCalAll(); scheduleAgenda(); }
 
 
+
+/* ======================= NUTRITION ======================= */
+let nuDay = null, nuDraft = null;
+function saveProfil(o){ S.profil = o; lsSet("phm-profil", o); if (FS) FS.setDoc(FS.doc(FS.db, "equipes", team, "reglages", "profil"), o).catch(writeErr); renderAll(); }
+const nuDate = () => nuDay ? parseDay(nuDay) : new Date(new Date().setHours(12, 0, 0, 0));
+// dépense du jour : séances prévues (hors moments à deux) + séances en plus
+function dayEnergy(d){
+  let k = 0; slotsOn(d).forEach(s => { if (s.t !== "ensemble" && s.t !== "repos") k += sessEnergy(s, d).kcal || 0; });
+  extrasOn(d).forEach(x => { k += extraEnergy(x).kcal || 0; }); return k;
+}
+// besoins du jour (Mifflin-St Jeor × 1,35 pour la vie courante + séances), déficit modéré si sèche
+function nutTargets(d){
+  const p = S.profil || {}, kg = Number(p.poids), cm = Number(p.taille), age = Number(p.age);
+  if (!kg || !cm || !age) return null;
+  const bmr = 10 * kg + 6.25 * cm - 5 * age + (p.sexe === "h" ? 5 : -161), sport = dayEnergy(d);
+  let kcal = bmr * 1.35 + sport;
+  if (p.obj === "seche") kcal *= 0.85; else if (p.obj === "muscle") kcal *= 1.08;
+  kcal = Math.round(Math.max(kcal, bmr * 1.15) / 10) * 10;
+  const prot = Math.round(kg * (p.obj === "seche" ? 2 : 1.8)), lip = Math.round(kg * 0.9), glu = Math.max(0, Math.round((kcal - prot * 4 - lip * 9) / 4));
+  return {kcal, p: prot, g: glu, l: lip, sport, bmr: Math.round(bmr)};
+}
+const repasOn = d => (S.repas || []).filter(r => r.day === ymd(d)).sort((a, b) => a.at - b.at);
+function dayTotals(d){ return repasOn(d).reduce((t, r) => ({kcal: t.kcal + (r.kcal || 0), p: t.p + (r.p || 0), g: t.g + (r.g || 0), l: t.l + (r.l || 0)}), {kcal: 0, p: 0, g: 0, l: 0}); }
+const bar = (lab, v, t, u) => `<div class="nu-bar"><div class="nu-bl"><span>${lab}</span><b>${Math.round(v)}${t ? ` / ${t}` : ""} ${u}</b></div><div class="nu-track"><i style="width:${t ? Math.min(100, v / t * 100) : 0}%"${t && v > t * 1.05 ? ' class="over"' : ""}></i></div></div>`;
+function renderNuHome(){
+  const el = $("nu-home"); if (!el) return;
+  const d = new Date(new Date().setHours(12, 0, 0, 0)), T = nutTargets(d), t = dayTotals(d), n = repasOn(d).length;
+  el.innerHTML = `<div class="row between"><h3 style="margin:0">Nutrition</h3><button type="button" class="link" data-goto="nutrition">Ouvrir ›</button></div>
+    ${T ? `<p class="note" style="margin:6px 0 8px">${n ? `${n} repas noté${n > 1 ? "s" : ""} aujourd'hui` : "Rien de noté aujourd'hui"} · objectif ${T.kcal} kcal (dont ${T.sport} kcal de sport)</p>${bar("Calories", t.kcal, T.kcal, "kcal")}${bar("Protéines", t.p, T.p, "g")}`
+      : `<p class="note" style="margin:6px 0 8px">Note ce que tu manges : Athéna calcule tes calories et tes macros, et te conseille pour sécher sans perdre d'énergie.</p>`}
+    <button type="button" class="btn" data-goto="nutrition" ${T ? "" : 'data-anchor="nu-profil"'} style="width:100%">${T ? "Noter un repas" : "Commencer : mon profil"}</button>`;
+}
+function renderNutrition(){
+  if (!$("v-nutrition")) return;
+  const d = nuDate(), T = nutTargets(d), t = dayTotals(d), isT = ymd(d) === ymd(new Date());
+  $("nu-day").innerHTML = `<div class="weeknav"><button type="button" class="wk-arrow" data-nu-day="${ymd(addDays(d, -1))}" aria-label="Jour précédent">‹</button><div class="wk-lab"><b>${isT ? "Aujourd'hui" : d.toLocaleDateString("fr-FR", {weekday: "long", day: "numeric", month: "long"}).replace(/^./, c => c.toUpperCase())}</b><span>${T ? `objectif ${T.kcal} kcal · sport ≈ ${T.sport} kcal` : "complète ton profil en bas de page"}</span></div><button type="button" class="wk-arrow" data-nu-day="${ymd(addDays(d, 1))}" aria-label="Jour suivant">›</button></div>
+    ${bar("Calories", t.kcal, T && T.kcal, "kcal")}${bar("Protéines", t.p, T && T.p, "g")}${bar("Glucides", t.g, T && T.g, "g")}${bar("Lipides", t.l, T && T.l, "g")}`;
+  const L = repasOn(d);
+  $("nu-list").innerHTML = `<h3>Repas ${isT ? "d'aujourd'hui" : "du jour"}</h3>` + (L.length ? L.map(r => `<div class="nu-meal"><div><b>${esc(r.meal)}</b> <span class="note">${Math.round(r.kcal)} kcal · P ${Math.round(r.p)} · G ${Math.round(r.g)} · L ${Math.round(r.l)}</span><p class="note">${esc(r.text)}</p></div><button type="button" class="ghost tiny" data-nu-del="${esc(r.id)}">×</button></div>`).join("") : `<p class="note">Aucun repas noté pour ce jour.</p>`);
+  const p = S.profil || {};
+  if (document.activeElement && !document.activeElement.closest("#nu-pform")){
+    $("pf-poids").value = p.poids || ""; $("pf-taille").value = p.taille || ""; $("pf-age").value = p.age || ""; $("pf-sexe").value = p.sexe || "f"; $("pf-obj").value = p.obj || "seche";
+  }
+  renderNuPreview();
+}
+function renderNuPreview(){
+  const el = $("nu-preview"); if (!el) return;
+  if (!nuDraft){ el.innerHTML = ""; return; }
+  const D = nuDraft;
+  el.innerHTML = `<div class="nu-prev">${(D.items || []).map(i => `<div class="nu-it"><span>${esc(i.nom || "")}${i.quantite ? ` <span class="note">${esc(i.quantite)}</span>` : ""}</span><span class="note">${Math.round(i.kcal || 0)} kcal</span></div>`).join("")}
+    <div class="nu-tot"><label>kcal<input type="number" id="nd-kcal" value="${Math.round(D.kcal)}"></label><label>Protéines<input type="number" id="nd-p" value="${Math.round(D.p)}"></label><label>Glucides<input type="number" id="nd-g" value="${Math.round(D.g)}"></label><label>Lipides<input type="number" id="nd-l" value="${Math.round(D.l)}"></label></div>
+    <p class="note">Vérifie et corrige si besoin, puis enregistre.</p>
+    <div class="gbtns"><button type="button" class="btn" id="nd-save">Enregistrer</button><button type="button" class="ghost small" id="nd-cancel">Annuler</button></div></div>`;
+}
+function parseJSON(t){ const m = String(t || "").match(/\{[\s\S]*\}/); if (!m) return null; try { return JSON.parse(m[0]); } catch(e){ return null; } }
+$("nu-form").addEventListener("submit", async e => {
+  e.preventDefault();
+  const text = $("nu-text").value.trim(); if (!text) return;
+  const b = $("nu-go"); b.disabled = true; b.textContent = "Athéna calcule…";
+  try {
+    const out = await askGroq([
+      {role: "system", content: "Tu es diététicien. Estime les valeurs nutritionnelles du repas décrit, avec des portions françaises standard quand la quantité n'est pas précisée. Réponds UNIQUEMENT avec un objet JSON, sans texte autour : {\"items\":[{\"nom\":\"…\",\"quantite\":\"…\",\"kcal\":0,\"p\":0,\"g\":0,\"l\":0}]} où p = protéines (g), g = glucides (g), l = lipides (g). Nombres entiers."},
+      {role: "user", content: text}], 700);
+    const j = parseJSON(out), items = j && Array.isArray(j.items) ? j.items : null;
+    if (!items || !items.length) throw new Error("Athéna n'a pas compris ce repas. Reformule avec les aliments et les quantités.");
+    const sum = k => items.reduce((n, i) => n + (Number(i[k]) || 0), 0);
+    nuDraft = {text, meal: $("nu-meal").value, items, kcal: sum("kcal"), p: sum("p"), g: sum("g"), l: sum("l")};
+    renderNuPreview();
+  } catch(err){ $("nu-preview").innerHTML = `<p class="verdict slow" style="white-space:normal">${esc(err.message)}</p>`; }
+  b.disabled = false; b.textContent = "Calculer";
+});
+document.addEventListener("click", e => {
+  const t = e.target;
+  if (t.closest("#nd-cancel")){ nuDraft = null; renderNuPreview(); return; }
+  if (t.closest("#nd-save") && nuDraft){
+    const d = nuDate(), num = id => Math.max(0, Number($(id).value) || 0);
+    addDoc("repas", {at: ymd(d) === ymd(new Date()) ? Date.now() : d.getTime(), day: ymd(d), meal: nuDraft.meal, text: nuDraft.text, kcal: num("nd-kcal"), p: num("nd-p"), g: num("nd-g"), l: num("nd-l")});
+    nuDraft = null; $("nu-text").value = ""; renderNutrition(); return;
+  }
+  const del = t.closest("[data-nu-del]"); if (del){ if (confirm("Supprimer ce repas ?")) delDoc("repas", del.dataset.nuDel); return; }
+  const nd = t.closest("[data-nu-day]"); if (nd){ nuDay = nd.dataset.nuDay === ymd(new Date()) ? null : nd.dataset.nuDay; renderNutrition(); return; }
+});
+$("nu-pform").addEventListener("submit", e => {
+  e.preventDefault();
+  const n = id => Number(String($(id).value).replace(",", ".")) || null;
+  saveProfil({poids: n("pf-poids"), taille: n("pf-taille"), age: n("pf-age"), sexe: $("pf-sexe").value, obj: $("pf-obj").value, at: Date.now()});
+  setSync("Profil enregistré : objectifs et calories mis à jour.");
+});
+$("nu-advice").addEventListener("click", async () => {
+  const out = $("nu-advice-out"), b = $("nu-advice"), d = nuDate(), T = nutTargets(d), t = dayTotals(d);
+  if (!T){ out.innerHTML = `<p class="note">Complète d'abord ton profil (en bas de page).</p>`; return; }
+  const seances = slotsOn(d).filter(s => s.t !== "ensemble" && s.t !== "repos").map(s => `${fmtH(s.h)} ${typeLabel(s.t)} (≈ ${sessEnergy(s, d).kcal} kcal)`).join(", ") || "aucune";
+  const repas = repasOn(d).map(r => `${r.meal} : ${r.text} (${Math.round(r.kcal)} kcal, P ${Math.round(r.p)} g)`).join(" | ") || "rien noté";
+  const objTxt = {seche: "sécher en douceur (perdre du gras sans perdre en performance)", maintien: "garder son poids", muscle: "prendre du muscle"}[(S.profil || {}).obj] || "sécher en douceur";
+  b.disabled = true; b.textContent = "Athéna réfléchit…";
+  try {
+    const txt = await askGroq([
+      {role: "system", content: "Tu es Athéna, la coach de la personne qui prépare les épreuves sportives du concours de gardien de la paix (parcours d'habileté motrice et Luc Léger). Tu la tutoies. Tu donnes des conseils de nutrition sportive concrets et prudents : jamais de régime extrême, déficit modéré, protéines suffisantes, glucides autour des séances, hydratation, récupération. Pas de diagnostic médical. Réponds en 120 mots maximum, en 3 ou 4 points courts, sans tableau, sans citer de jour de la semaine."},
+      {role: "user", content: `Heure : ${new Date().getHours()} h. Objectif : ${objTxt}. Besoins du jour : ${T.kcal} kcal, ${T.p} g de protéines, ${T.g} g de glucides, ${T.l} g de lipides. Déjà mangé : ${Math.round(t.kcal)} kcal, ${Math.round(t.p)} g protéines, ${Math.round(t.g)} g glucides, ${Math.round(t.l)} g lipides. Repas : ${repas}. Séances du jour : ${seances}. Que me conseilles-tu pour la suite de la journée ?`}], 450);
+    out.innerHTML = `<div class="nu-adv">${mdLite(txt)}</div>`;
+  } catch(err){ out.innerHTML = `<p class="note">${esc(err.message)}</p>`; }
+  b.disabled = false; b.textContent = "Demander un conseil pour aujourd'hui";
+});
+
 /* ======================= REFONTE : navigation, aujourd'hui, minuteur ======================= */
 const TRAIN = ["parcours", "luc", "frac", "tests"];
-const TITLES = {accueil: "Athéna", parcours: "S'entraîner", luc: "S'entraîner", frac: "S'entraîner", tests: "S'entraîner", progres: "Progrès", coach: "Athéna", plan: "Ton plan", ateliers: "Les 10 ateliers", reglages: "Réglages"};
+const TITLES = {accueil: "Athéna", parcours: "S'entraîner", luc: "S'entraîner", frac: "S'entraîner", tests: "S'entraîner", progres: "Progrès", coach: "Athéna", plan: "Ton plan", ateliers: "Les 10 ateliers", reglages: "Réglages", nutrition: "Nutrition"};
 const TRAIN_LABELS = {parcours: "Parcours", luc: "Luc Léger", frac: "Fractionné", tests: "Tests"};
 let prevView = "accueil";
 function renderTrainNav(v){
@@ -2802,7 +2979,7 @@ function renderTrainNav(v){
 }
 function chrome(v){
   $("top-title").textContent = v === "accueil" ? prenom() : (TITLES[v] || "Athéna");
-  const sub = v === "ateliers" || v === "reglages";
+  const sub = v === "ateliers" || v === "reglages" || v === "nutrition";
   $("top-back").hidden = !sub;
   document.querySelector(".topbar").classList.toggle("sub", sub);
   document.querySelector(".topbar").classList.toggle("home", v === "accueil");
@@ -2815,13 +2992,50 @@ function saveFait(o){ S.fait = o; lsSet("phm-fait", o); if (FS) FS.setDoc(FS.doc
 const slotKey = s => s.t + "@" + (s.h || "");
 const slotTitle = (s, d) => (s.duo ? typeLabel("ensemble") + " · " : "") + ((d && s.t !== "ensemble" && session(s.t, d, s.h).titre) || typeLabel(s.t));
 const isDone = (d, s) => !!((S.fait || {})[ymd(d)] || {})[slotKey(s)];
+// dépense estimée (MET × poids × durée) et ce qui est travaillé, par type de séance
+const WORK = {
+  course_end: {met: 8.3, w: ["endurance", "cardio", "jambes"]},
+  course_frac: {met: 9.5, w: ["vitesse (VMA)", "cardio", "jambes"]},
+  course_rec: {met: 7, w: ["récupération active", "foulée"]},
+  luc: {met: 9.5, w: ["cardio maximal", "changements de direction"]},
+  parcours: {met: 6.5, w: ["explosivité", "coordination", "force", "équilibre"]},
+  gym: {met: 4, w: ["force", "gainage", "souplesse", "équilibre"]},
+  freeletics: {met: 8, w: ["force", "cardio", "gainage"]},
+  renfo: {met: 3.5, w: ["force", "gainage"]},
+  krav: {met: 9, w: ["cardio", "combat", "gainage", "réflexes"]},
+  jjb: {met: 9, w: ["force", "gainage", "souplesse", "combat"]}
+};
+const poids = () => Number((S.profil || {}).poids) || 0;
+function sessEnergy(s, d){
+  const W = WORK[s.t]; if (!W) return {kcal: 0, w: []};
+  const x = session(s.t, d, s.h), txt = stripTags(x.L.join(" ")), mm = /^course/.test(s.t) ? txt.match(/(\d+)\s*min/) : null;
+  const min = mm ? Number(mm[1]) : slotDur(s), pli = /Pliability/.test(txt);
+  const kg = poids(), kcal = kg ? W.met * kg * min / 60 + (pli ? 2.5 * kg * 20 / 60 : 0) : 0;
+  return {kcal: Math.round(kcal / 5) * 5, min, w: W.w.concat(pli ? ["mobilité et souplesse (Pliability)"] : [])};
+}
+function extraEnergy(x){
+  const kg = poids(); if (!kg) return {kcal: 0, w: []};
+  if (x.t === "course"){ const k = x.km ? x.km * kg * 1.0 : (x.min ? 8.3 * kg * x.min / 60 : 0); return {kcal: Math.round(k / 5) * 5, w: WORK.course_end.w}; }
+  const W = {freeletics: WORK.freeletics, parcours: WORK.parcours, gym: WORK.gym}[x.t] || {met: 5, w: []};
+  return {kcal: x.min ? Math.round(W.met * kg * x.min / 60 / 5) * 5 : 0, w: W.w};
+}
+const energyLine = e => `<p class="energy">${e.kcal ? `<b>≈ ${e.kcal} kcal</b>` : `<span>Calories : <button type="button" class="link" data-goto="nutrition" data-anchor="nu-profil">indique ton poids</button></span>`}${e.w && e.w.length ? ` · Travaillé : ${e.w.join(", ")}` : ""}</p>`;
+// routine quotidienne : chaque exercice se coche à part (clés « routine:… » dans les « Fait » du jour)
+const ROUTINE = [{k: "susp", l: "3 suspensions à la barre"}, {k: "pompes", l: "3 × 5 pompes"}, {k: "poignets", l: "Mobilité des poignets"}];
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-rt]"); if (!b) return;
+  const [day, k] = b.dataset.rt.split("|"), o = JSON.parse(JSON.stringify(S.fait || {})), key = "routine:" + k;
+  o[day] = o[day] || {}; if (o[day][key]) delete o[day][key]; else o[day][key] = Date.now();
+  saveFait(o); renderToday(); renderWeek();
+});
 // séances faites en plus du programme : rangées avec les « Fait », clé « +id »
 const EXTRA = {course: "Course", freeletics: "Freeletics / renforcement", parcours: "Parcours", gym: "Gym", autre: "Autre séance"};
 const extrasOn = d => Object.entries(((S.fait || {})[ymd(d)]) || {}).filter(([k, v]) => k[0] === "+" && v && typeof v === "object").map(([k, v]) => Object.assign({id: k}, v));
 function weekCount(d){
   const st = weekStart(d || Date.now()); let plan_ = 0, done = 0, extra = 0;
-  for (let i = 0; i < 7; i++){ const day = addDays(st, i); extra += extrasOn(day).length; slotsOn(day).forEach(s => { if (s.t === "repos" || s.t === "ensemble") return; plan_++; if (isDone(day, s)) done++; }); }
-  return {plan: plan_, done, extra};
+  let kcal = 0;
+  for (let i = 0; i < 7; i++){ const day = addDays(st, i); extrasOn(day).forEach(x => { extra++; kcal += extraEnergy(x).kcal || 0; }); slotsOn(day).forEach(s => { if (s.t === "repos" || s.t === "ensemble") return; plan_++; if (isDone(day, s)){ done++; kcal += sessEnergy(s, day).kcal || 0; } }); }
+  return {plan: plan_, done, extra, kcal};
 }
 
 /* ---- aujourd'hui ---- */
@@ -2869,14 +3083,18 @@ function renderToday(){
     const main = x.L[0] || "", more = x.L.slice(1);
     return `<div class="sess${done ? " done" : ""}"><span class="ic ${T.ic}" style="position:relative">${ICONS[T.ic] || ICONS.daily}${s.duo ? `<em class="duo-badge">♥</em>` : ""}</span><div>
       <h3>${esc(slotTitle(s, d))}</h3><div class="when">${s.h ? slotHours(s) : "Quand tu veux"}${x.lieu ? " · " + esc(x.lieu) : ""}</div>
-      <p class="what">${main}</p>
+      <p class="what">${main}</p>${s.t !== "ensemble" && s.t !== "repos" ? energyLine(sessEnergy(s, d)) : ""}
       ${more.length ? `<details><summary>Détails</summary>${more.map(l => `<p>${l}</p>`).join("")}</details>` : ""}
       ${s.t === "repos" || s.t === "ensemble" ? "" : `<div class="acts">${a ? `<button type="button" class="btn" data-goto="${a.go}"${a.mode ? ` data-mode="${a.mode}"` : ""}${a.mes ? ` data-mes="${a.mes}"` : ""}>${a.l}</button>` : ""}<button type="button" class="ghost done-btn" data-done="${ymd(d)}|${esc(slotKey(s))}" aria-pressed="${done}">${done ? "Fait ✓" : "Fait"}</button></div>`}
     </div></div>`;
   });
-  if (!sl.some(s => s.t === "repos")) cards.push(`<div class="sess"><span class="ic daily">${ICONS.daily}</span><div><h3>Routine 10 min</h3><div class="when">Quand tu veux</div><p class="what">3 suspensions à la barre, 3 × 5 pompes, mobilité des poignets.</p></div></div>`);
+  if (!sl.some(s => s.t === "repos")){
+    const R = (S.fait || {})[ymd(d)] || {}, nOk = ROUTINE.filter(r => R["routine:" + r.k]).length;
+    cards.push(`<div class="sess routine${nOk === ROUTINE.length ? " done" : ""}"><span class="ic daily">${ICONS.daily}</span><div><h3>Routine 10 min <span class="note">${nOk}/${ROUTINE.length}</span></h3><div class="when">Quand tu veux · coche ce que tu as fait</div>
+      <div class="rt-list">${ROUTINE.map(r => `<button type="button" class="rt${R["routine:" + r.k] ? " on" : ""}" data-rt="${ymd(d)}|${r.k}" aria-pressed="${!!R["routine:" + r.k]}"><span class="rt-box">${R["routine:" + r.k] ? "✓" : ""}</span>${r.l}</button>`).join("")}</div></div></div>`);
+  }
   const ex = extrasOn(d).map(x => `<div class="sess done extra"><span class="ic run">${ICONS[x.t === "course" ? "run" : "daily"] || ICONS.daily}</span><div>
-      <h3>${esc(EXTRA[x.t] || "Séance")} <span class="verdict ok">en plus</span></h3><div class="when">${[x.km ? fr(x.km) + " km" : "", x.min ? x.min + " min" : ""].filter(Boolean).join(" · ") || "Bien joué"}</div>
+      <h3>${esc(EXTRA[x.t] || "Séance")} <span class="verdict ok">en plus</span></h3><div class="when">${[x.km ? fr(x.km) + " km" : "", x.min ? x.min + " min" : ""].filter(Boolean).join(" · ") || "Bien joué"}</div>${energyLine(extraEnergy(x))}
       <div class="acts"><button type="button" class="ghost small" data-extra-del="${ymd(d)}|${esc(x.id)}">Retirer</button></div></div></div>`).join("");
   const addForm = `<details class="extra-add"><summary>+ Ajouter une séance faite en plus</summary>
       <form class="extra-form" data-extra-day="${ymd(d)}">
@@ -3251,7 +3469,7 @@ $("theme-seg").addEventListener("click", e => { const b = e.target.closest("[dat
 applyTheme(lsGet("phm-theme", "auto"));
 
 /* ======================= DÉMARRAGE ======================= */
-function renderAll(){ renderAthena(); renderLove(); renderHome(); renderPlanAll(); renderHello(); renderTiles(); renderSetup(); renderSplits(); renderRecos(); renderWeek(); renderMesures(); if (!$("v-progres").hidden) renderProg(); }
+function renderAll(){ renderAthena(); renderLove(); renderHome(); renderPlanAll(); renderHello(); renderTiles(); renderSetup(); renderSplits(); renderRecos(); renderWeek(); renderMesures(); renderNuHome(); if (!$("v-nutrition").hidden) renderNutrition(); if (!$("v-progres").hidden) renderProg(); }
 setStatus(); renderChrono(); renderSeance(); renderLucBareme(); renderAteliers(); renderAll();
 show((location.hash || "#accueil").slice(1), true);
 initStore();
