@@ -787,7 +787,9 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--accent)}
 .nu-pform input,.nu-pform select{width:100%;min-width:0}
 .nu-adv{margin-top:10px;line-height:1.5}
 .nu-home .btn{margin-top:6px}
-.sess-edit{display:inline-block;margin-top:6px;font-size:.85rem}
+.sess-tools{display:flex;gap:18px;margin-top:6px}
+.sess-edit,.sess-del{font-size:.85rem}
+.sess-del{color:var(--muted)}
 .rpe{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:8px}
 .rpe .chip,.jn-e .chip{padding:4px 10px;font-size:.8rem}
 .chip.on{background:var(--ink);color:var(--ground);border-color:var(--ink)}
@@ -3463,6 +3465,13 @@ document.addEventListener("click", e => {
     const [day, i] = del.dataset.edDel.split("|"), p = clonePlan(), src = slotsOn(parseDay(day)).map(x => Object.assign({}, x));
     src.splice(Number(i), 1); putDay(p, day, src); editSlot = null; savePlan(p); setSync("Séance enlevée pour ce jour."); return;
   }
+  const sd = t.closest("[data-sess-del]"); if (sd){
+    const [day, i] = sd.dataset.sessDel.split("|"), d0 = parseDay(day), src = slotsOn(d0).map(x => Object.assign({}, x)), s0 = src[Number(i)]; if (!s0) return;
+    if (!confirm(`Supprimer « ${slotTitle(s0, d0)} »${s0.h ? " de " + fmtH(s0.h) : ""} pour ce jour ?\n(Ton planning habituel ne change pas.)`)) return;
+    const p = clonePlan(), o = JSON.parse(JSON.stringify(S.fait || {}));
+    src.splice(Number(i), 1); putDay(p, day, src); if (o[day]) delete o[day][slotKey(s0)];
+    editSlot = null; saveFait(o); savePlan(p); setSync("Séance supprimée pour ce jour. L'agenda suit tout seul."); return;
+  }
   const rs = t.closest("[data-day-reset]"); if (rs){
     if (!confirm("Revenir au planning habituel pour ce jour ? Tes modifications de ce jour seront effacées.")) return;
     const p = clonePlan(); if (p.jours) delete p.jours[rs.dataset.dayReset]; editSlot = null; savePlan(p); return;
@@ -3524,7 +3533,7 @@ function renderToday(){
     const T = TYPES[s.t] || {l: s.t, ic: "daily"}, x = session(s.t, d, s.h), a = actionFor(s, d, x), done = isDone(d, s);
     const fv = ((S.fait || {})[dk] || {})[slotKey(s)], rpe = fv && typeof fv === "object" ? fv.rpe : null;
     const rpeRow = done && s.t !== "ensemble" ? `<div class="rpe"><span class="note">Ressenti :</span>${["facile", "moyen", "dur"].map(v => `<button type="button" class="chip${rpe === v ? " on" : ""}" data-rpe="${dk}|${esc(slotKey(s))}|${v}">${v}</button>`).join("")}</div>` : "";
-    const editBtn = `<button type="button" class="link sess-edit" data-edit="${dk}|${i}">Modifier</button>`;
+    const editBtn = `<div class="sess-tools"><button type="button" class="link sess-edit" data-edit="${dk}|${i}">Modifier</button><button type="button" class="link sess-del" data-sess-del="${dk}|${i}">Supprimer</button></div>`;
     const main = x.L[0] || "", more = x.L.slice(1);
     return `<div class="sess${done ? " done" : ""}"><span class="ic ${T.ic}" style="position:relative">${ICONS[T.ic] || ICONS.daily}${s.duo ? `<em class="duo-badge">♥</em>` : ""}</span><div>
       <h3>${esc(slotTitle(s, d))}</h3><div class="when">${s.h ? slotHours(s) : "Quand tu veux"}${x.lieu ? " · " + esc(x.lieu) : ""}</div>
