@@ -848,35 +848,40 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--accent)}
 .pv-verdict.ko{background:color-mix(in srgb,#E5383B 14%,transparent);color:#E5383B}
 .pv .gbtns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .pv .gbtns>*{width:100%}
-.noyau-ov{--S:min(88vw,470px,50vh);position:fixed;inset:0;z-index:100;background:#07070a;color:#F4EDE4;font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;overflow:hidden}
-.noyau-ov canvas{position:absolute;left:50%;top:34%;transform:translate(-50%,-50%);width:var(--S);height:var(--S)}
+.noyau-ov{position:fixed;inset:0;z-index:100;background:#07070a;color:#F4EDE4;font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;overflow:hidden;display:grid;grid-template-rows:auto auto minmax(120px,1fr) auto auto auto;padding:calc(14px + env(safe-area-inset-top)) 14px calc(12px + env(safe-area-inset-bottom))}
+.noyau-ov[hidden]{display:none}
 body.noyau-on{overflow:hidden}
 body.noyau-on nav.tabs{display:none}
-.ny-coin{position:absolute;display:flex;flex-direction:column;gap:3px;font-size:10px;letter-spacing:.16em;color:#6f6876;text-transform:uppercase}
+.ny-top{display:flex;justify-content:space-between;align-items:flex-start}
+.ny-coin{display:flex;flex-direction:column;gap:3px;font-size:10px;letter-spacing:.16em;color:#6f6876;text-transform:uppercase}
 .ny-coin b{color:#E8C68A;font-size:12px;letter-spacing:.3em;font-weight:600}
-.ny-tl{top:calc(16px + env(safe-area-inset-top));left:16px}
-.ny-tr{top:calc(16px + env(safe-area-inset-top));right:16px;text-align:right}
-.ny-tr b{font-size:15px;letter-spacing:.12em;color:#F4EDE4}
-.ny-etat{position:absolute;left:0;right:0;top:calc(34% - var(--S) / 2 + 2px);text-align:center;font-size:11px;letter-spacing:.5em;color:#E8C68A;text-transform:uppercase}
-.ny-pan{position:absolute;top:calc(34% + var(--S) / 2 - 10px);display:flex;flex-direction:column;gap:6px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;width:45vw;max-width:220px}
-.ny-pan p{margin:0;display:flex;flex-direction:column;gap:1px;border-left:1px solid #2a2530;padding-left:8px}
+.ny-r{text-align:right}.ny-r b{font-size:15px;letter-spacing:.12em;color:#F4EDE4}
+.ny-etat{text-align:center;font-size:11px;letter-spacing:.5em;color:#E8C68A;text-transform:uppercase;margin:6px 0 0}
+.ny-stage{position:relative;min-height:0;display:flex;align-items:center;justify-content:center}
+.ny-stage canvas{display:block}
+.ny-hud{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:2px 0 10px}
+.ny-pan{display:flex;flex-direction:column;gap:6px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;min-width:0}
+.ny-pan p{margin:0;display:flex;flex-direction:column;gap:1px;border-left:1px solid #2a2530;padding-left:8px;min-width:0}
 .ny-pan i{font-style:normal;color:#6f6876}
-.ny-pan em{font-style:normal;color:#F4EDE4;letter-spacing:.05em;font-size:11px}
-.ny-pl{left:14px}.ny-pr{right:14px;align-items:flex-end;text-align:right}
-.ny-pr p{border-left:0;border-right:1px solid #2a2530;padding:0 8px 0 0}
-.ny-bas{position:absolute;left:0;right:0;bottom:calc(14px + env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:center;gap:10px;padding:0 16px}
-.ny-cap{max-width:560px;text-align:center;font-family:var(--body,system-ui);font-size:.95rem;line-height:1.42;color:#F4EDE4;max-height:5.8em;overflow:auto;-webkit-mask-image:linear-gradient(#000 80%,transparent);mask-image:linear-gradient(#000 80%,transparent)}
-.ny-cap.me{color:#a59fac;font-style:italic}
-.ny-actbox{max-width:520px;width:100%;border:1px solid #E8C68A;border-radius:12px;padding:10px 12px;font-family:var(--body,system-ui);font-size:.88rem;display:flex;flex-direction:column;gap:6px;background:rgba(232,198,138,.06)}
+.ny-pan em{font-style:normal;color:#F4EDE4;letter-spacing:.05em;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ny-pr{align-items:flex-end;text-align:right}
+.ny-pr p{border-left:0;border-right:1px solid #2a2530;padding:0 8px 0 0;align-items:flex-end}
+.ny-talk{display:flex;flex-direction:column;gap:8px;max-height:34vh;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:2px 2px 6px;font-family:var(--body,system-ui)}
+.ny-talk:empty{display:none}
+.ny-me{color:#a59fac;font-style:italic;font-size:.88rem;line-height:1.35;text-align:center}
+.ny-me:empty,.ny-cap:empty{display:none}
+.ny-cap{text-align:center;font-size:.98rem;line-height:1.45;color:#F4EDE4}
+.ny-actbox{border:1px solid #E8C68A;border-radius:12px;padding:10px 12px;font-size:.88rem;display:flex;flex-direction:column;gap:6px;background:rgba(232,198,138,.06);text-align:left}
 .ny-actbox ul{margin:0;padding-left:18px}
 .ny-actbox .gbtns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.ny-ctl{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;width:100%;max-width:520px}
+.ny-ctl{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;margin-top:8px}
 .ny-x{justify-self:start;background:transparent;border:1px solid #2f2a35;color:#a59fac;border-radius:2px;padding:8px 12px;font:inherit;font-size:10px;letter-spacing:.2em;text-transform:uppercase;cursor:pointer}
 .ny-mic{width:72px;height:72px;border-radius:50%;border:1px solid #E8C68A;background:radial-gradient(circle,rgba(232,198,138,.18),transparent 70%);display:grid;place-items:center;cursor:pointer;padding:0}
 .ny-mic svg{width:26px;height:26px;fill:none;stroke:#E8C68A;stroke-width:1.6;stroke-linecap:round}
 .noyau-ov[data-mode="hear"] .ny-mic{background:#E5383B;border-color:#E5383B;animation:micPulse 1.2s ease-in-out infinite}
 .noyau-ov[data-mode="hear"] .ny-mic svg{stroke:#fff}
 .ny-hint{justify-self:end;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#6f6876;text-align:right}
+@media (max-height:640px){.ny-hud{display:none}}
 .ny-open{display:flex;align-items:center;justify-content:center;gap:10px}
 .ny-dot{width:10px;height:10px;border-radius:50%;background:radial-gradient(circle,#fff6e6,#F08A6C 60%,transparent 70%);box-shadow:0 0 10px #F08A6C}
 @media (max-height:720px){.ny-pan{display:none}}
@@ -1385,17 +1390,12 @@ body.noyau-on nav.tabs{display:none}
 </div>
 
 <div id="noyau-ov" class="noyau-ov" hidden>
-  <canvas id="noyau-cv"></canvas>
-  <div class="ny-coin ny-tl"><b>ATHÉNA</b><span>Coach · noyau</span><span id="ny-sess">Séance 00:00</span></div>
-  <div class="ny-coin ny-tr"><b id="ny-heure">00:00</b><span id="ny-date"></span></div>
+  <div class="ny-top"><div class="ny-coin"><b>ATHÉNA</b><span>Coach · noyau</span><span id="ny-sess">Séance 00:00</span></div><div class="ny-coin ny-r"><b id="ny-heure">00:00</b><span id="ny-date"></span></div></div>
   <div id="ny-etat" class="ny-etat">En attente</div>
-  <div class="ny-pan ny-pl" id="ny-pl"></div>
-  <div class="ny-pan ny-pr" id="ny-pr"></div>
-  <div class="ny-bas">
-    <div id="ny-cap" class="ny-cap"></div>
-    <div id="ny-act"></div>
-    <div class="ny-ctl"><button type="button" class="ny-x" id="ny-close" aria-label="Fermer">Fermer</button><button type="button" class="ny-mic" id="ny-mic" aria-label="Parler à Athéna"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button><span class="ny-hint" id="ny-hint">Touche et parle</span></div>
-  </div>
+  <div class="ny-stage" id="ny-stage"><canvas id="noyau-cv"></canvas></div>
+  <div class="ny-hud"><div class="ny-pan" id="ny-pl"></div><div class="ny-pan ny-pr" id="ny-pr"></div></div>
+  <div class="ny-talk" id="ny-talk"><div id="ny-me" class="ny-me"></div><div id="ny-cap" class="ny-cap"></div><div id="ny-act"></div></div>
+  <div class="ny-ctl"><button type="button" class="ny-x" id="ny-close" aria-label="Fermer">Fermer</button><button type="button" class="ny-mic" id="ny-mic" aria-label="Parler à Athéna"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button><span class="ny-hint" id="ny-hint">Touche et parle</span></div>
 </div>
 <nav class="tabs" aria-label="Navigation">
   <div class="in">
@@ -1630,6 +1630,8 @@ function show(v, noScroll){
   chrome(v);
   if (v === "frac") frFill();
   if (v === "tests") renderMesures();
+  if (v === "parcours" && typeof prefetchVoice === "function") prefetchVoice(["C'est parti ! " + TIMED[0].short].concat(TIMED.slice(1).map((t, i) => t.short + (i === TIMED.length - 2 ? ", dernier atelier, fonce !" : ""))));
+  if (v === "luc" && typeof prefetchVoice === "function") prefetchVoice(Array.from({length: 11}, (_, i) => { const p = i + 1; return "Palier " + p + (p >= 4 ? [" ! Accroche-toi.", " ! Tu tiens.", " ! Encore un.", " ! Allez !"][p % 4] : "."); }));
   if (v === "reglages" && typeof renderPush === "function") renderPush();
   if (typeof renderSimu === "function") renderSimu();
   if (v === "nutrition" && typeof renderNutrition === "function") renderNutrition();
@@ -3320,19 +3322,53 @@ function pickVoice(){
 try { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; } catch(e){}
 const voixOn = () => lsGet("phm-voix", true) !== false;
 const plain = t => String(t || "").replace(/<[^>]+>/g, " ").replace(/\*\*/g, "").replace(/[•#]/g, "").replace(/\s*[-–]\s+/g, ". ").replace(/♥/g, "").replace(/\bkcal\b/g, "kilocalories").replace(/\bkm\b/g, "kilomètres").replace(/\bmin\b/g, "minutes").replace(/(\d+) h (\d+)/g, "$1 heures $2").replace(/(\d+) h\b/g, "$1 heures").replace(/\s{2,}/g, " ").trim();
-// iPhone : la voix n'est autorisée qu'après un premier toucher → on la « débloque » à chaque geste utile
-let voiceUnlocked = false;
+// La voix d'Athéna : une vraie voix (fichier audio fabriqué par le relais, comme Atlas) jouée par un lecteur audio,
+// qui marche aussi iPhone en mode silencieux. Sinon, la voix du téléphone.
+const athAudio = new Audio(); athAudio.preload = "auto"; athAudio.setAttribute("playsinline", ""); athAudio.setAttribute("webkit-playsinline", "");
+let ttsOff = false, audioUnlocked = false, voiceUnlocked = false, speakSeq = 0;
+const voiceCache = new Map();
+const silentWav = (() => { const b = new ArrayBuffer(46), v = new DataView(b), w = (o, t) => [...t].forEach((c, i) => v.setUint8(o + i, c.charCodeAt(0)));
+  w(0, "RIFF"); v.setUint32(4, 38, true); w(8, "WAVE"); w(12, "fmt "); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true); v.setUint32(24, 8000, true); v.setUint32(28, 16000, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true); w(36, "data"); v.setUint32(40, 2, true); v.setInt16(44, 0, true);
+  return URL.createObjectURL(new Blob([b], {type: "audio/wav"})); })();
+// iPhone : le son n'est autorisé qu'après un toucher → on « débloque » le lecteur (et la voix du téléphone) au premier geste
 function unlockVoice(){
-  try { if (!window.speechSynthesis) return; if (!athVoice) pickVoice(); if (voiceUnlocked) return; const u = new SpeechSynthesisUtterance(" "); u.volume = 0; u.lang = "fr-FR"; speechSynthesis.speak(u); voiceUnlocked = true; } catch(e){}
+  try { if (!audioUnlocked){ athAudio.src = silentWav; const p = athAudio.play(); if (p && p.then) p.then(() => { audioUnlocked = true; }).catch(() => {}); else audioUnlocked = true; } } catch(e){}
+  try { if (window.speechSynthesis && !voiceUnlocked){ if (!athVoice) pickVoice(); const u = new SpeechSynthesisUtterance(" "); u.volume = 0; u.lang = "fr-FR"; speechSynthesis.speak(u); voiceUnlocked = true; } } catch(e){}
 }
 document.addEventListener("touchend", unlockVoice, {passive: true}); document.addEventListener("click", unlockVoice);
+function stopAudio(){ speakSeq++; try { athAudio.pause(); } catch(e){} try { speechSynthesis.cancel(); } catch(e){} }
+async function voiceUrl(texte){
+  if (voiceCache.has(texte)) return voiceCache.get(texte);
+  const ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), 9000);
+  try {
+    const r = await fetch(`${AGENDA_BASE}/parler`, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({texte}), signal: ctl.signal});
+    if (r.status === 503){ ttsOff = true; throw new Error("pas de voix"); }
+    if (!r.ok) throw new Error("voix " + r.status);
+    const url = URL.createObjectURL(await r.blob()); voiceCache.set(texte, url); return url;
+  } finally { clearTimeout(tm); }
+}
+function prefetchVoice(list){ if (ttsOff || !AGENDA_BASE || !navigator.onLine) return; list.forEach((t, i) => setTimeout(() => voiceUrl(plain(t)).catch(() => {}), i * 400)); }
 function say(txt, opt){
   opt = opt || {};
   if (!opt.force && !voixOn()) return;
-  // sur iPhone, parler juste après « cancel » avale la phrase : petite pause si une voix était en cours
-  if (opt.interrupt !== false && (speechSynthesis.speaking || speechSynthesis.pending)){ try { speechSynthesis.cancel(); } catch(e){} setTimeout(() => say(txt, Object.assign({}, opt, {interrupt: false})), 120); return; }
+  const texte = plain(txt); if (!texte) return;
+  const seq = ++speakSeq;
+  try { athAudio.pause(); } catch(e){} try { speechSynthesis.cancel(); } catch(e){}
+  if (!ttsOff && AGENDA_BASE && navigator.onLine){
+    voiceUrl(texte).then(url => {
+      if (seq !== speakSeq) return;
+      athAudio.onplaying = () => document.dispatchEvent(new Event("ath-talk-start"));
+      athAudio.onended = athAudio.onerror = () => document.dispatchEvent(new Event("ath-talk-end"));
+      athAudio.src = url; const p = athAudio.play(); if (p && p.catch) p.catch(() => { if (seq === speakSeq) sayLocal(texte, opt); });
+    }).catch(() => { if (seq === speakSeq) sayLocal(texte, opt); });
+    return;
+  }
+  sayLocal(texte, opt);
+}
+// la voix du téléphone, en secours (pas de réseau, ou voix du relais pas réglée)
+function sayLocal(texte, opt){
   try {
-    const parts = plain(txt).match(/[^.!?]+[.!?]*/g) || [];
+    const parts = texte.match(/[^.!?]+[.!?]*/g) || [];
     parts.forEach((p, i) => { const u = new SpeechSynthesisUtterance(p.trim()); u.lang = "fr-FR"; if (athVoice) u.voice = athVoice; u.rate = opt.rate || 1.02; u.pitch = 1.05;
       if (i === 0) u.onstart = () => document.dispatchEvent(new Event("ath-talk-start"));
       if (i === parts.length - 1){ u.onend = () => document.dispatchEvent(new Event("ath-talk-end")); u.onerror = u.onend; }
@@ -3351,7 +3387,7 @@ async function micStart(){
     rec = new MediaRecorder(stream, type ? {mimeType: type} : undefined); recChunks = [];
     rec.ondataavailable = e => { if (e.data && e.data.size) recChunks.push(e.data); };
     rec.onstop = async () => { stream.getTracks().forEach(t => t.stop()); clearTimeout(recTimer); await micSend(new Blob(recChunks, {type: rec.mimeType || type || "audio/webm"})); rec = null; };
-    rec.start(); speechSynthesis.cancel();
+    rec.start(); stopAudio();
     $("mic").classList.add("on"); $("mic-lab").textContent = "J'écoute… touche pour envoyer"; setMic("Parle normalement, comme à quelqu'un. Touche le bouton quand tu as fini.");
     recTimer = setTimeout(() => { if (rec && rec.state === "recording") rec.stop(); }, 120000);
   } catch(e){ setMic("Micro refusé : autorise le micro pour Athéna dans les réglages du téléphone, ou écris ton message."); }
@@ -3372,7 +3408,7 @@ async function micSend(blob){
 }
 $("mic").addEventListener("click", () => { unlockVoice(); if (rec && rec.state === "recording") rec.stop(); else micStart(); });
 $("voix-on").checked = voixOn();
-$("voix-on").addEventListener("change", e => { lsSet("phm-voix", e.target.checked); if (!e.target.checked) speechSynthesis.cancel(); else say("C'est moi, Athéna. Je te répondrai à voix haute.", {force: true}); });
+$("voix-on").addEventListener("change", e => { lsSet("phm-voix", e.target.checked); if (!e.target.checked) stopAudio(); else say("C'est moi, Athéna. Je te répondrai à voix haute.", {force: true}); });
 
 
 /* ======================= NOTIFICATIONS ======================= */
@@ -3555,7 +3591,13 @@ const NOYAU = (() => {
   let rec = null, chunks = [], stream = null, actx = null, an = null, abuf = null;
   const LIB = {idle: "En attente", hear: "Écoute", think: "Analyse", talk: "Réponse", happy: "Bravo", sleep: "Veille"};
   function particules(n){ P = []; const g = Math.PI * (3 - Math.sqrt(5)); for (let i = 0; i < n; i++){ const y = 1 - (i / (n - 1)) * 2, r = Math.sqrt(1 - y * y), th = g * i; P.push({x: Math.cos(th) * r, y, z: Math.sin(th) * r, s: Math.random() * 6.283, k: .9 + Math.random() * .2}); } }
-  function taille(){ const r = cv.getBoundingClientRect(); dpr = Math.min(2, devicePixelRatio || 1); W = Math.max(200, Math.round(r.width * dpr)); cv.width = W; cv.height = W; particules(W > 700 ? 460 : 320); }
+  // la sphère prend la place libre (elle rétrécit quand la conversation s'allonge)
+  function taille(){
+    const st = $("ny-stage").getBoundingClientRect(), side = Math.max(140, Math.min(st.width, st.height, 520));
+    cv.style.width = cv.style.height = side + "px"; dpr = Math.min(2, devicePixelRatio || 1);
+    const w = Math.round(side * dpr); if (w !== W){ W = w; cv.width = W; cv.height = W; if (!P.length || Math.abs(P.length - (W > 700 ? 460 : 320)) > 0) particules(W > 700 ? 460 : 320); }
+  }
+  const ro = window.ResizeObserver ? new ResizeObserver(() => { if (!ov.hidden) taille(); }) : null;
   function setMode(m){ mode = m; $("ny-etat").textContent = LIB[m]; ov.dataset.mode = m; if (m !== "sleep") idleAt = Date.now(); $("ny-hint").textContent = m === "hear" ? "Touche quand tu as fini" : m === "think" ? "Athéna réfléchit…" : m === "talk" ? "Touche pour l'interrompre" : "Touche et parle"; }
   function niveau(now){
     let cible = 0;
@@ -3616,7 +3658,11 @@ const NOYAU = (() => {
     $("ny-pl").innerHTML = row("Concours", dl != null ? `J−${dl} · 29 mars` : "—") + row("Bloc", `${m.n} · sem. ${weekType(today)}`) + row("Semaine", wc.plan ? `${wc.done} / ${wc.plan} séances${wc.extra ? " +" + wc.extra : ""}` : "—");
     $("ny-pr").innerHTML = row("Prochaine", nx ? `${nx.i === 0 ? "" : nx.i === 1 ? "Demain " : DAYS[dow(nx.day)].slice(0, 3) + ". "}${fmtH(nx.s.h)} · ${typeLabel(nx.s.t).split(" · ")[0]}` : "—") + row("Forme", [J.energie ? ENERGIE[J.energie - 1] : "", J.sommeil ? fr(J.sommeil) + " h" : ""].filter(Boolean).join(" · ") || "à noter") + row("Routine", `${routine} / ${ROUTINE.length}`);
   }
-  function caption(txt, who){ const el = $("ny-cap"); el.className = "ny-cap" + (who === "me" ? " me" : ""); el.textContent = who === "me" ? `« ${txt} »` : txt; }
+  function caption(txt, who){
+    if (who === "me"){ $("ny-me").textContent = `« ${txt} »`; $("ny-cap").textContent = ""; }
+    else { $("ny-cap").textContent = txt; if (who === "only") $("ny-me").textContent = ""; }
+    const t = $("ny-talk"); t.scrollTop = 0;
+  }
   function actions(){
     const el = $("ny-act"), i = chat.length - 1, m = chat[i];
     if (!m || m.role !== "assistant" || !m.actions || !m.actions.length || m.applied){ el.innerHTML = ""; return; }
@@ -3625,24 +3671,24 @@ const NOYAU = (() => {
   async function micStartN(){
     if (!navigator.mediaDevices || !window.MediaRecorder){ caption("La dictée n'est pas possible sur ce téléphone. Utilise l'onglet Athéna pour écrire."); return; }
     try {
-      speechSynthesis.cancel();
+      stopAudio();
       stream = await navigator.mediaDevices.getUserMedia({audio: true});
       try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); await actx.resume(); const src = actx.createMediaStreamSource(stream); an = actx.createAnalyser(); an.fftSize = 128; abuf = new Uint8Array(an.frequencyBinCount); src.connect(an); } catch(e){ an = null; }
       const type = ["audio/mp4", "audio/webm;codecs=opus", "audio/webm", "audio/ogg"].find(t => MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) || "";
       rec = new MediaRecorder(stream, type ? {mimeType: type} : undefined); chunks = [];
       rec.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
       rec.onstop = () => { const blob = new Blob(chunks, {type: rec.mimeType || type || "audio/webm"}); stream.getTracks().forEach(t => t.stop()); an = null; rec = null; envoyer(blob); };
-      rec.start(); setMode("hear"); caption("Je t'écoute…"); $("ny-act").innerHTML = "";
+      rec.start(250); setMode("hear"); caption("Je t'écoute… parle normalement, puis touche le micro.", "only"); $("ny-act").innerHTML = "";
       setTimeout(() => { if (rec && rec.state === "recording") rec.stop(); }, 120000);
     } catch(e){ caption("Autorise le micro pour Athéna dans les réglages du téléphone."); setMode("idle"); }
   }
   async function envoyer(blob){
-    setMode("think"); caption("…");
+    setMode("think"); caption("Je transcris…", "only");
     try {
       const r = await fetch(`${AGENDA_BASE}/voix`, {method: "POST", headers: {"Content-Type": (blob.type || "audio/webm").split(";")[0]}, body: blob});
       const j = await r.json(), t = String(j.text || "").trim();
       if (!r.ok || HALLU.test(t)){ setMode("idle"); caption(r.ok ? "Je n'ai pas bien entendu. Réessaie, un peu plus près." : "La dictée ne répond pas pour le moment."); return; }
-      caption(t, "me");
+      caption(t, "me"); $("ny-cap").textContent = "Athéna réfléchit…";
       await sendChat(t);
       const m = chat[chat.length - 1];
       if (m && m.role === "assistant"){ caption(m.content); actions(); say(m.content + (m.actions && m.actions.length ? " Je te propose de l'enregistrer : touche Valider." : ""), {force: true}); }
@@ -3652,21 +3698,21 @@ const NOYAU = (() => {
   }
   function open(){
     if (!ctx){ show("coach"); return; }
-    ov.hidden = false; document.body.classList.add("noyau-on"); t0 = Date.now(); boot = 0; setMode("idle"); taille(); hud();
+    ov.hidden = false; document.body.classList.add("noyau-on"); t0 = Date.now(); boot = 0; setMode("idle"); hud(); $("ny-me").textContent = ""; W = 0; requestAnimationFrame(taille); if (ro) ro.observe($("ny-stage"));
     const P = lsGet("phm-point", null), hello = P && P.day === ymd(new Date()) ? P.text : (prenom() ? `Bonjour ${prenom()}. Raconte-moi ta journée : touche le micro et parle.` : "Raconte-moi ta journée : touche le micro et parle.");
-    caption(hello); actions(); unlockVoice();
+    caption(hello, "only"); actions(); unlockVoice();
     say(prenom() ? `Bonjour ${prenom()}. Touche le micro et raconte-moi ta journée.` : "Bonjour. Touche le micro et raconte-moi ta journée.", {force: true});
     cancelAnimationFrame(raf); last = 0; bootAt = performance.now(); raf = requestAnimationFrame(frame); clock = setInterval(hud, 1000); try { grabWake(); } catch(e){}
   }
   function close(){
-    ov.hidden = true; document.body.classList.remove("noyau-on"); cancelAnimationFrame(raf); clearInterval(clock); speechSynthesis.cancel();
+    ov.hidden = true; document.body.classList.remove("noyau-on"); cancelAnimationFrame(raf); clearInterval(clock); if (ro) ro.disconnect(); stopAudio();
     if (rec && rec.state === "recording"){ rec.onstop = null; rec.stop(); } if (stream) stream.getTracks().forEach(t => t.stop()); rec = null; an = null; try { dropWake(); } catch(e){}
     renderAll(); renderToday();
   }
   $("ny-close").addEventListener("click", close);
   $("ny-mic").addEventListener("click", () => { unlockVoice();
     if (rec && rec.state === "recording"){ rec.stop(); return; }
-    if (mode === "talk"){ speechSynthesis.cancel(); setMode("idle"); return; }
+    if (mode === "talk"){ stopAudio(); setMode("idle"); return; }
     if (mode !== "think") micStartN();
   });
   ov.addEventListener("click", e => { if (mode === "sleep" && !e.target.closest("button")){ setMode("idle"); } });

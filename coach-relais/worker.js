@@ -333,6 +333,27 @@ async function transcribe(env, req, cors){
   return new Response(await r.text(), {status: r.status, headers: {...cors, "Content-Type": "application/json"}});
 }
 
+// ===================== Voix d'Athéna (ElevenLabs) =====================
+// Une vraie voix, jouée comme un fichier audio (marche aussi iPhone en mode silencieux). Clé : secret ELEVENLABS_API_KEY.
+// Voix : secret facultatif ATHENA_VOICE_ID (sinon une voix féminine de base). Les phrases déjà dites sont gardées en cache.
+async function parler(env, req, cors, ctx){
+  if (!env.ELEVENLABS_API_KEY) return json({configured: false}, 503, cors);
+  let b = {}; try { b = await req.json(); } catch (e) {}
+  const texte = String(b.texte || "").replace(/\s+/g, " ").trim().slice(0, 1500);
+  if (!texte) return json({error: {message: "texte vide"}}, 400, cors);
+  const voice = env.ATHENA_VOICE_ID || "EXAVITQu4vr4xnSDxMaL", model = env.ATHENA_VOICE_MODEL || "eleven_v4_turbo";
+  const key = new Request("https://athena-voix.cache/" + (await evId("voix", voice + "|" + model + "|" + texte)));
+  const cache = caches.default, hit = await cache.match(key);
+  if (hit){ const h = new Headers(hit.headers); Object.entries(cors).forEach(([k, v]) => h.set(k, v)); return new Response(hit.body, {status: 200, headers: h}); }
+  const r = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(voice)}?output_format=mp3_44100_64`, {
+    method: "POST", headers: {"Content-Type": "application/json", "xi-api-key": env.ELEVENLABS_API_KEY, Accept: "audio/mpeg"},
+    body: JSON.stringify({text: texte, model_id: model, language_code: "fr", voice_settings: {stability: 0.5, similarity_boost: 0.8, style: 0.2, use_speaker_boost: true, speed: 1.03}})});
+  if (!r.ok){ let d = ""; try { d = JSON.stringify((await r.json()).detail || ""); } catch (e) {} return json({error: {message: "voix " + r.status + " " + d.slice(0, 160)}}, r.status === 401 || r.status === 402 ? r.status : 502, cors); }
+  const buf = await r.arrayBuffer();
+  ctx.waitUntil(cache.put(key, new Response(buf, {headers: {"Content-Type": "audio/mpeg", "Cache-Control": "public, max-age=2592000"}})));
+  return new Response(buf, {status: 200, headers: {...cors, "Content-Type": "audio/mpeg"}});
+}
+
 export default {
   async scheduled(event, env, ctx) {
     if (env.GKV && env.VAPID_PRIVATE_JWK) ctx.waitUntil(pushRound(env).catch(() => {}));
@@ -358,6 +379,10 @@ export default {
     };
     if (req.method === "OPTIONS") return new Response(null, { headers: cors });
     if (req.method !== "POST" || !ORIGINS.includes(origin)) return json({ error: { message: "interdit" } }, 403, cors);
+    if (url.pathname === "/parler"){
+      const LIM = env.VOIXLIM || env.LIMITER; if (LIM) { const { success } = await LIM.limit({ key: (req.headers.get("CF-Connecting-IP") || "?") + ":parler" }); if (!success) return json({ error: { message: "trop de demandes" } }, 429, cors); }
+      return parler(env, req, cors, ctx);
+    }
     if (url.pathname === "/voix"){
       if (env.LIMITER) { const { success } = await env.LIMITER.limit({ key: (req.headers.get("CF-Connecting-IP") || "?") + ":voix" }); if (!success) return json({ error: { message: "trop de messages vocaux" } }, 429, cors); }
       return transcribe(env, req, cors);

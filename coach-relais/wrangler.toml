@@ -16,3 +16,9 @@ id = "b1fb5ae5e2e44b85b760b7a392402b70"
 # Mise à jour automatique des agendas Google toutes les 15 minutes
 [triggers]
 crons = ["*/15 * * * *"]
+
+# Voix d'Athéna : 60 phrases par minute et par adresse
+[[ratelimits]]
+name = "VOIXLIM"
+namespace_id = "1002"
+simple = { limit = 60, period = 60 }
