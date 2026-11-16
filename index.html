@@ -2486,13 +2486,15 @@ ENREGISTRER POUR ELLE : si elle te dit avoir fait quelque chose, te demande de c
 {"type":"ajouter","date":"…","seance":"course_end|course_frac|course_rec|parcours|luc|renfo|freeletics|gym|krav|jjb|ensemble","heure":"HH:MM","ensemble":true} : prévoir une séance
 {"type":"note","date":"…","forme":1,"sommeil":7.5,"douleur":"…","texte":"…"} : sa forme (1 épuisée à 5 au top), son sommeil, une douleur, une note
 {"type":"repas","date":"…","repas":"Petit-déjeuner|Déjeuner|Collation|Dîner","texte":"ce qu'elle a mangé"} : un repas à noter
-Règles : « en_plus » UNIQUEMENT pour une séance qui n'était pas dans son agenda ; si elle a fait la séance prévue (même différemment), c'est « fait ». N'invente JAMAIS une valeur qu'elle n'a pas donnée (distance, durée, sommeil, forme) : laisse le champ absent. « note » seulement pour une info nouvelle qu'elle vient de te dire (pas ce qui est déjà noté). Ne mets ce bloc que si elle t'a donné une info concrète ou demandé un changement. Jamais d'action sur ses cours au club sans demande explicite. Quand tu proposes d'enregistrer, réponds en 80 mots maximum.`;
+Règles : « en_plus » UNIQUEMENT pour une séance qui n'était pas dans son agenda ; si elle a fait la séance prévue (même différemment), c'est « fait ». N'invente JAMAIS une valeur qu'elle n'a pas donnée (distance, durée, sommeil, forme) : laisse le champ absent. « note » seulement pour une info nouvelle qu'elle vient de te dire (pas ce qui est déjà noté). Ne mets ce bloc que si elle t'a donné une info concrète ou demandé un changement. Jamais d'action sur ses cours au club sans demande explicite. Quand tu proposes d'enregistrer, réponds en 80 mots maximum. Dans ton texte, n'écris JAMAIS les clés entre crochets ni de date au format AAAA-MM-JJ : dis « demain », « jeudi 19 novembre ».`;
 const chatSystem = () => systemPrompt() + ACTIONS_RULES;
+// pas de jargon technique dans ce qu'elle lit : clés de séance et dates AAAA-MM-JJ
+const cleanTxt = t => String(t || "").replace(/\s*\[[a-z_]+@[0-9:]*\]\s*/g, " ").replace(/\b(\d{4})[-‑](\d{2})[-‑](\d{2})\b/g, (x, y, mo, d) => { try { return dLab(`${y}-${mo}-${d}`); } catch(e){ return x; } }).replace(/ {2,}/g, " ").trim();
 function splitActions(t){
   const m = String(t || "").match(/<actions>\s*([\s\S]*?)\s*<\/actions>/i);
-  if (!m) return {text: String(t || "").trim(), actions: []};
+  if (!m) return {text: cleanTxt(t), actions: []};
   let a = []; try { a = JSON.parse(m[1].replace(/^```(json)?|```$/g, "").trim()); } catch(e){ a = []; }
-  return {text: String(t).replace(m[0], "").trim(), actions: Array.isArray(a) ? a.filter(x => x && x.type).slice(0, 8) : []};
+  return {text: cleanTxt(String(t).replace(m[0], "")), actions: Array.isArray(a) ? a.filter(x => x && x.type).slice(0, 8) : []};
 }
 const dLab = k => { try { const d = parseDay(k), t = ymd(new Date()); return k === t ? "aujourd'hui" : k === ymd(addDays(new Date(), -1)) ? "hier" : k === ymd(addDays(new Date(), 1)) ? "demain" : d.toLocaleDateString("fr-FR", {weekday: "long", day: "numeric", month: "long"}); } catch(e){ return k; } };
 function findSlot(day, key){ const l = slotsOn(parseDay(day)); let i = l.findIndex(s => slotKey(s) === key); if (i < 0) i = l.findIndex(s => s.t === String(key || "").split("@")[0]); return i; }
