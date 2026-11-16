@@ -2355,7 +2355,7 @@ function journalText(){
   const today = new Date(new Date().setHours(12, 0, 0, 0)), L = [];
   for (let i = -14; i <= 7; i++){
     const d = addDays(today, i), k = ymd(d), F = (S.fait || {})[k] || {};
-    if (d < addDays(calStart(), -7) || d > calEnd()) continue;
+    if (d < calStart() || d > calEnd()) continue;
     const lab = i === 0 ? "AUJOURD'HUI" : i === -1 ? "hier" : i === 1 ? "demain" : DAYS[dow(d)];
     const parts = slotsOn(d).filter(s => s.t !== "repos").map(s => {
       if (s.t === "ensemble") return `${fmtH(s.h)} moment à deux`;
@@ -3156,6 +3156,7 @@ function rappels(){
     if (h >= 14 && n === 0) R.push({ic: "•", t: "Aucun repas noté aujourd'hui", d: "Note ton petit-déjeuner et ton déjeuner pour suivre tes protéines.", btn: {l: "Noter un repas", attr: `data-goto="nutrition"`}});
     else if (h >= 19 && T && t.p < T.p * 0.7) R.push({ic: "•", t: `Protéines : ${Math.round(t.p)} / ${T.p} g`, d: "Pense à une source de protéines ce soir (œufs, poisson, viande, skyr, tofu).", btn: {l: "Noter un repas", attr: `data-goto="nutrition"`}});
   }
+  if (!S.essais.length && !S.luc.length && Date.now() > calStart().getTime() + 3 * 864e5) R.push({ic: "!", t: "Tes tests de départ ne sont pas encore faits", d: "Un parcours chronométré puis, 30 min après, un Luc Léger complet. Ils servent de point de départ à tout le programme : cale-les à ta prochaine séance de parcours (ou dis à Athéna quand tu peux les faire)."});
   const lastLuc = S.luc.length ? Math.max(...S.luc.map(x => x.at)) : 0, started = Date.now() > calStart().getTime() + 14 * 864e5;
   if (started && Date.now() - lastLuc > 21 * 864e5) R.push({ic: "•", t: "Pas de Luc Léger depuis 3 semaines", d: "Fais-en un complet à une de tes prochaines séances de course : c'est la moitié de ta note."});
   objectifs().filter(o => !o.ok && o.due >= ymd(today) && o.due <= ymd(addDays(today, 10))).forEach(o => R.push({ic: "◆", t: `Objectif avant le ${parseDay(o.due).toLocaleDateString("fr-FR", {day: "numeric", month: "long"})}`, d: o.label}));
@@ -3410,8 +3411,8 @@ function renderToday(){
   const addForm = `<details class="extra-add"><summary>+ Ajouter une séance faite en plus</summary>
       <form class="extra-form" data-extra-day="${ymd(d)}">
         <select name="t" aria-label="Type de séance">${Object.entries(EXTRA).map(([k, v]) => `<option value="${k}">${v}</option>`).join("")}</select>
-        <input name="km" type="number" min="0" step="any" inputmode="decimal" placeholder="Distance (km)" aria-label="Distance en km">
-        <input name="min" type="number" min="0" step="1" inputmode="numeric" placeholder="Durée (min)" aria-label="Durée en minutes">
+        <input name="min" type="number" min="0" step="1" inputmode="numeric" placeholder="Durée (minutes)" aria-label="Durée en minutes">
+        <input name="km" class="ex-km" type="number" min="0" max="60" step="any" inputmode="decimal" placeholder="Distance (km)" aria-label="Distance en km">
         <label class="note ex-cont"><input type="checkbox" name="cont" checked> Courue sans m'arrêter (compte pour l'objectif 8 / 10 km)</label>
         <button type="submit" class="btn">Enregistrer</button>
       </form></details>`;
@@ -3419,12 +3420,12 @@ function renderToday(){
   const dayBar = `<div class="day-tools">${dayEdited(d) ? `<span class="note">Journée modifiée</span><button type="button" class="link" data-day-reset="${dk}">Revenir au planning habituel</button>` : ""}<button type="button" class="link" data-edit="${dk}|add">+ Prévoir une séance ce jour</button></div>`;
   el.innerHTML = head + dayBar + `<div class="sess-list">${sl.length ? cards.join("") : `<div class="sess"><span class="ic daily">${ICONS.daily}</span><div><h3>Rien de prévu</h3><p class="what">Repos, ou la routine 10 min si tu as envie.</p></div></div>`}${addPlanned}${ex}</div>` + addForm + journalCard(d);
 }
-document.addEventListener("change", e => { const f = e.target.closest(".extra-form"); if (f && e.target.name === "t") f.querySelector(".ex-cont").hidden = e.target.value !== "course"; });
+document.addEventListener("change", e => { const f = e.target.closest(".extra-form"); if (f && e.target.name === "t"){ const c = e.target.value === "course"; f.querySelector(".ex-cont").hidden = !c; f.querySelector(".ex-km").hidden = !c; if (!c) f.km.value = ""; } });
 document.addEventListener("submit", e => {
   const f = e.target.closest(".extra-form"); if (!f) return; e.preventDefault();
   const day = f.dataset.extraDay, t = f.t.value, km = parseFloat(String(f.km.value).replace(",", ".")), min = parseInt(f.min.value, 10);
   const o = JSON.parse(JSON.stringify(S.fait || {})); o[day] = o[day] || {};
-  o[day]["+" + newId()] = Object.assign({t, at: Date.now()}, km > 0 ? {km} : {}, min > 0 ? {min} : {});
+  o[day]["+" + newId()] = Object.assign({t, at: Date.now()}, t === "course" && km > 0 ? {km} : {}, min > 0 ? {min} : {});
   saveFait(o);
   if (t === "course" && km > 0 && f.cont.checked) addDoc("mesures", {at: day === ymd(new Date()) ? Date.now() : new Date(day + "T12:00:00").getTime(), type: "course", value: km});
   renderToday(); renderTiles(); renderWeek(); setSync("Séance en plus enregistrée. Bravo !");
