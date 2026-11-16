@@ -2393,10 +2393,14 @@ async function askGroq(messages, maxTokens){
     return (j.choices?.[0]?.message?.content || "").replace(/<think>[\s\S]*?<\/think>/g, "").trim();
   };
   if (!navigator.onLine) throw new Error("Pas de réseau : Athéna a besoin d'internet pour discuter. Les priorités ci-dessus marchent sans.");
+  // surcharge passagère (429) : on passe au modèle de secours, puis on réessaie après quelques secondes
   try { return await call(AI_DEFAULT); }
   catch(e){
-    if (e.status === 429) throw new Error("Athéna a reçu beaucoup de questions : réessaie dans quelques minutes.");
-    try { return await call(AI_BACKUP); } catch(e2){ throw new Error("Le coach ne répond pas pour le moment. Réessaie plus tard."); }
+    try { return await call(AI_BACKUP); }
+    catch(e2){
+      if (e.status === 429 || e2.status === 429){ await new Promise(r => setTimeout(r, 8000)); try { return await call(AI_DEFAULT); } catch(e3){} }
+      throw new Error(e.status === 429 ? "Athéna a reçu beaucoup de questions : réessaie dans une minute." : "Le coach ne répond pas pour le moment. Réessaie plus tard.");
+    }
   }
 }
 function mdLite(t){ return esc(t).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/^#+\s*/gm, "").replace(/^\s*[-•]\s+/gm, "• ").replace(/\n/g, "<br>"); }
@@ -2489,7 +2493,7 @@ ENREGISTRER POUR ELLE : si elle te dit avoir fait quelque chose, te demande de c
 Règles : « en_plus » UNIQUEMENT pour une séance qui n'était pas dans son agenda ; si elle a fait la séance prévue (même différemment), c'est « fait ». N'invente JAMAIS une valeur qu'elle n'a pas donnée (distance, durée, sommeil, forme) : laisse le champ absent. « note » seulement pour une info nouvelle qu'elle vient de te dire (pas ce qui est déjà noté). Ne mets ce bloc que si elle t'a donné une info concrète ou demandé un changement. Jamais d'action sur ses cours au club sans demande explicite. Quand tu proposes d'enregistrer, réponds en 80 mots maximum. Dans ton texte, n'écris JAMAIS les clés entre crochets ni de date au format AAAA-MM-JJ : dis « demain », « jeudi 19 novembre ».`;
 const chatSystem = () => systemPrompt() + ACTIONS_RULES;
 // pas de jargon technique dans ce qu'elle lit : clés de séance et dates AAAA-MM-JJ
-const cleanTxt = t => String(t || "").replace(/\s*\[[a-z_]+@[0-9:]*\]\s*/g, " ").replace(/\b(\d{4})[-‑](\d{2})[-‑](\d{2})\b/g, (x, y, mo, d) => { try { return dLab(`${y}-${mo}-${d}`); } catch(e){ return x; } }).replace(/ {2,}/g, " ").trim();
+const cleanTxt = t => String(t || "").replace(/\s*\[[a-z_]+@[0-9:]*\]\s*/g, " ").replace(/(\b(?:le|du|au)\s+)?\b(\d{4})[-‑](\d{2})[-‑](\d{2})\b/g, (x, pre, y, mo, d) => { try { const l = dLab(`${y}-${mo}-${d}`); return (/^(aujourd|demain|hier)/.test(l) ? "" : (pre || "")) + l; } catch(e){ return x; } }).replace(/ {2,}/g, " ").trim();
 function splitActions(t){
   const m = String(t || "").match(/<actions>\s*([\s\S]*?)\s*<\/actions>/i);
   if (!m) return {text: cleanTxt(t), actions: []};
