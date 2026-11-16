@@ -846,7 +846,6 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--accent)}
     <div class="panel install-help" id="install-help" hidden></div>
   </div>
 
-  <div class="panel setup" id="setup" hidden></div>
 
   <div class="card-today">
     <div class="weeknav" id="weeknav"></div>
@@ -911,6 +910,7 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--accent)}
 
 <section class="view" id="v-reglages" data-view="reglages" hidden>
   <h2>Réglages</h2>
+  <div class="panel setup" id="setup" hidden></div>
   <div class="panel about">
     <div class="ath-head"><span class="ath-ava" data-athena></span><div><h3>Athéna</h3><p class="note">Force &amp; stratégie</p></div></div>
     <p>Athéna, c'est ta coach. Comme la déesse grecque de la sagesse et de la stratégie, protectrice de la cité, elle t'aide à préparer le concours avec méthode : chaque jour quoi faire, comment progresser, et jusqu'où tu es arrivée.</p>
@@ -3678,15 +3678,16 @@ function renderSetup(){
   const steps = [
     {ok: lsGet("phm-age2", null) != null, t: "Indique ton âge", d: "Pour calculer tes notes avec le bon bonus.", go: "reglages", b: "Régler"},
     {ok: !planEmpty(), hide: notLinked(), t: "Remplis ton planning A / B", d: "Tes séances habituelles, avec l'heure.", go: "plan", b: "Remplir"},
-    {ok: !!(team && FB), t: "Relie ce téléphone à votre espace", d: "Avec le lien de partage reçu : planning, résultats et agenda.", go: "reglages", b: "Relier"},
+    {ok: !!(team && FB), t: "Relie ce téléphone à votre espace", d: "Avec le lien de partage reçu : planning, résultats et agenda.", go: "reglages", anchor: "share", b: "Relier"},
+    {ok: !!lsGet("phm-push", null) || !pushOk() || (isIOS() && !isStandalone()), t: "Active les notifications", d: "Le point du jour le matin et le bilan du soir, même appli fermée.", go: "reglages", anchor: "push-panel", b: "Activer"},
     {ok: !!lsGet("phm-agenda-ok", false), t: "Abonne ton agenda", d: "Tes séances et les rappels arrivent tout seuls.", go: "plan", b: "Abonner", tick: true},
     {ok: S.essais.length > 0 && S.luc.length > 0, t: "Fais tes tests de départ", d: "Un parcours chronométré et un Luc Léger complet.", go: "parcours", b: "Commencer"}
   ].filter(st => !st.hide);
   const left = steps.filter(s => !s.ok).length;
-  if (!left || lsGet("phm-setup-hide", false)){ el.hidden = true; return; }
+  if (!left){ el.hidden = true; return; }
   el.hidden = false;
-  el.innerHTML = `<div class="row between"><h3>Pour bien démarrer · ${steps.length - left}/${steps.length}</h3><button type="button" class="link" id="setup-hide">Masquer</button></div>
-    <ul class="steps">${steps.map(s => `<li class="${s.ok ? "done" : ""}"><div><div class="s-t">${s.ok ? "✓ " : ""}${s.t}</div><div class="s-d">${s.d}</div></div>${s.ok ? "" : `<span class="s-a row" style="gap:6px">${s.tick ? `<button type="button" class="ghost tiny" id="agenda-ok">C'est fait</button>` : ""}<button type="button" class="ghost tiny" data-goto="${s.go}">${s.b}</button></span>`}</li>`).join("")}</ul>`;
+  el.innerHTML = `<div class="row between"><h3>Pour bien démarrer · ${steps.length - left}/${steps.length}</h3></div>
+    <ul class="steps">${steps.map(s => `<li class="${s.ok ? "done" : ""}"><div><div class="s-t">${s.ok ? "✓ " : ""}${s.t}</div><div class="s-d">${s.d}</div></div>${s.ok ? "" : `<span class="s-a row" style="gap:6px">${s.tick ? `<button type="button" class="ghost tiny" id="agenda-ok">C'est fait</button>` : ""}<button type="button" class="ghost tiny" data-goto="${s.go}"${s.anchor ? ` data-anchor="${s.anchor}"` : ""}>${s.b}</button></span>`}</li>`).join("")}</ul>`;
 }
 document.addEventListener("click", e => {
   if (e.target.id === "setup-hide"){ lsSet("phm-setup-hide", true); renderSetup(); }
