@@ -3544,7 +3544,7 @@ document.addEventListener("click", e => {
 // une présence : sphère de particules, cœur corail, couronne de fréquences qui suit les voix, affichage de bord avec ses vraies données
 const NOYAU = (() => {
   const ov = $("noyau-ov"), cv = $("noyau-cv"), ctx = cv.getContext ? cv.getContext("2d") : null;
-  let W = 0, dpr = 1, P = [], mode = "idle", lvl = 0, rot = 0, rA = 0, rB = 0, boot = 0, raf = 0, last = 0, t0 = 0, idleAt = 0, clock = 0;
+  let bootAt = 0, W = 0, dpr = 1, P = [], mode = "idle", lvl = 0, rot = 0, rA = 0, rB = 0, boot = 0, raf = 0, last = 0, t0 = 0, idleAt = 0, clock = 0;
   let rec = null, chunks = [], stream = null, actx = null, an = null, abuf = null;
   const LIB = {idle: "En attente", hear: "Écoute", think: "Analyse", talk: "Réponse", happy: "Bravo", sleep: "Veille"};
   function particules(n){ P = []; const g = Math.PI * (3 - Math.sqrt(5)); for (let i = 0; i < n; i++){ const y = 1 - (i / (n - 1)) * 2, r = Math.sqrt(1 - y * y), th = g * i; P.push({x: Math.cos(th) * r, y, z: Math.sin(th) * r, s: Math.random() * 6.283, k: .9 + Math.random() * .2}); } }
@@ -3561,7 +3561,7 @@ const NOYAU = (() => {
     raf = requestAnimationFrame(frame);
     const dt = Math.min(50, now - (last || now)); last = now; if (!ctx || !W) return;
     if (mode === "idle" && Date.now() - idleAt > 90000) setMode("sleep");
-    niveau(now); boot = Math.min(1, boot + dt / 1400);
+    niveau(now); boot = Math.min(1, (now - (bootAt || now)) / 1200);
     const c = W / 2, R = W * .25 * (.9 + .1 * boot), sleep = mode === "sleep";
     const speed = sleep ? .05 : mode === "think" ? .9 : mode === "talk" ? .45 : .22;
     rot += dt / 1000 * speed; rA += dt / 1000 * (mode === "think" ? 1.4 : .35); rB -= dt / 1000 * (mode === "think" ? 1 : .22);
@@ -3648,7 +3648,7 @@ const NOYAU = (() => {
     ov.hidden = false; document.body.classList.add("noyau-on"); t0 = Date.now(); boot = 0; setMode("idle"); taille(); hud();
     const P = lsGet("phm-point", null), hello = P && P.day === ymd(new Date()) ? P.text : (prenom() ? `Bonjour ${prenom()}. Raconte-moi ta journée : touche le micro et parle.` : "Raconte-moi ta journée : touche le micro et parle.");
     caption(hello); actions();
-    cancelAnimationFrame(raf); last = 0; raf = requestAnimationFrame(frame); clock = setInterval(hud, 1000); try { grabWake(); } catch(e){}
+    cancelAnimationFrame(raf); last = 0; bootAt = performance.now(); raf = requestAnimationFrame(frame); clock = setInterval(hud, 1000); try { grabWake(); } catch(e){}
   }
   function close(){
     ov.hidden = true; document.body.classList.remove("noyau-on"); cancelAnimationFrame(raf); clearInterval(clock); speechSynthesis.cancel();
