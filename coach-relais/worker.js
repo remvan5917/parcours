@@ -2,7 +2,7 @@
 // et n'accepte que les demandes venant de l'appli.
 const ORIGINS = ["https://remvan5917.github.io"];
 const MODELS = ["openai/gpt-oss-120b", "qwen/qwen3.8-27b"];
-const MAX_CHARS = 24000; // taille totale maximale d'une demande
+const MAX_CHARS = 60000; // taille totale maximale d'une demande (le coach voit tout son agenda)
 
 const json = (data, status, headers) => new Response(JSON.stringify(data), { status, headers: { ...headers, "Content-Type": "application/json" } });
 
@@ -136,7 +136,7 @@ async function gSyncKey(env, k, team, force){
     if (e.allDay && /^\d{4}-\d{2}-\d{2}$/.test(e.d)){
       const key = `${e.d}|semaine|${String(e.t || "").slice(0, 40)}`;
       const body = {summary: String(e.t || "Semaine"), description: String(e.desc || ""), start: {date: e.d}, end: {date: addD(e.d, Math.min(7, Number(e.days) || 1))},
-        transparency: "transparent", colorId: "8", reminders: {useDefault: false}, status: "confirmed"};
+        transparency: "transparent", colorId: /^Concours/.test(e.t) ? "5" : "8", reminders: {useDefault: false}, status: "confirmed"};
       want[key] = {body, hash: JSON.stringify(body).length + ":" + [...JSON.stringify(body)].reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 0)};
       continue;
     }
@@ -261,7 +261,7 @@ export default {
     const model = MODELS.includes(body.model) ? body.model : MODELS[0];
     const messages = (Array.isArray(body.messages) ? body.messages : []).slice(-16).map(m => ({
       role: ["system", "user", "assistant"].includes(m.role) ? m.role : "user",
-      content: String(m.content || "").slice(0, 14000),
+      content: String(m.content || "").slice(0, 40000),
     }));
     if (!messages.length) return json({ error: { message: "message vide" } }, 400, cors);
     if (messages.reduce((n, m) => n + m.content.length, 0) > MAX_CHARS) return json({ error: { message: "demande trop longue" } }, 413, cors);

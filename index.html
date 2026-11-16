@@ -787,6 +787,33 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--accent)}
 .nu-pform input,.nu-pform select{width:100%;min-width:0}
 .nu-adv{margin-top:10px;line-height:1.5}
 .nu-home .btn{margin-top:6px}
+.sess-edit{display:inline-block;margin-top:6px;font-size:.85rem}
+.rpe{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.rpe .chip,.jn-e .chip{padding:4px 10px;font-size:.8rem}
+.chip.on{background:var(--ink);color:var(--ground);border-color:var(--ink)}
+.day-tools{display:flex;gap:12px;align-items:center;justify-content:flex-end;flex-wrap:wrap;margin:-4px 0 8px;font-size:.88rem}
+.slot-ed{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.slot-ed label{display:flex;flex-direction:column;gap:3px;font-size:.8rem;color:var(--muted)}
+.slot-ed .wide{grid-column:1/-1}
+.slot-ed input,.slot-ed select{width:100%;min-width:0}
+.slot-ed .ed-duo{flex-direction:row;align-items:center;gap:8px;color:var(--ink)}
+.slot-ed .ed-duo input{width:auto}
+.ed-btns{display:flex;gap:8px;flex-wrap:wrap}
+.sess.editing{border-color:var(--accent)}
+.jn-e{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.jn-form{display:grid;grid-template-columns:1fr 1.4fr;gap:8px}
+.jn-form label{display:flex;flex-direction:column;gap:3px;font-size:.8rem;color:var(--muted)}
+.jn-form .wide{grid-column:1/-1}
+.jn-form input,.jn-form textarea{width:100%;min-width:0;font:inherit}
+.jn-form textarea{padding:8px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);resize:vertical}
+.act-box{align-self:flex-start;max-width:92%;border:1px solid var(--accent);border-radius:12px;padding:10px 12px;font-size:.9rem;display:flex;flex-direction:column;gap:6px}
+.act-box ul{margin:0;padding-left:18px}
+.act-box .gbtns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.point .point-txt{margin:8px 0 4px;line-height:1.5}
+.rap{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}
+.rap li{display:grid;grid-template-columns:22px 1fr;gap:8px;align-items:start;border-top:1px solid var(--line);padding-top:8px}
+.rap .rap-ic{font-weight:800;color:var(--accent);text-align:center}
+.rap p{margin:2px 0 4px}
 </style>
 </head>
 <body>
@@ -803,6 +830,7 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--accent)}
 <section class="view" id="v-accueil" data-view="accueil">
   <section class="hero-card" id="hero"><span class="hero-ava" data-athena></span><div id="hero-main"></div><p class="love" id="love"></p></section>
   <p class="sync" id="sync" hidden></p>
+  <div class="panel point" id="point" hidden></div>
   <div class="install-zone">
     <div class="panel install-help" id="install-help" hidden></div>
   </div>
@@ -1524,7 +1552,7 @@ document.addEventListener("click", e => { const g = e.target.closest("[data-goto
 const S = { essais: [], mesures: [], luc: [], rapports: [], exam: null, examLabel: null, plan: null, lieux: null, fait: null };
 const LKEY = {essais:"phm-essais-v3", mesures:"phm-mesures-v1", luc:"phm-luc-v1", rapports:"phm-rapports-v1", repas:"phm-repas-v1"};
 const COLLS = ["essais", "mesures", "luc", "rapports", "repas"];
-const EXAM_DEFAULT = {date:"2027-03-29", label:"fin mars – début avril 2027"};
+const EXAM_DEFAULT = {date:"2027-03-29", label:"entre le 29 mars et le 28 mai 2027 (prête dès le 29 mars ; date exacte sur ta convocation)"};
 const FB = window.PARCOURS_FIREBASE || null;
 let FS = null;
 let team = lsGet("phm-team", null);
@@ -1596,6 +1624,7 @@ async function connectFirebase(){
 }
 async function initStore(){
   loadLocal(); storeReady = true; renderAll(); renderShare();
+  setTimeout(() => genPoint(false), team ? 6000 : 1500);
   if (!$("v-coach").hidden) genWeek(false);
   if (FB && team){
     setSync("Connexion au partage…");
@@ -1793,7 +1822,7 @@ function renderHome(){
   if (S.exam){
     const d = Math.ceil((new Date(S.exam + "T08:00:00") - new Date()) / 86400000);
     const when = new Date(S.exam + "T12:00:00").toLocaleDateString("fr-FR", {day:"numeric", month:"long", year:"numeric"});
-    const lbl = S.examLabel ? `${S.examLabel} (date exacte à confirmer)` : `le ${when}`;
+    const lbl = S.examLabel ? (/convocation|confirmer/.test(S.examLabel) ? S.examLabel : `${S.examLabel} (date exacte à confirmer)`) : `le ${when}`;
     el.innerHTML = d >= 0 ? `<b>${d} jours</b><span class="note">environ ${Math.floor(d / 7)} semaines avant les épreuves sportives, ${lbl}</span>` : `<span class="note">La date des épreuves (${lbl}) est passée. Mets-la à jour dans Réglages.</span>`;
   } else el.innerHTML = `<span class="note">Ajoute la date des épreuves sportives dans Réglages pour voir le compte à rebours.</span>`;
   renderPhases();
@@ -2313,12 +2342,47 @@ const RULES = `Règles officielles (descriptif 2025, femmes) :
 function systemPrompt(){
   return `Tu es Athéna, sa coach : le début d'un robot que Rémy crée pour sa compagne, qui porte le nom de la déesse de la sagesse et de la stratégie. Tu l'accompagnes dans sa préparation aux épreuves sportives du concours de gardien de la paix (police nationale). Tu parles à la première personne, avec chaleur et précision. Tu la tutoies, en français simple, chaleureux et motivant, sans jargon : si tu utilises un mot technique, explique-le en quelques mots. Réponses courtes et concrètes (séances, durées, répétitions, quel atelier, où). FORMAT : jamais de tableau, jamais de titre, pas d'emoji numéroté ; des phrases courtes ou une liste simple avec des tirets. En discussion, 120 mots au maximum.
 Appuie-toi UNIQUEMENT sur ses données ci-dessous et sur les règles officielles ; n'invente pas de chiffres. Si une donnée manque, dis-lui quel test faire.
-Chaque conseil doit être réaliste et faisable dans sa semaine : où (Fitness Park, club de gym, dehors), combien de fois, combien de répétitions. Ne donne JAMAIS de jour de la semaine (lundi, mardi…) ni d'horaire : elle a son propre planning et ses cours en club ; parle de « une fois dans la semaine », « à une de tes courses », « avant ou après un cours de gym ». Pour le fractionné, la partie rapide se court à la vitesse de son palier visé (ou un peu plus), jamais plus lentement que son dernier palier atteint. Le lycée de Saint-Quentin est loin : seulement pour un passage de temps en temps sur le vrai parcours, pas pour courir. Ne répète pas deux fois le même conseil.
-Ne parle jamais de poids, de régime ou d'apparence. En cas de douleur, blessure, malaise ou vrai vertige : pas de diagnostic, conseille le repos et un médecin.
+Chaque conseil doit être réaliste et faisable dans sa semaine : où (Fitness Park, club de gym, dehors), combien de fois, combien de répétitions. SON AGENDA (ci-dessous, 14 jours passés et 7 à venir) EST LA VÉRITÉ : elle le modifie souvent. Tu peux parler d'hier, d'aujourd'hui, de demain et des séances qui y figurent, avec leur jour et leur heure, mais n'invente JAMAIS de créneau ni d'horaire qui n'y est pas, et ne propose jamais de changer ses cours au club (gym, krav maga, jujitsu) sauf si elle le demande. Tu vois ce qu'elle a fait ou non (FAIT / NON COCHÉ), son ressenti, sa routine, ses repas, sa forme et ses notes : sers-t'en. Rappelle avec bienveillance ce qui manque (séance non cochée, routine, test à faire, repas non notés) et ce qu'il faut préparer pour la prochaine séance (affaires, lieu, repas avant, sommeil). Tiens compte de tout ce qu'elle écrit dans ses notes (fatigue, douleur, règles, stress, séance changée). Pour le fractionné, la partie rapide se court à la vitesse de son palier visé (ou un peu plus), jamais plus lentement que son dernier palier atteint. Le lycée de Saint-Quentin est loin : seulement pour un passage de temps en temps sur le vrai parcours, pas pour courir. Ne répète pas deux fois le même conseil.
+Nutrition : elle a demandé un suivi pour sécher en douceur ; donne des conseils prudents (déficit modéré, assez de protéines, glucides autour des séances, hydratation), jamais de régime extrême ni de commentaire sur son apparence. En cas de douleur, blessure, malaise ou vrai vertige : pas de diagnostic, conseille le repos et un médecin.
 ${RULES}
 
 SES DONNÉES :
-${contextText()}`;
+${contextText()}
+${journalText()}`;
+}
+// ce qu'Athéna voit au jour le jour : agenda réel, fait / pas fait, ressenti, routine, en plus, repas, forme, notes
+function journalText(){
+  const today = new Date(new Date().setHours(12, 0, 0, 0)), L = [];
+  for (let i = -14; i <= 7; i++){
+    const d = addDays(today, i), k = ymd(d), F = (S.fait || {})[k] || {};
+    if (d < addDays(calStart(), -7) || d > calEnd()) continue;
+    const lab = i === 0 ? "AUJOURD'HUI" : i === -1 ? "hier" : i === 1 ? "demain" : DAYS[dow(d)];
+    const parts = slotsOn(d).filter(s => s.t !== "repos").map(s => {
+      if (s.t === "ensemble") return `${fmtH(s.h)} moment à deux`;
+      const v = F[slotKey(s)], st = v ? "FAIT" + (typeof v === "object" && v.rpe ? ` (ressenti ${v.rpe})` : "") : (i < 0 ? "NON COCHÉ" : i === 0 ? "à faire" : "prévu");
+      return `[${slotKey(s)}] ${s.h ? fmtH(s.h) + " " : ""}${slotTitle(s, d)} : ${st}`;
+    });
+    extrasOn(d).forEach(x => parts.push(`en plus : ${EXTRA[x.t] || x.t}${x.km ? " " + fr(x.km) + " km" : ""}${x.min ? " " + x.min + " min" : ""}`));
+    if (i <= 0){
+      const rt = ROUTINE.filter(r => F["routine:" + r.k]).map(r => r.l);
+      parts.push("routine : " + (rt.length ? rt.join(", ") : "rien coché"));
+      const R = repasOn(d), T = nutTargets(d);
+      if (R.length){ const t = dayTotals(d); parts.push(`repas notés : ${R.length}, ${Math.round(t.kcal)} kcal, protéines ${Math.round(t.p)} g${T ? ` (objectif ${T.kcal} kcal, ${T.p} g)` : ""}`); }
+      else if (S.profil && S.profil.poids) parts.push("repas : rien noté");
+      const J = F.journal || {}, jt = [J.energie ? "forme " + ENERGIE[J.energie - 1].toLowerCase() : "", J.sommeil ? `sommeil ${fr(J.sommeil)} h` : "", J.douleur ? "douleur : " + J.douleur : "", J.note ? "note : « " + J.note + " »" : ""].filter(Boolean);
+      if (jt.length) parts.push(jt.join(", "));
+    }
+    L.push(`- ${lab} ${k}${dayEdited(d) ? " (journée modifiée par elle)" : ""} : ${parts.join(" ; ") || "rien de prévu"}`);
+  }
+  const nx = [0, 1].map(i => addDays(today, i)).map(d => slotsOn(d).filter(s => s.t !== "ensemble" && s.t !== "repos").map(s => { const x = session(s.t, d, s.h); return `${ymd(d)} ${fmtH(s.h)} ${slotTitle(s, d)} — lieu : ${x.lieu || "?"} — contenu : ${stripTags(x.L.join(" ")).slice(0, 220)}`; }).join("\n")).filter(Boolean).join("\n");
+  const O = objectifs().filter(o => !o.ok).slice(0, 5).map(o => `${o.due} : ${o.label}`).join(" ; ");
+  const P = S.profil || {}, T0 = nutTargets(today);
+  return `SON AGENDA RÉEL (clé de séance entre crochets) :\n${L.join("\n")}
+Contenu des séances d'aujourd'hui et demain :\n${nx || "aucune"}
+Calendrier officiel du concours : ${CONCOURS.map(c => c.d + " " + c.t).join(" ; ")}. Inscription : ${(S.profil || {}).inscrit ? "faite" : "pas encore confirmée dans l'appli (à rappeler avant le 18 janvier 18 h)"}. Elle prépare aussi les épreuves écrites du 9 mars : pas de grosse séance la veille.
+Objectifs datés pas encore atteints : ${O || "aucun"}
+Nutrition : ${P.poids ? `objectif « ${({seche: "sécher en douceur", maintien: "garder son poids", muscle: "prendre du muscle"})[P.obj] || "sécher en douceur"} »${T0 ? `, besoins du jour ${T0.kcal} kcal dont ${T0.sport} kcal de sport, ${T0.p} g de protéines` : ""}` : "profil pas rempli"}.
+Heure actuelle : ${new Date().getHours()} h ${String(new Date().getMinutes()).padStart(2, "0")}.`;
 }
 async function askGroq(messages, maxTokens){
   const call = async model => {
@@ -2408,17 +2472,93 @@ $("wk-next").addEventListener("click", () => { if (wkOffset < 0){ wkOffset++; re
 document.addEventListener("click", e => { if (e.target.id === "wk-gen") genWeek(true); });
 let chat = lsGet("phm-chat", []), chatBusy = false;
 function renderChat(){
-  $("chat-log").innerHTML = chat.length ? chat.map(m => `<div class="msg ${m.role === "user" ? "me" : "bot"}">${m.role === "user" ? esc(m.content) : mdLite(m.content)}</div>`).join("") : `<div class="msg bot">Salut, moi c'est Athéna, ta coach. Pose-moi une question sur ta préparation : un atelier, ta course, ta semaine…</div>`;
+  $("chat-log").innerHTML = chat.length ? chat.map((m, i) => `<div class="msg ${m.role === "user" ? "me" : "bot"}">${m.role === "user" ? esc(m.content) : mdLite(m.content)}</div>` + (m.actions && m.actions.length ? `<div class="act-box"><b>${m.applied === "oui" ? "Enregistré :" : m.applied === "non" ? "Pas enregistré :" : "Athéna propose d'enregistrer :"}</b><ul>${(m.applied === "oui" && m.done ? m.done : m.actions.map(describeAction)).filter(Boolean).map(x => `<li>${esc(x)}</li>`).join("")}</ul>${m.applied ? "" : `<div class="gbtns"><button type="button" class="btn" data-act="${i}|oui">Valider</button><button type="button" class="ghost small" data-act="${i}|non">Non merci</button></div>`}</div>` : "")).join("") : `<div class="msg bot">Salut, moi c'est Athéna, ta coach. Raconte-moi ta journée ou pose-moi une question : ce que tu as fait, ce qui change dans ton agenda, ta forme, un repas… Je vois tout ton agenda et je peux l'enregistrer pour toi.</div>`;
   $("chat-log").scrollTop = $("chat-log").scrollHeight;
-  $("chat-sugg").innerHTML = ["Explique-moi mes recommandations de la semaine", "J'ai peur sur la poutre", "Comment gagner du temps au slalom ?", "Je suis fatiguée aujourd'hui", "Comment progresser au Luc Léger ?"].map(s => `<button type="button" class="chip" data-ask="${esc(s)}">${esc(s)}</button>`).join("");
+  $("chat-sugg").innerHTML = ["Qu'est-ce qu'il me reste à faire ?", "J'ai fait ma séance ce matin", "Je ne peux pas m'entraîner demain", "Je suis fatiguée aujourd'hui", "Qu'est-ce que je mange avant ma séance ?", "J'ai peur sur la poutre"].map(s => `<button type="button" class="chip" data-ask="${esc(s)}">${esc(s)}</button>`).join("");
 }
+const ACTIONS_RULES = `
+ENREGISTRER POUR ELLE : si elle te dit avoir fait quelque chose, te demande de changer son agenda, ou te donne une info à noter, propose de l'enregistrer : ajoute TOUT À LA FIN de ta réponse un bloc <actions>[…]</actions> contenant une liste JSON valide. Elle validera d'un bouton ; dans ton texte, dis simplement « je te propose de l'enregistrer ». Types possibles (dates réelles AAAA-MM-JJ d'après son agenda, clés entre crochets) :
+{"type":"fait","date":"…","cle":"course_end@08:30","ressenti":"facile|moyen|dur"} : une séance de son agenda faite
+{"type":"en_plus","date":"…","seance":"course|freeletics|parcours|gym|autre","km":5,"min":30} : une séance faite en plus
+{"type":"routine","date":"…","items":["susp","pompes","poignets"]} : exercices de la routine faits
+{"type":"deplacer","date":"…","cle":"…","vers_date":"…","vers_heure":"HH:MM"} : déplacer une séance
+{"type":"enlever","date":"…","cle":"…"} : enlever une séance ce jour-là
+{"type":"ajouter","date":"…","seance":"course_end|course_frac|course_rec|parcours|luc|renfo|freeletics|gym|krav|jjb|ensemble","heure":"HH:MM","ensemble":true} : prévoir une séance
+{"type":"note","date":"…","forme":1,"sommeil":7.5,"douleur":"…","texte":"…"} : sa forme (1 épuisée à 5 au top), son sommeil, une douleur, une note
+{"type":"repas","date":"…","repas":"Petit-déjeuner|Déjeuner|Collation|Dîner","texte":"ce qu'elle a mangé"} : un repas à noter
+Ne mets ce bloc que si elle t'a donné une info concrète ou demandé un changement. Jamais d'action sur ses cours au club sans demande explicite.`;
+const chatSystem = () => systemPrompt() + ACTIONS_RULES;
+function splitActions(t){
+  const m = String(t || "").match(/<actions>\s*([\s\S]*?)\s*<\/actions>/i);
+  if (!m) return {text: String(t || "").trim(), actions: []};
+  let a = []; try { a = JSON.parse(m[1].replace(/^```(json)?|```$/g, "").trim()); } catch(e){ a = []; }
+  return {text: String(t).replace(m[0], "").trim(), actions: Array.isArray(a) ? a.filter(x => x && x.type).slice(0, 8) : []};
+}
+const dLab = k => { try { const d = parseDay(k), t = ymd(new Date()); return k === t ? "aujourd'hui" : k === ymd(addDays(new Date(), -1)) ? "hier" : k === ymd(addDays(new Date(), 1)) ? "demain" : d.toLocaleDateString("fr-FR", {weekday: "long", day: "numeric", month: "long"}); } catch(e){ return k; } };
+function findSlot(day, key){ const l = slotsOn(parseDay(day)); let i = l.findIndex(s => slotKey(s) === key); if (i < 0) i = l.findIndex(s => s.t === String(key || "").split("@")[0]); return i; }
+function describeAction(a){
+  const day = dLab(a.date), sl = a.cle && a.date ? slotsOn(parseDay(a.date))[findSlot(a.date, a.cle)] : null, nm = sl ? slotTitle(sl, parseDay(a.date)) : (TYPES[String(a.cle || "").split("@")[0]] || {}).l || "la séance";
+  switch (a.type){
+    case "fait": return `Cocher « ${nm} » comme faite ${day}${a.ressenti ? ` (ressenti ${a.ressenti})` : ""}`;
+    case "en_plus": return `Ajouter une séance en plus ${day} : ${EXTRA[a.seance] || "séance"}${a.km ? ", " + fr(a.km) + " km" : ""}${a.min ? ", " + a.min + " min" : ""}`;
+    case "routine": return `Cocher dans la routine ${day} : ${(a.items || []).map(k => (ROUTINE.find(r => r.k === k) || {}).l).filter(Boolean).join(", ")}`;
+    case "deplacer": return `Déplacer « ${nm} » de ${day} à ${dLab(a.vers_date || a.date)}${a.vers_heure ? " à " + fmtH(a.vers_heure) : ""}`;
+    case "enlever": return `Enlever « ${nm} » ${day}`;
+    case "ajouter": return `Prévoir ${day}${a.heure ? " à " + fmtH(a.heure) : ""} : ${(a.ensemble ? typeLabel("ensemble") + " · " : "") + typeLabel(a.seance)}`;
+    case "note": return `Noter pour ${day} : ${[a.forme ? "forme " + (ENERGIE[a.forme - 1] || "").toLowerCase() : "", a.sommeil ? "sommeil " + fr(a.sommeil) + " h" : "", a.douleur ? "douleur : " + a.douleur : "", a.texte ? "« " + a.texte + " »" : ""].filter(Boolean).join(", ")}`;
+    case "repas": return `Noter ${String(a.repas || "un repas").toLowerCase()} ${day} : ${a.texte || ""}`;
+  }
+  return "";
+}
+async function applyActions(list){
+  const o = JSON.parse(JSON.stringify(S.fait || {})), p = clonePlan(); let planCh = false, faitCh = false; const done = [], meals = [];
+  const okDate = k => /^\d{4}-\d{2}-\d{2}$/.test(k || "");
+  for (const a of list){
+    if (!okDate(a.date)) continue;
+    const k = a.date; o[k] = o[k] || {};
+    if (a.type === "fait"){ const i = findSlot(k, a.cle); if (i < 0) continue; const s = slotsOn(parseDay(k))[i]; o[k][slotKey(s)] = ["facile", "moyen", "dur"].includes(a.ressenti) ? {at: Date.now(), rpe: a.ressenti} : Date.now(); faitCh = true; }
+    else if (a.type === "en_plus"){ o[k]["+" + newId()] = Object.assign({t: EXTRA[a.seance] ? a.seance : "autre", at: Date.now()}, Number(a.km) > 0 ? {km: Number(a.km)} : {}, Number(a.min) > 0 ? {min: Math.round(Number(a.min))} : {}); faitCh = true; }
+    else if (a.type === "routine"){ (a.items || []).forEach(it => { if (ROUTINE.some(r => r.k === it)) o[k]["routine:" + it] = Date.now(); }); faitCh = true; }
+    else if (a.type === "note"){ const J = Object.assign({}, o[k].journal || {}); if (a.forme >= 1 && a.forme <= 5) J.energie = Math.round(a.forme); if (Number(a.sommeil) > 0) J.sommeil = Number(a.sommeil); if (a.douleur) J.douleur = String(a.douleur).slice(0, 120); if (a.texte) J.note = ((J.note ? J.note + " · " : "") + String(a.texte)).slice(0, 600); J.at = Date.now(); o[k].journal = J; faitCh = true; }
+    else if (a.type === "enlever" || a.type === "deplacer"){
+      const src = (p.jours && p.jours[k] ? p.jours[k] : slotsOn(parseDay(k))).map(x => Object.assign({}, x)), i = src.findIndex(s => slotKey(s) === a.cle) >= 0 ? src.findIndex(s => slotKey(s) === a.cle) : src.findIndex(s => s.t === String(a.cle || "").split("@")[0]);
+      if (i < 0) continue; const old = src.splice(i, 1)[0]; putDay(p, k, src);
+      if (a.type === "deplacer"){
+        const to = okDate(a.vers_date) ? a.vers_date : k, ns = Object.assign({}, old, a.vers_heure ? {h: a.vers_heure} : {});
+        if (ns.fin && old.h && a.vers_heure){ const m = t => { const [x, y] = t.split(":").map(Number); return x * 60 + y; }, dd = m(old.fin) - m(old.h), e = m(a.vers_heure) + dd; ns.fin = e > 0 && e < 1440 ? String(Math.floor(e / 60)).padStart(2, "0") + ":" + String(e % 60).padStart(2, "0") : ""; }
+        const dst = (to === k ? src : (p.jours && p.jours[to] ? p.jours[to] : slotsOn(parseDay(to)))).map(x => Object.assign({}, x)); dst.push(ns); putDay(p, to, dst);
+        moveFait(o, k, slotKey(old), to, slotKey(ns)); faitCh = true;
+      }
+      planCh = true;
+    }
+    else if (a.type === "ajouter"){ if (!TYPES[a.seance] || a.seance === "repos") continue; const src = (p.jours && p.jours[k] ? p.jours[k] : slotsOn(parseDay(k))).map(x => Object.assign({}, x)); src.push({t: a.seance, h: /^\d{2}:\d{2}$/.test(a.heure || "") ? a.heure : "", duo: !!a.ensemble && a.seance !== "ensemble"}); putDay(p, k, src); planCh = true; }
+    else if (a.type === "repas" && a.texte){ meals.push(a); }
+    done.push(describeAction(a));
+  }
+  if (faitCh) saveFait(o);
+  if (planCh) savePlan(p);
+  for (const a of meals){
+    try { const est = await estimateMeal(a.texte); addDoc("repas", {at: a.date === ymd(new Date()) ? Date.now() : parseDay(a.date).getTime(), day: a.date, meal: ["Petit-déjeuner", "Déjeuner", "Collation", "Dîner"].includes(a.repas) ? a.repas : "Collation", text: String(a.texte).slice(0, 600), kcal: est.kcal, p: est.p, g: est.g, l: est.l}); }
+    catch(e){ done.push("Repas non calculé : " + e.message); }
+  }
+  renderAll(); renderToday();
+  return done;
+}
+document.addEventListener("click", async e => {
+  const b = e.target.closest("[data-act]"); if (!b) return;
+  const [idx, what] = b.dataset.act.split("|"), m = chat[Number(idx)]; if (!m || !m.actions || m.applied) return;
+  if (what === "non"){ m.applied = "non"; lsSet("phm-chat", chat); renderChat(); return; }
+  b.disabled = true; b.textContent = "J'enregistre…";
+  const done = await applyActions(m.actions); m.applied = "oui"; m.done = done; lsSet("phm-chat", chat); renderChat();
+});
 async function sendChat(text){
   text = text.trim(); if (!text || chatBusy) return;
   chatBusy = true; chat.push({role: "user", content: text}); renderChat();
   $("chat-log").insertAdjacentHTML("beforeend", `<div class="msg bot" id="typing">…</div>`);
   try {
-    const t = await askGroq([{role: "system", content: systemPrompt()}, ...chat.slice(-12).map(m => ({role: m.role, content: m.content}))], 450);
-    chat.push({role: "assistant", content: t || "…"});
+    const t = await askGroq([{role: "system", content: chatSystem()}, ...chat.slice(-12).map(m => ({role: m.role, content: m.content}))], 650);
+    const sp = splitActions(t);
+    chat.push(Object.assign({role: "assistant", content: sp.text || "…"}, sp.actions.length ? {actions: sp.actions} : {}));
   } catch(e){ chat.push({role: "assistant", content: e.message || "Je n'arrive pas à répondre (réseau ?)."}); }
   chat = chat.slice(-40); lsSet("phm-chat", chat); chatBusy = false; renderChat();
 }
@@ -2515,7 +2655,22 @@ function weekType(d){
 }
 const dow = d => ((new Date(d).getDay() + 6) % 7) + 1;
 // annulations ponctuelles (club fermé un jour férié…) : plan.annul = {"AAAA-MM-JJ": ["gym", …]}
-function slotsOn(d){ const p = plan(), w = weekType(d), off = ((p.annul || {})[ymd(d)]) || []; return ((p[w] || {})[dow(d)] || []).filter(s => !off.includes(s.t)).sort((a, b) => (a.h || "").localeCompare(b.h || "")); }
+// calendrier officiel du concours (session 2027)
+const CONCOURS = [
+  {d: "2027-01-18", h: "18:00", t: "Clôture des inscriptions au concours (18 h)", k: "inscription"},
+  {d: "2027-03-09", t: "Épreuves écrites du concours", k: "ecrits"},
+  {d: "2027-03-29", t: "Début de la période des épreuves sportives et de l'oral (jusqu'au 28 mai, date exacte sur ta convocation)", k: "sport"},
+  {d: "2027-05-28", t: "Fin de la période des épreuves sportives et de l'oral", k: "finsport"},
+  {d: "2027-07-02", h: "14:00", t: "Résultats définitifs (14 h)", k: "resultats"}
+];
+// journée modifiée à la main : plan.jours = {"AAAA-MM-JJ": [créneaux]} remplace le planning A/B ce jour-là
+function slotsOn(d){
+  const p = plan(), k = ymd(d), sortH = l => l.slice().sort((a, b) => (a.h || "").localeCompare(b.h || ""));
+  if (p.jours && Array.isArray(p.jours[k])) return sortH(p.jours[k]);
+  const w = weekType(d), off = ((p.annul || {})[k]) || [];
+  return sortH(((p[w] || {})[dow(d)] || []).filter(s => !off.includes(s.t)));
+}
+const dayEdited = d => !!((plan().jours || {})[ymd(d)]);
 // téléphone pas encore relié à l'espace partagé (réinstallation, autre navigateur…) : on le dit au lieu de « remplis ton planning »
 const notLinked = () => !!FB && !team;
 const planEmpty = () => { const p = plan(); return !["A", "B"].some(w => Object.values(p[w] || {}).some(l => l && l.length)); };
@@ -2656,7 +2811,7 @@ function renderObjectifs(){
 }
 // éditeur de planning
 let planWk = "A";
-function savePlan(p){ S.plan = p; lsSet("phm-plan", p); if (FS) FS.setDoc(FS.doc(FS.db, "equipes", team, "reglages", "planning"), p).catch(writeErr); renderAll(); }
+function savePlan(p){ p = JSON.parse(JSON.stringify(p)); S.plan = p; lsSet("phm-plan", p); if (FS) FS.setDoc(FS.doc(FS.db, "equipes", team, "reglages", "planning"), p).catch(writeErr); renderAll(); }
 function renderPlanning(){
   if (!$("planning")) return;
   const p = plan();
@@ -2739,6 +2894,7 @@ function agendaEvents(){
         desc: [`Bloc ${m.n}${m.deload ? " (semaine allégée + tests)" : ""} · semaine ${weekType(d)}`, x.lieu ? "Lieu : " + x.lieu : "", ...x.L.map(stripTags), "", "Détails et chrono : " + location.origin + location.pathname].filter((l, i) => l || i > 0).join("\n")});
     });
   }
+  CONCOURS.forEach(c => { if (c.d >= ymd(new Date())) out.push({d: c.d, allDay: true, days: 1, t: "Concours · " + c.t, desc: "Calendrier officiel du concours de gardien de la paix (session 2027)."}); });
   return out;
 }
 let agendaTimer = null;
@@ -2919,19 +3075,22 @@ function renderNuPreview(){
     <p class="note">Vérifie et corrige si besoin, puis enregistre.</p>
     <div class="gbtns"><button type="button" class="btn" id="nd-save">Enregistrer</button><button type="button" class="ghost small" id="nd-cancel">Annuler</button></div></div>`;
 }
+async function estimateMeal(text){
+  const out = await askGroq([
+    {role: "system", content: "Tu es diététicien. Estime les valeurs nutritionnelles du repas décrit, avec des portions françaises standard quand la quantité n'est pas précisée. Réponds UNIQUEMENT avec un objet JSON, sans texte autour : {\"items\":[{\"nom\":\"…\",\"quantite\":\"…\",\"kcal\":0,\"p\":0,\"g\":0,\"l\":0}]} où p = protéines (g), g = glucides (g), l = lipides (g). Nombres entiers."},
+    {role: "user", content: text}], 700);
+  const j = parseJSON(out), items = j && Array.isArray(j.items) ? j.items : null;
+  if (!items || !items.length) throw new Error("Athéna n'a pas compris ce repas. Reformule avec les aliments et les quantités.");
+  const sum = k => items.reduce((n, i) => n + (Number(i[k]) || 0), 0);
+  return {items, kcal: sum("kcal"), p: sum("p"), g: sum("g"), l: sum("l")};
+}
 function parseJSON(t){ const m = String(t || "").match(/\{[\s\S]*\}/); if (!m) return null; try { return JSON.parse(m[0]); } catch(e){ return null; } }
 $("nu-form").addEventListener("submit", async e => {
   e.preventDefault();
   const text = $("nu-text").value.trim(); if (!text) return;
   const b = $("nu-go"); b.disabled = true; b.textContent = "Athéna calcule…";
   try {
-    const out = await askGroq([
-      {role: "system", content: "Tu es diététicien. Estime les valeurs nutritionnelles du repas décrit, avec des portions françaises standard quand la quantité n'est pas précisée. Réponds UNIQUEMENT avec un objet JSON, sans texte autour : {\"items\":[{\"nom\":\"…\",\"quantite\":\"…\",\"kcal\":0,\"p\":0,\"g\":0,\"l\":0}]} où p = protéines (g), g = glucides (g), l = lipides (g). Nombres entiers."},
-      {role: "user", content: text}], 700);
-    const j = parseJSON(out), items = j && Array.isArray(j.items) ? j.items : null;
-    if (!items || !items.length) throw new Error("Athéna n'a pas compris ce repas. Reformule avec les aliments et les quantités.");
-    const sum = k => items.reduce((n, i) => n + (Number(i[k]) || 0), 0);
-    nuDraft = {text, meal: $("nu-meal").value, items, kcal: sum("kcal"), p: sum("p"), g: sum("g"), l: sum("l")};
+    nuDraft = Object.assign({text, meal: $("nu-meal").value}, await estimateMeal(text));
     renderNuPreview();
   } catch(err){ $("nu-preview").innerHTML = `<p class="verdict slow" style="white-space:normal">${esc(err.message)}</p>`; }
   b.disabled = false; b.textContent = "Calculer";
@@ -2969,6 +3128,70 @@ $("nu-advice").addEventListener("click", async () => {
   b.disabled = false; b.textContent = "Demander un conseil pour aujourd'hui";
 });
 
+
+/* ---- le point du jour : rappels calculés + mot d'Athéna ---- */
+const PREP = {
+  course_end: "tenue et chaussures de course, une gourde ; 20 min de Pliability juste après",
+  course_frac: "chaussures de course, une gourde, le minuteur de l'appli (onglet Fractionné) ; 20 min de Pliability après",
+  course_rec: "tenue de course ; reste vraiment tranquille ; Pliability après",
+  parcours: "Fitness Park : prévois 1 h 30, une gourde, l'appli pour chronométrer chaque atelier",
+  luc: "un espace de 20 m, l'appli pour les bips (volume à fond), une gourde",
+  gym: "si possible 10 traversées de poutre avant ou après le cours",
+  krav: "une gourde, des protections si tu en as",
+  jjb: "ta tenue, une gourde, une collation pour après (3 h de cours)",
+  freeletics: "tapis et gourde ; Pliability après"
+};
+function rappels(){
+  const R = [], now = new Date(), h = now.getHours(), today = new Date(new Date().setHours(12, 0, 0, 0)), y = addDays(today, -1), tm = addDays(today, 1);
+  if (planEmpty()) return R;
+  const F = d => (S.fait || {})[ymd(d)] || {};
+  if (y >= calStart()) slotsOn(y).filter(s => s.t !== "ensemble" && s.t !== "repos" && !isDone(y, s)).forEach(s => R.push({ic: "!", t: `Hier : ${slotTitle(s, y)} pas cochée`, d: "Faite ? Coche-la. Pas faite ou changée ? Dis-le à Athéna, elle ajuste.", btn: {l: "C'est fait", attr: `data-done="${ymd(y)}|${esc(slotKey(s))}"`}}));
+  const todo = slotsOn(today).filter(s => s.t !== "ensemble" && s.t !== "repos" && !isDone(today, s));
+  todo.forEach(s => { const x = session(s.t, today, s.h); const late = s.h && Number(s.h.split(":")[0]) < h - 2; R.push({ic: late ? "!" : "•", t: `${s.h ? fmtH(s.h) + " · " : ""}${slotTitle(s, today)}${late ? " : faite ?" : ""}`, d: (x.titre && /Test|Simulation/.test(x.titre) ? "Jour de test : mange léger 2 à 3 h avant, échauffe-toi 15 min, et lance le chrono depuis la séance. " : "") + "À prévoir : " + (PREP[s.t] || "ta tenue et une gourde") + ".", btn: late ? {l: "C'est fait", attr: `data-done="${ymd(today)}|${esc(slotKey(s))}"`} : null}); });
+  if (h >= 17){ const tmS = slotsOn(tm).filter(s => s.t !== "ensemble" && s.t !== "repos" && s.h && s.h < "11:00"); tmS.forEach(s => R.push({ic: "→", t: `Demain ${fmtH(s.h)} : ${slotTitle(s, tm)}`, d: "Prépare tes affaires ce soir (" + (PREP[s.t] || "tenue, gourde") + ") et couche-toi tôt."})); }
+  const left = ROUTINE.filter(r => !F(today)["routine:" + r.k]);
+  if (h >= 15 && left.length && !slotsOn(today).some(s => s.t === "repos")) R.push({ic: "•", t: `Routine : il te reste ${left.map(r => r.l.replace(/^3 (× 5 )?/, "")).join(", ")}`, d: "10 minutes suffisent. Coche au fur et à mesure dans ta journée."});
+  if (S.profil && S.profil.poids){
+    const n = repasOn(today).length, T = nutTargets(today), t = dayTotals(today);
+    if (h >= 14 && n === 0) R.push({ic: "•", t: "Aucun repas noté aujourd'hui", d: "Note ton petit-déjeuner et ton déjeuner pour suivre tes protéines.", btn: {l: "Noter un repas", attr: `data-goto="nutrition"`}});
+    else if (h >= 19 && T && t.p < T.p * 0.7) R.push({ic: "•", t: `Protéines : ${Math.round(t.p)} / ${T.p} g`, d: "Pense à une source de protéines ce soir (œufs, poisson, viande, skyr, tofu).", btn: {l: "Noter un repas", attr: `data-goto="nutrition"`}});
+  }
+  const lastLuc = S.luc.length ? Math.max(...S.luc.map(x => x.at)) : 0, started = Date.now() > calStart().getTime() + 14 * 864e5;
+  if (started && Date.now() - lastLuc > 21 * 864e5) R.push({ic: "•", t: "Pas de Luc Léger depuis 3 semaines", d: "Fais-en un complet à une de tes prochaines séances de course : c'est la moitié de ta note."});
+  objectifs().filter(o => !o.ok && o.due >= ymd(today) && o.due <= ymd(addDays(today, 10))).forEach(o => R.push({ic: "◆", t: `Objectif avant le ${parseDay(o.due).toLocaleDateString("fr-FR", {day: "numeric", month: "long"})}`, d: o.label}));
+  if (!(S.profil || {}).inscrit && ymd(today) <= "2027-01-18"){ const dl = Math.ceil((parseDay("2027-01-18") - today) / 864e5); if (dl <= 45) R.push({ic: "!", t: `Inscription au concours : clôture dans ${dl} jour${dl > 1 ? "s" : ""}`, d: "Le 18 janvier à 18 h. Inscris-toi sans attendre la dernière minute.", btn: {l: "Je suis inscrite", attr: `data-inscrit="1"`}}); }
+  CONCOURS.forEach(c => { const dl = Math.round((parseDay(c.d) - today) / 864e5); if (c.k !== "inscription" && dl >= 0 && dl <= 14) R.push({ic: "◆", t: dl === 0 ? "Aujourd'hui : " + c.t : `Dans ${dl} jour${dl > 1 ? "s" : ""} : ${c.t}`, d: c.k === "ecrits" ? "La veille : séance légère ou repos, et couche-toi tôt." : ""}); });
+  const Jy = F(y).journal || {}; if (Jy.douleur) R.push({ic: "!", t: `Hier tu as noté : ${Jy.douleur}`, d: "Écoute ton corps : si ça fait mal, allège ou repose-toi. Si ça dure, demande l'avis d'un médecin."});
+  return R;
+}
+let pointBusy = false;
+function renderPoint(){
+  const el = $("point"); if (!el) return;
+  if (planEmpty()){ el.hidden = true; return; }
+  const R = rappels(), P = lsGet("phm-point", null), k = ymd(new Date()), fresh = P && P.day === k;
+  el.hidden = false;
+  el.innerHTML = `<div class="row between"><h3 style="margin:0">Le point d'Athéna</h3>${aiOn() ? `<button type="button" class="link" id="point-go">${pointBusy ? "…" : fresh ? "Actualiser" : "Demander"}</button>` : ""}</div>
+    ${fresh ? `<div class="point-txt">${mdLite(P.text)}</div>` : pointBusy ? `<p class="note">Athéna regarde ta journée…</p>` : ""}
+    ${R.length ? `<ul class="rap">${R.map(r => `<li><span class="rap-ic">${r.ic}</span><div><b>${esc(r.t)}</b><p class="note">${esc(r.d)}</p>${r.btn ? `<button type="button" class="ghost tiny" ${r.btn.attr}>${r.btn.l}</button>` : ""}</div></li>`).join("")}</ul>` : `<p class="note">Rien à signaler : tout est à jour. Bravo.</p>`}
+    <button type="button" class="ghost small" data-goto="coach" style="width:100%;margin-top:8px">Raconter ma journée à Athéna</button>`;
+}
+async function genPoint(force){
+  if (!aiOn() || pointBusy || !storeReady || planEmpty() || !navigator.onLine) return;
+  const P = lsGet("phm-point", null), k = ymd(new Date());
+  if (!force && P && P.day === k && Date.now() - P.at < 4 * 3600e3) return;
+  pointBusy = true; renderPoint();
+  try {
+    const R = rappels().map(r => "- " + r.t + " : " + r.d).join("\n") || "rien";
+    const t = await askGroq([{role: "system", content: systemPrompt()}, {role: "user", content: `Fais-moi le point de ma journée en 70 mots maximum, comme une coach qui me connaît : ce qui m'attend aujourd'hui (d'après mon agenda), ce que je n'ai pas encore fait ou coché, ce qu'il faut préparer, et un encouragement adapté à ma forme et à mes notes. Rappels calculés par l'appli :\n${R}\nPas de liste longue, pas de titre.`}], 350);
+    if (t) lsSet("phm-point", {day: k, at: Date.now(), text: splitActions(t).text});
+  } catch(e){}
+  pointBusy = false; renderPoint();
+}
+document.addEventListener("click", e => {
+  if (e.target.closest("#point-go")) genPoint(true);
+  if (e.target.closest("[data-inscrit]")){ saveProfil(Object.assign({}, S.profil || {}, {inscrit: true})); setSync("Noté : tu es inscrite. Bravo !"); }
+});
+
 /* ======================= REFONTE : navigation, aujourd'hui, minuteur ======================= */
 const TRAIN = ["parcours", "luc", "frac", "tests"];
 const TITLES = {accueil: "Athéna", parcours: "S'entraîner", luc: "S'entraîner", frac: "S'entraîner", tests: "S'entraîner", progres: "Progrès", coach: "Athéna", plan: "Ton plan", ateliers: "Les 10 ateliers", reglages: "Réglages", nutrition: "Nutrition"};
@@ -2988,7 +3211,7 @@ function chrome(v){
 $("top-back").addEventListener("click", () => show(prevView && prevView !== "reglages" && prevView !== "ateliers" ? prevView : "accueil"));
 
 /* ---- séances faites ---- */
-function saveFait(o){ S.fait = o; lsSet("phm-fait", o); if (FS) FS.setDoc(FS.doc(FS.db, "equipes", team, "reglages", "fait"), o).catch(writeErr); }
+function saveFait(o){ o = JSON.parse(JSON.stringify(o || {})); S.fait = o; lsSet("phm-fait", o); if (FS) FS.setDoc(FS.doc(FS.db, "equipes", team, "reglages", "fait"), o).catch(writeErr); }
 const slotKey = s => s.t + "@" + (s.h || "");
 const slotTitle = (s, d) => (s.duo ? typeLabel("ensemble") + " · " : "") + ((d && s.t !== "ensemble" && session(s.t, d, s.h).titre) || typeLabel(s.t));
 const isDone = (d, s) => !!((S.fait || {})[ymd(d)] || {})[slotKey(s)];
@@ -3055,6 +3278,89 @@ function actionFor(s, d, x){
   if (s.t === "gym") return {l: "Plan vertige", go: "ateliers", mode: "club"};
   return null;
 }
+
+/* ---- modifier une journée, ressenti, forme du jour ---- */
+let editSlot = null; // {day, i} ou {day, add:true}
+const clonePlan = () => JSON.parse(JSON.stringify(plan()));
+function putDay(p, k, list){
+  p.jours = p.jours || {}; p.jours[k] = list.map(s => Object.fromEntries(Object.entries(s).filter(([, v]) => v !== "" && v != null && v !== false)));
+  const lim = ymd(addDays(new Date(), -60)); Object.keys(p.jours).forEach(x => { if (x < lim) delete p.jours[x]; });
+}
+function moveFait(o, fromDay, fromKey, toDay, toKey){
+  if (!o[fromDay] || !o[fromDay][fromKey] || (fromDay === toDay && fromKey === toKey)) return;
+  const v = o[fromDay][fromKey]; delete o[fromDay][fromKey]; o[toDay] = o[toDay] || {}; o[toDay][toKey] = v;
+}
+const typeOpts = sel => Object.entries(TYPES).filter(([k]) => k !== "repos").map(([k, t]) => `<option value="${k}"${k === sel ? " selected" : ""}>${esc(k === "ensemble" ? typeLabel("ensemble") : t.l)}</option>`).join("");
+function slotEditor(day, s, i){
+  const add = i == null;
+  return `<form class="slot-ed" data-ed-day="${day}"${add ? "" : ` data-ed-i="${i}"`}>
+    <label class="wide">Séance<select name="t">${typeOpts(s.t || "course_end")}</select></label>
+    <label>Début<input type="time" name="h" value="${esc(s.h || "")}"></label>
+    <label>Fin (facultatif)<input type="time" name="fin" value="${esc(s.fin || "")}"></label>
+    <label class="wide">Jour<input type="date" name="day" value="${day}"></label>
+    <label class="wide ed-duo"><input type="checkbox" name="duo"${s.duo ? " checked" : ""}> Avec ${esc(typeLabel("ensemble"))} (on s'entraîne ensemble)</label>
+    <div class="wide ed-btns"><button type="submit" class="btn">${add ? "Ajouter" : "Enregistrer"}</button>${add ? "" : `<button type="button" class="ghost small" data-ed-del="${day}|${i}">Enlever ce jour</button>`}<button type="button" class="ghost small" data-ed-close>Fermer</button></div>
+    <p class="note wide">Ne change que ce jour-là : ton planning A / B habituel reste le même. L'agenda suit tout seul.</p>
+  </form>`;
+}
+document.addEventListener("submit", e => {
+  const f = e.target.closest(".slot-ed"); if (!f) return; e.preventDefault();
+  const day = f.dataset.edDay, to = f.day.value || day, p = clonePlan(), o = JSON.parse(JSON.stringify(S.fait || {}));
+  const ns = {t: f.t.value, h: f.h.value || "", fin: f.fin.value || "", duo: f.duo.checked && f.t.value !== "ensemble"};
+  const src = slotsOn(parseDay(day)).map(x => Object.assign({}, x));
+  if (f.dataset.edI != null){
+    const i = Number(f.dataset.edI), old = src[i]; if (!old) return;
+    src.splice(i, 1);
+    if (to === day){ src.push(ns); putDay(p, day, src); }
+    else { putDay(p, day, src); const dst = slotsOn(parseDay(to)).map(x => Object.assign({}, x)); dst.push(ns); putDay(p, to, dst); }
+    moveFait(o, day, slotKey(old), to, slotKey(ns));
+  } else {
+    if (to === day){ src.push(ns); putDay(p, day, src); }
+    else { const dst = slotsOn(parseDay(to)).map(x => Object.assign({}, x)); dst.push(ns); putDay(p, to, dst); }
+  }
+  editSlot = null; saveFait(o); savePlan(p); setSync(to === day ? "Journée mise à jour. L'agenda suit tout seul." : `Séance déplacée au ${parseDay(to).toLocaleDateString("fr-FR", {weekday: "long", day: "numeric", month: "long"})}.`);
+});
+document.addEventListener("click", e => {
+  const t = e.target;
+  const ed = t.closest("[data-edit]"); if (ed){ const [day, i] = ed.dataset.edit.split("|"); editSlot = {day, i: i === "add" ? null : Number(i), add: i === "add"}; renderToday(); return; }
+  if (t.closest("[data-ed-close]")){ editSlot = null; renderToday(); return; }
+  const del = t.closest("[data-ed-del]"); if (del){
+    const [day, i] = del.dataset.edDel.split("|"), p = clonePlan(), src = slotsOn(parseDay(day)).map(x => Object.assign({}, x));
+    src.splice(Number(i), 1); putDay(p, day, src); editSlot = null; savePlan(p); setSync("Séance enlevée pour ce jour."); return;
+  }
+  const rs = t.closest("[data-day-reset]"); if (rs){
+    if (!confirm("Revenir au planning habituel pour ce jour ? Tes modifications de ce jour seront effacées.")) return;
+    const p = clonePlan(); if (p.jours) delete p.jours[rs.dataset.dayReset]; editSlot = null; savePlan(p); return;
+  }
+  const rp = t.closest("[data-rpe]"); if (rp){
+    const [day, k, v] = rp.dataset.rpe.split("|"), o = JSON.parse(JSON.stringify(S.fait || {})); o[day] = o[day] || {};
+    const cur = o[day][k], base = cur && typeof cur === "object" ? cur : {at: cur || Date.now()};
+    base.rpe = base.rpe === v ? undefined : v; o[day][k] = base; saveFait(o); renderToday(); return;
+  }
+  const jn = t.closest("[data-jn-e]"); if (jn){
+    const [day, n] = jn.dataset.jnE.split("|"), o = JSON.parse(JSON.stringify(S.fait || {})); o[day] = o[day] || {};
+    const J = Object.assign({}, o[day].journal || {}); J.energie = J.energie === Number(n) ? undefined : Number(n); J.at = Date.now(); o[day].journal = J; saveFait(o); renderToday(); return;
+  }
+});
+document.addEventListener("submit", e => {
+  const f = e.target.closest(".jn-form"); if (!f) return; e.preventDefault();
+  const day = f.dataset.jnDay, o = JSON.parse(JSON.stringify(S.fait || {})); o[day] = o[day] || {};
+  const J = Object.assign({}, o[day].journal || {}), sl = parseFloat(String(f.sommeil.value).replace(",", "."));
+  J.sommeil = sl > 0 ? sl : undefined; J.douleur = f.douleur.value.trim().slice(0, 120) || undefined; J.note = f.note.value.trim().slice(0, 600) || undefined; J.at = Date.now();
+  o[day].journal = J; saveFait(o); renderToday(); setSync("Noté. Athéna en tiendra compte.");
+});
+const ENERGIE = ["Épuisée", "Fatiguée", "Correcte", "En forme", "Au top"];
+function journalCard(d){
+  const k = ymd(d), J = (((S.fait || {})[k]) || {}).journal || {};
+  return `<div class="sess journal"><span class="ic daily">${ICONS.daily}</span><div><h3>Ma forme et mes notes</h3><div class="when">Athéna en tient compte pour ses conseils</div>
+    <div class="jn-e">${ENERGIE.map((l, i) => `<button type="button" class="chip${J.energie === i + 1 ? " on" : ""}" data-jn-e="${k}|${i + 1}" aria-pressed="${J.energie === i + 1}">${l}</button>`).join("")}</div>
+    <form class="jn-form" data-jn-day="${k}">
+      <label>Sommeil (h)<input name="sommeil" type="number" min="0" max="16" step="0.5" inputmode="decimal" value="${J.sommeil || ""}"></label>
+      <label>Douleur, gêne<input name="douleur" type="text" maxlength="120" placeholder="ex : poignet droit" value="${esc(J.douleur || "")}"></label>
+      <label class="wide">Note libre<textarea name="note" rows="2" maxlength="600" placeholder="Ce que tu veux qu'Athéna sache : séance changée, fatigue, règles, stress, ce que tu as fait en plus…">${esc(J.note || "")}</textarea></label>
+      <button type="submit" class="ghost small wide">Enregistrer mes notes</button>
+    </form></div></div>`;
+}
 function renderToday(){
   const el = $("today"); if (!el) return;
   const now = new Date(); now.setHours(12, 0, 0, 0);
@@ -3077,15 +3383,20 @@ function renderToday(){
     el.innerHTML = head + `<div class="sess"><span class="ic daily">${ICONS.daily}</span><div><h3>Ton planning est vide</h3><p class="what">Indique tes séances habituelles (semaine A et semaine B) : l'appli te dira ensuite chaque jour quoi faire, où, et combien de temps.</p><div class="acts"><button type="button" class="btn" data-goto="plan" data-anchor="planning-panel">Remplir mon planning</button></div></div></div>`;
     return;
   }
-  const sl = slotsOn(d);
-  const cards = sl.map(s => {
+  const sl = slotsOn(d), dk = ymd(d);
+  const cards = sl.map((s, i) => {
+    if (editSlot && editSlot.day === dk && editSlot.i === i) return `<div class="sess editing"><span class="ic daily">${ICONS.daily}</span><div><h3>Modifier : ${esc(slotTitle(s, d))}</h3>${slotEditor(dk, s, i)}</div></div>`;
     const T = TYPES[s.t] || {l: s.t, ic: "daily"}, x = session(s.t, d, s.h), a = actionFor(s, d, x), done = isDone(d, s);
+    const fv = ((S.fait || {})[dk] || {})[slotKey(s)], rpe = fv && typeof fv === "object" ? fv.rpe : null;
+    const rpeRow = done && s.t !== "ensemble" ? `<div class="rpe"><span class="note">Ressenti :</span>${["facile", "moyen", "dur"].map(v => `<button type="button" class="chip${rpe === v ? " on" : ""}" data-rpe="${dk}|${esc(slotKey(s))}|${v}">${v}</button>`).join("")}</div>` : "";
+    const editBtn = `<button type="button" class="link sess-edit" data-edit="${dk}|${i}">Modifier</button>`;
     const main = x.L[0] || "", more = x.L.slice(1);
     return `<div class="sess${done ? " done" : ""}"><span class="ic ${T.ic}" style="position:relative">${ICONS[T.ic] || ICONS.daily}${s.duo ? `<em class="duo-badge">♥</em>` : ""}</span><div>
       <h3>${esc(slotTitle(s, d))}</h3><div class="when">${s.h ? slotHours(s) : "Quand tu veux"}${x.lieu ? " · " + esc(x.lieu) : ""}</div>
       <p class="what">${main}</p>${s.t !== "ensemble" && s.t !== "repos" ? energyLine(sessEnergy(s, d)) : ""}
       ${more.length ? `<details><summary>Détails</summary>${more.map(l => `<p>${l}</p>`).join("")}</details>` : ""}
       ${s.t === "repos" || s.t === "ensemble" ? "" : `<div class="acts">${a ? `<button type="button" class="btn" data-goto="${a.go}"${a.mode ? ` data-mode="${a.mode}"` : ""}${a.mes ? ` data-mes="${a.mes}"` : ""}>${a.l}</button>` : ""}<button type="button" class="ghost done-btn" data-done="${ymd(d)}|${esc(slotKey(s))}" aria-pressed="${done}">${done ? "Fait ✓" : "Fait"}</button></div>`}
+      ${rpeRow}${editBtn}
     </div></div>`;
   });
   if (!sl.some(s => s.t === "repos")){
@@ -3104,7 +3415,9 @@ function renderToday(){
         <label class="note ex-cont"><input type="checkbox" name="cont" checked> Courue sans m'arrêter (compte pour l'objectif 8 / 10 km)</label>
         <button type="submit" class="btn">Enregistrer</button>
       </form></details>`;
-  el.innerHTML = head + `<div class="sess-list">${sl.length ? cards.join("") : `<div class="sess"><span class="ic daily">${ICONS.daily}</span><div><h3>Rien de prévu</h3><p class="what">Repos, ou la routine 10 min si tu as envie.</p></div></div>`}${ex}</div>` + addForm;
+  const addPlanned = editSlot && editSlot.day === dk && editSlot.add ? `<div class="sess editing"><span class="ic daily">${ICONS.daily}</span><div><h3>Ajouter une séance prévue</h3>${slotEditor(dk, {h: ""}, null)}</div></div>` : "";
+  const dayBar = `<div class="day-tools">${dayEdited(d) ? `<span class="note">Journée modifiée</span><button type="button" class="link" data-day-reset="${dk}">Revenir au planning habituel</button>` : ""}<button type="button" class="link" data-edit="${dk}|add">+ Prévoir une séance ce jour</button></div>`;
+  el.innerHTML = head + dayBar + `<div class="sess-list">${sl.length ? cards.join("") : `<div class="sess"><span class="ic daily">${ICONS.daily}</span><div><h3>Rien de prévu</h3><p class="what">Repos, ou la routine 10 min si tu as envie.</p></div></div>`}${addPlanned}${ex}</div>` + addForm + journalCard(d);
 }
 document.addEventListener("change", e => { const f = e.target.closest(".extra-form"); if (f && e.target.name === "t") f.querySelector(".ex-cont").hidden = e.target.value !== "course"; });
 document.addEventListener("submit", e => {
@@ -3335,8 +3648,8 @@ function dayInfo(d){
   const sl = inRange && !planEmpty() ? slotsOn(d).filter(s => s.t !== "repos") : [];
   const test = sl.some(s => /^<b>(Test|TEST|Simulation|Dernière simulation)/.test(session(s.t, d, s.h).L[0] || ""));
   const obj = objectifs().filter(o => o.due === ymd(d));
-  const exam = ymd(d) === ymd(calEnd());
-  return {inRange, m, sl, test, obj, exam};
+  const exam = ymd(d) === ymd(calEnd()), conc = CONCOURS.filter(c => c.d === ymd(d));
+  return {inRange, m, sl, test, obj, exam, conc};
 }
 function renderCal(){
   const el = $("mcal"); if (!el) return;
@@ -3354,7 +3667,7 @@ function renderCal(){
     const d = new Date(y, mo, n, 12), k = ymd(d), I = dayInfo(d);
     if (n > 1 && dow(d) === 1) h += wkCell(d);
     const love = I.sl.some(s => s.t === "ensemble" || s.duo);
-    const tag = I.exam ? `<span class="tag j">J</span>` : I.test ? `<span class="tag t">T</span>` : I.obj.length ? `<span class="tag o">◆</span>` : "";
+    const tag = I.exam ? `<span class="tag j">J</span>` : I.conc.length ? `<span class="tag j">!</span>` : I.test ? `<span class="tag t">T</span>` : I.obj.length ? `<span class="tag o">◆</span>` : "";
     h += `<button type="button" class="mcell ${I.m ? "b" + I.m.i : ""}${k < today ? " past" : ""}${k === today ? " today" : ""}${love ? " love" : ""}" data-cal="${k}" aria-selected="${calSel === k}" aria-label="${d.toLocaleDateString("fr-FR", {weekday: "long", day: "numeric", month: "long"})}${love ? ", " + typeLabel("ensemble") : ""}">${tag}${love ? `<span class="lv" aria-hidden="true">♥</span>` : ""}<span class="n">${n}</span><span class="pts">${I.sl.slice(0, 6).map(s => `<i class="${(TYPES[s.t] || {ic: "daily"}).ic}${s.t !== "ensemble" && isDone(d, s) ? " ok" : ""}"></i>`).join("")}</span></button>`;
   }
   el.innerHTML = h;
@@ -3371,7 +3684,8 @@ function renderCalDay(){
   const head = `<div class="row between"><b style="font-family:var(--display);font-size:1.15rem;text-transform:capitalize">${d.toLocaleDateString("fr-FR", {weekday: "long", day: "numeric", month: "long"})}</b><span class="note">${I.m ? "Bloc " + I.m.n + (I.m.deload ? " · semaine allégée" : "") + " · semaine " + weekType(d) : ""}</span></div>`;
   const items = I.sl.map(s => { const T = TYPES[s.t] || {ic: "daily"}, x = session(s.t, d, s.h); return `<div class="it"><i class="${T.ic}"></i><div><b>${s.h ? slotHours(s) + " · " : ""}${esc(slotTitle(s, d))}</b>${s.t !== "ensemble" && isDone(d, s) ? ` <span class="verdict ok">fait</span>` : ""}<div class="note">${stripTags(x.L[0] || "")}</div></div></div>`; }).join("");
   const objs = I.obj.map(o => `<div class="it"><i style="background:var(--warn);border-radius:2px;transform:rotate(45deg)"></i><div><b>Échéance</b><div class="note">${esc(o.label)}${o.ok ? " · atteint" : ""}</div></div></div>`).join("");
-  const exam = I.exam ? `<div class="it"><i style="background:var(--cone)"></i><div><b>Épreuves sportives</b><div class="note">Le grand jour ♥</div></div></div>` : "";
+  const concI = I.conc.map(c => `<div class="it"><i style="background:var(--cone)"></i><div><b>Concours</b><div class="note">${esc(c.t)}</div></div></div>`).join("");
+  const exam = concI + (I.exam ? `<div class="it"><i style="background:var(--cone)"></i><div><b>Épreuves sportives</b><div class="note">Le grand jour ♥</div></div></div>` : "");
   el.innerHTML = `<div class="calday">${head}${items || (I.inRange ? `<p class="note">${planEmpty() ? (notLinked() ? "Ce téléphone n'est pas relié à votre espace : Réglages › Partage entre téléphones › « Coller et rejoindre »." : "Remplis ton planning pour voir tes séances.") : "Rien de prévu : repos."}</p>` : `<p class="note">En dehors du programme.</p>`)}${objs}${exam}
     ${I.inRange && !planEmpty() ? `<button type="button" class="ghost small" data-open-day="${calSel}" style="align-self:flex-start">Ouvrir ce jour dans Aujourd'hui</button>` : ""}</div>` + weekList(d);
 }
@@ -3469,7 +3783,7 @@ $("theme-seg").addEventListener("click", e => { const b = e.target.closest("[dat
 applyTheme(lsGet("phm-theme", "auto"));
 
 /* ======================= DÉMARRAGE ======================= */
-function renderAll(){ renderAthena(); renderLove(); renderHome(); renderPlanAll(); renderHello(); renderTiles(); renderSetup(); renderSplits(); renderRecos(); renderWeek(); renderMesures(); renderNuHome(); if (!$("v-nutrition").hidden) renderNutrition(); if (!$("v-progres").hidden) renderProg(); }
+function renderAll(){ renderAthena(); renderLove(); renderHome(); renderPlanAll(); renderHello(); renderTiles(); renderSetup(); renderSplits(); renderRecos(); renderWeek(); renderMesures(); renderNuHome(); renderPoint(); if (!$("v-nutrition").hidden) renderNutrition(); if (!$("v-progres").hidden) renderProg(); }
 setStatus(); renderChrono(); renderSeance(); renderLucBareme(); renderAteliers(); renderAll();
 show((location.hash || "#accueil").slice(1), true);
 initStore();
