@@ -2359,7 +2359,7 @@ function journalText(){
     const lab = i === 0 ? "AUJOURD'HUI" : i === -1 ? "hier" : i === 1 ? "demain" : DAYS[dow(d)];
     const parts = slotsOn(d).filter(s => s.t !== "repos").map(s => {
       if (s.t === "ensemble") return `${fmtH(s.h)} moment à deux`;
-      const v = F[slotKey(s)], st = v ? "FAIT" + (typeof v === "object" && v.rpe ? ` (ressenti ${v.rpe})` : "") : (i < 0 ? "NON COCHÉ" : i === 0 ? "à faire" : "prévu");
+      const v = F[slotKey(s)], vo = v && typeof v === "object" ? v : {}, st = v ? "FAIT" + [vo.km ? fr(vo.km) + " km" : "", vo.min ? vo.min + " min" : "", vo.rpe ? "ressenti " + vo.rpe : ""].filter(Boolean).map((x, j) => (j ? ", " : " (") + x).join("") + (vo.km || vo.min || vo.rpe ? ")" : "") : (i < 0 ? "NON COCHÉ" : i === 0 ? "à faire" : "prévu");
       return `[${slotKey(s)}] ${s.h ? fmtH(s.h) + " " : ""}${slotTitle(s, d)} : ${st}`;
     });
     extrasOn(d).forEach(x => parts.push(`en plus : ${EXTRA[x.t] || x.t}${x.km ? " " + fr(x.km) + " km" : ""}${x.min ? " " + x.min + " min" : ""}`));
@@ -2478,7 +2478,7 @@ function renderChat(){
 }
 const ACTIONS_RULES = `
 ENREGISTRER POUR ELLE : si elle te dit avoir fait quelque chose, te demande de changer son agenda, ou te donne une info à noter, propose de l'enregistrer : ajoute TOUT À LA FIN de ta réponse un bloc <actions>[…]</actions> contenant une liste JSON valide. Elle validera d'un bouton ; dans ton texte, dis simplement « je te propose de l'enregistrer ». Types possibles (dates réelles AAAA-MM-JJ d'après son agenda, clés entre crochets) :
-{"type":"fait","date":"…","cle":"course_end@08:30","ressenti":"facile|moyen|dur"} : une séance de son agenda faite
+{"type":"fait","date":"…","cle":"course_end@08:30","ressenti":"facile|moyen|dur","km":6,"min":35} : une séance de son agenda faite, même si elle l'a faite autrement (autre distance, autre heure) ; km et min seulement si elle les a dits
 {"type":"en_plus","date":"…","seance":"course|freeletics|parcours|gym|autre","km":5,"min":30} : une séance faite en plus
 {"type":"routine","date":"…","items":["susp","pompes","poignets"]} : exercices de la routine faits
 {"type":"deplacer","date":"…","cle":"…","vers_date":"…","vers_heure":"HH:MM"} : déplacer une séance
@@ -2486,7 +2486,7 @@ ENREGISTRER POUR ELLE : si elle te dit avoir fait quelque chose, te demande de c
 {"type":"ajouter","date":"…","seance":"course_end|course_frac|course_rec|parcours|luc|renfo|freeletics|gym|krav|jjb|ensemble","heure":"HH:MM","ensemble":true} : prévoir une séance
 {"type":"note","date":"…","forme":1,"sommeil":7.5,"douleur":"…","texte":"…"} : sa forme (1 épuisée à 5 au top), son sommeil, une douleur, une note
 {"type":"repas","date":"…","repas":"Petit-déjeuner|Déjeuner|Collation|Dîner","texte":"ce qu'elle a mangé"} : un repas à noter
-Ne mets ce bloc que si elle t'a donné une info concrète ou demandé un changement. Jamais d'action sur ses cours au club sans demande explicite.`;
+Règles : « en_plus » UNIQUEMENT pour une séance qui n'était pas dans son agenda ; si elle a fait la séance prévue (même différemment), c'est « fait ». N'invente JAMAIS une valeur qu'elle n'a pas donnée (distance, durée, sommeil, forme) : laisse le champ absent. « note » seulement pour une info nouvelle qu'elle vient de te dire (pas ce qui est déjà noté). Ne mets ce bloc que si elle t'a donné une info concrète ou demandé un changement. Jamais d'action sur ses cours au club sans demande explicite. Quand tu proposes d'enregistrer, réponds en 80 mots maximum.`;
 const chatSystem = () => systemPrompt() + ACTIONS_RULES;
 function splitActions(t){
   const m = String(t || "").match(/<actions>\s*([\s\S]*?)\s*<\/actions>/i);
@@ -2499,7 +2499,7 @@ function findSlot(day, key){ const l = slotsOn(parseDay(day)); let i = l.findInd
 function describeAction(a){
   const day = dLab(a.date), sl = a.cle && a.date ? slotsOn(parseDay(a.date))[findSlot(a.date, a.cle)] : null, nm = sl ? slotTitle(sl, parseDay(a.date)) : (TYPES[String(a.cle || "").split("@")[0]] || {}).l || "la séance";
   switch (a.type){
-    case "fait": return `Cocher « ${nm} » comme faite ${day}${a.ressenti ? ` (ressenti ${a.ressenti})` : ""}`;
+    case "fait": return `Cocher « ${nm} » comme faite ${day}${[a.km ? fr(a.km) + " km" : "", a.min ? a.min + " min" : "", a.ressenti ? "ressenti " + a.ressenti : ""].filter(Boolean).map((x, i) => (i ? ", " : " (") + x).join("")}${a.km || a.min || a.ressenti ? ")" : ""}`;
     case "en_plus": return `Ajouter une séance en plus ${day} : ${EXTRA[a.seance] || "séance"}${a.km ? ", " + fr(a.km) + " km" : ""}${a.min ? ", " + a.min + " min" : ""}`;
     case "routine": return `Cocher dans la routine ${day} : ${(a.items || []).map(k => (ROUTINE.find(r => r.k === k) || {}).l).filter(Boolean).join(", ")}`;
     case "deplacer": return `Déplacer « ${nm} » de ${day} à ${dLab(a.vers_date || a.date)}${a.vers_heure ? " à " + fmtH(a.vers_heure) : ""}`;
@@ -2516,7 +2516,7 @@ async function applyActions(list){
   for (const a of list){
     if (!okDate(a.date)) continue;
     const k = a.date; o[k] = o[k] || {};
-    if (a.type === "fait"){ const i = findSlot(k, a.cle); if (i < 0) continue; const s = slotsOn(parseDay(k))[i]; o[k][slotKey(s)] = ["facile", "moyen", "dur"].includes(a.ressenti) ? {at: Date.now(), rpe: a.ressenti} : Date.now(); faitCh = true; }
+    if (a.type === "fait"){ const i = findSlot(k, a.cle); if (i < 0) continue; const s = slotsOn(parseDay(k))[i], extra = Object.assign({}, ["facile", "moyen", "dur"].includes(a.ressenti) ? {rpe: a.ressenti} : {}, Number(a.km) > 0 ? {km: Number(a.km)} : {}, Number(a.min) > 0 ? {min: Math.round(Number(a.min))} : {}); o[k][slotKey(s)] = Object.keys(extra).length ? Object.assign({at: Date.now()}, extra) : Date.now(); faitCh = true; }
     else if (a.type === "en_plus"){ o[k]["+" + newId()] = Object.assign({t: EXTRA[a.seance] ? a.seance : "autre", at: Date.now()}, Number(a.km) > 0 ? {km: Number(a.km)} : {}, Number(a.min) > 0 ? {min: Math.round(Number(a.min))} : {}); faitCh = true; }
     else if (a.type === "routine"){ (a.items || []).forEach(it => { if (ROUTINE.some(r => r.k === it)) o[k]["routine:" + it] = Date.now(); }); faitCh = true; }
     else if (a.type === "note"){ const J = Object.assign({}, o[k].journal || {}); if (a.forme >= 1 && a.forme <= 5) J.energie = Math.round(a.forme); if (Number(a.sommeil) > 0) J.sommeil = Number(a.sommeil); if (a.douleur) J.douleur = String(a.douleur).slice(0, 120); if (a.texte) J.note = ((J.note ? J.note + " · " : "") + String(a.texte)).slice(0, 600); J.at = Date.now(); o[k].journal = J; faitCh = true; }
@@ -3452,7 +3452,7 @@ document.addEventListener("click", e => {
   // on ne garde que les 120 derniers jours
   const lim = ymd(addDays(new Date(), -120)); Object.keys(o).forEach(x => { if (x < lim) delete o[x]; });
   const nowDone = !!o[d][k], rect = b.getBoundingClientRect();
-  saveFait(o); renderToday(); renderTiles(); renderHello();
+  saveFait(o); renderToday(); renderTiles(); renderHello(); renderPoint();
   if (nowDone){
     try { navigator.vibrate && navigator.vibrate(18); } catch(err){}
     if (!matchMedia("(prefers-reduced-motion: reduce)").matches){
@@ -3463,7 +3463,7 @@ document.addEventListener("click", e => {
         document.body.appendChild(p); setTimeout(() => p.remove(), 800);
       }
       const card = [...document.querySelectorAll("[data-done]")].find(x => x.dataset.done === b.dataset.done);
-      if (card) card.closest(".sess").classList.add("pop");
+      const sc = card && card.closest(".sess"); if (sc) sc.classList.add("pop");
     }
   }
 });
