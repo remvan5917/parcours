@@ -337,14 +337,25 @@ async function transcribe(env, req, cors){
 // Une vraie voix, jouée comme un fichier audio (marche aussi iPhone en mode silencieux). Clé : secret ELEVENLABS_API_KEY.
 // Voix : secret facultatif ATHENA_VOICE_ID (sinon une voix féminine de base). Les phrases déjà dites sont gardées en cache.
 async function parler(env, req, cors, ctx){
-  if (!env.ELEVENLABS_API_KEY) return json({configured: false}, 503, cors);
+  if (!env.ELEVENLABS_API_KEY && !env.AI) return json({configured: false}, 503, cors);
   let b = {}; try { b = await req.json(); } catch (e) {}
   const texte = String(b.texte || "").replace(/\s+/g, " ").trim().slice(0, 1500);
   if (!texte) return json({error: {message: "texte vide"}}, 400, cors);
-  const voice = env.ATHENA_VOICE_ID || "EXAVITQu4vr4xnSDxMaL", model = env.ATHENA_VOICE_MODEL || "eleven_v4_turbo";
+  const eleven = !!env.ELEVENLABS_API_KEY, voice = eleven ? (env.ATHENA_VOICE_ID || "EXAVITQu4vr4xnSDxMaL") : "melotts-fr", model = eleven ? (env.ATHENA_VOICE_MODEL || "eleven_v4_turbo") : "melotts";
   const key = new Request("https://athena-voix.cache/" + (await evId("voix", voice + "|" + model + "|" + texte)));
   const cache = caches.default, hit = await cache.match(key);
   if (hit){ const h = new Headers(hit.headers); Object.entries(cors).forEach(([k, v]) => h.set(k, v)); return new Response(hit.body, {status: 200, headers: h}); }
+  if (!eleven){
+    // voix gratuite : Workers AI MeloTTS en français (réponse : audio MP3 en base64)
+    let out;
+    try { out = await env.AI.run("@cf/myshell-ai/melotts", {prompt: texte, lang: "fr"}); }
+    catch (e) { return json({error: {message: "voix indisponible : " + String(e.message || e).slice(0, 160)}}, 502, cors); }
+    const b64 = out && (out.audio || out.result && out.result.audio);
+    if (!b64) return json({error: {message: "voix vide"}}, 502, cors);
+    const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0)), type = bytes[0] === 0x52 && bytes[1] === 0x49 ? "audio/wav" : "audio/mpeg";
+    ctx.waitUntil(cache.put(key, new Response(bytes, {headers: {"Content-Type": type, "Cache-Control": "public, max-age=2592000"}})));
+    return new Response(bytes, {status: 200, headers: {...cors, "Content-Type": type}});
+  }
   const r = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(voice)}?output_format=mp3_44100_64`, {
     method: "POST", headers: {"Content-Type": "application/json", "xi-api-key": env.ELEVENLABS_API_KEY, Accept: "audio/mpeg"},
     body: JSON.stringify({text: texte, model_id: model, language_code: "fr", voice_settings: {stability: 0.5, similarity_boost: 0.8, style: 0.2, use_speaker_boost: true, speed: 1.03}})});

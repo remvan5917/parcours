@@ -883,6 +883,7 @@ body.noyau-on nav.tabs{display:none}
 .ny-mic svg{width:26px;height:26px;fill:none;stroke:#E8C68A;stroke-width:1.6;stroke-linecap:round}
 .noyau-ov[data-mode="hear"] .ny-mic{background:#E5383B;border-color:#E5383B;animation:micPulse 1.2s ease-in-out infinite}
 .noyau-ov[data-mode="hear"] .ny-mic svg{stroke:#fff}
+.noyau-ov.muted .ny-mic{opacity:.45;border-style:dashed}
 .ny-hint{justify-self:end;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#6f6876;text-align:right}
 @media (max-height:640px){.ny-hud{display:none}}
 .ny-open{display:flex;align-items:center;justify-content:center;gap:10px}
@@ -3593,7 +3594,7 @@ const NOYAU = (() => {
   const ov = $("noyau-ov"), cv = $("noyau-cv"), ctx = cv.getContext ? cv.getContext("2d") : null;
   let bootAt = 0, W = 0, dpr = 1, P = [], mode = "idle", lvl = 0, rot = 0, rA = 0, rB = 0, boot = 0, raf = 0, last = 0, t0 = 0, idleAt = 0, clock = 0;
   let rec = null, chunks = [], stream = null, actx = null, an = null, abuf = null;
-  const LIB = {idle: "En attente", hear: "Écoute", think: "Analyse", talk: "Réponse", happy: "Bravo", sleep: "Veille"};
+  const LIB = {idle: "À l'écoute", hear: "Écoute", think: "Analyse", talk: "Réponse", happy: "Bravo", sleep: "Veille"};
   function particules(n){ P = []; const g = Math.PI * (3 - Math.sqrt(5)); for (let i = 0; i < n; i++){ const y = 1 - (i / (n - 1)) * 2, r = Math.sqrt(1 - y * y), th = g * i; P.push({x: Math.cos(th) * r, y, z: Math.sin(th) * r, s: Math.random() * 6.283, k: .9 + Math.random() * .2}); } }
   // la sphère prend la place libre (elle rétrécit quand la conversation s'allonge)
   function taille(){
@@ -3602,7 +3603,7 @@ const NOYAU = (() => {
     const w = Math.round(side * dpr); if (w !== W){ W = w; cv.width = W; cv.height = W; if (!P.length || Math.abs(P.length - (W > 700 ? 460 : 320)) > 0) particules(W > 700 ? 460 : 320); }
   }
   const ro = window.ResizeObserver ? new ResizeObserver(() => { if (!ov.hidden) taille(); }) : null;
-  function setMode(m){ mode = m; $("ny-etat").textContent = LIB[m]; ov.dataset.mode = m; if (m !== "sleep") idleAt = Date.now(); $("ny-hint").textContent = m === "hear" ? "Touche quand tu as fini" : m === "think" ? "Athéna réfléchit…" : m === "talk" ? "Touche pour l'interrompre" : "Touche et parle"; }
+  function setMode(m){ mode = m; $("ny-etat").textContent = LIB[m]; ov.dataset.mode = m; if (m !== "sleep") idleAt = Date.now(); $("ny-hint").textContent = muted ? "Micro coupé" : m === "hear" ? "Je t'écoute" : m === "think" ? "Je réfléchis…" : m === "talk" ? "Touche pour m'interrompre" : m === "sleep" ? "Parle pour me réveiller" : "Parle quand tu veux"; }
   function niveau(now){
     let cible = 0;
     if (mode === "hear" && an){ an.getByteFrequencyData(abuf); let sum = 0; for (let i = 2; i < 40; i++) sum += abuf[i]; cible = Math.min(1, sum / (38 * 140)); }
@@ -3673,56 +3674,101 @@ const NOYAU = (() => {
     ov.classList.add("has-act");
     el.innerHTML = `<div class="ny-actbox"><b>À enregistrer :</b><ul>${m.actions.map(describeAction).filter(Boolean).map(x => `<li>${esc(x)}</li>`).join("")}</ul><div class="gbtns"><button type="button" class="btn" data-act="${i}|oui">Valider</button><button type="button" class="ghost small" data-act="${i}|non">Non merci</button></div></div>`;
   }
-  async function micStartN(){
-    if (!navigator.mediaDevices || !window.MediaRecorder){ caption("La dictée n'est pas possible sur ce téléphone. Utilise l'onglet Athéna pour écrire."); return; }
-    try {
-      stopAudio();
-      stream = await navigator.mediaDevices.getUserMedia({audio: true});
-      try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); await actx.resume(); const src = actx.createMediaStreamSource(stream); an = actx.createAnalyser(); an.fftSize = 128; abuf = new Uint8Array(an.frequencyBinCount); src.connect(an); } catch(e){ an = null; }
-      const type = ["audio/mp4", "audio/webm;codecs=opus", "audio/webm", "audio/ogg"].find(t => MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) || "";
-      rec = new MediaRecorder(stream, type ? {mimeType: type} : undefined); chunks = [];
-      rec.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
-      rec.onstop = () => { const blob = new Blob(chunks, {type: rec.mimeType || type || "audio/webm"}); stream.getTracks().forEach(t => t.stop()); an = null; rec = null; envoyer(blob); };
-      rec.start(250); setMode("hear"); caption("Je t'écoute… parle normalement, puis touche le micro.", "only"); $("ny-act").innerHTML = ""; ov.classList.remove("has-act");
-      setTimeout(() => { if (rec && rec.state === "recording") rec.stop(); }, 120000);
-    } catch(e){ caption("Autorise le micro pour Athéna dans les réglages du téléphone."); setMode("idle"); }
+  // ——— écoute continue, comme Atlas : elle parle quand elle veut, Athéna détecte le début et la fin de sa phrase ———
+  let live = false, muted = false, speechOn = false, speechT0 = 0, lastVoice = 0, segT0 = 0, floorLvl = .008, vad = 0, tbuf = null, resumeT = 0;
+  const recType = () => ["audio/mp4", "audio/webm;codecs=opus", "audio/webm", "audio/ogg"].find(t => window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) || "";
+  async function ensureMic(){
+    if (stream && stream.active && an) return true;
+    stream = await navigator.mediaDevices.getUserMedia({audio: {echoCancellation: true, noiseSuppression: true, autoGainControl: true}});
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)(); await actx.resume();
+    const src = actx.createMediaStreamSource(stream); an = actx.createAnalyser(); an.fftSize = 1024; src.connect(an);
+    abuf = new Uint8Array(an.frequencyBinCount); tbuf = new Float32Array(an.fftSize);
+    return true;
+  }
+  function startRec(){
+    if (!live || muted || !stream || (rec && rec.state === "recording")) return;
+    const type = recType(); chunks = [];
+    try { rec = new MediaRecorder(stream, type ? {mimeType: type} : undefined); } catch(e){ rec = null; return; }
+    rec.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
+    rec.onstop = () => { const keep = rec && rec._keep, blob = new Blob(chunks, {type: (rec && rec.mimeType) || type || "audio/webm"}); rec = null; if (keep) envoyer(blob); else if (live && !muted && mode !== "think" && mode !== "talk") startRec(); };
+    rec.start(250); segT0 = Date.now(); speechOn = false; speechT0 = 0;
+    if (mode !== "happy") setMode("idle");
+  }
+  function stopRec(keep){ if (rec && rec.state === "recording"){ rec._keep = keep; rec.stop(); } }
+  // iPhone : micro ouvert = son dans l'écouteur, tout bas → on rend le micro pendant qu'Athéna parle, on le reprend après
+  function releaseMic(){ if (stream){ stream.getTracks().forEach(t => t.stop()); } stream = null; an = null; }
+  function resumeSoon(ms){ clearTimeout(resumeT); resumeT = setTimeout(() => { if (!live || muted || mode === "think" || mode === "talk") return; ensureMic().then(() => { clearInterval(vad); vad = setInterval(vadTick, 50); startRec(); }).catch(() => { caption("Autorise le micro pour Athéna (Réglages de l'iPhone › Athéna › Micro), puis rouvre-moi.", "only"); }); }, ms || 350); }
+  function vadTick(){
+    if (!live || muted || !an || !tbuf || !rec || mode === "think" || mode === "talk") return;
+    an.getFloatTimeDomainData(tbuf); let sum = 0; for (let i = 0; i < tbuf.length; i++) sum += tbuf[i] * tbuf[i];
+    const rms = Math.sqrt(sum / tbuf.length), now = Date.now(), thr = Math.max(.018, floorLvl * 3.2);
+    if (!speechOn) floorLvl = floorLvl * .98 + Math.min(rms, floorLvl * 1.6 + .002) * .02; // bruit de fond, qui s'adapte lentement
+    if (rms > thr){
+      lastVoice = now;
+      if (!speechOn){ if (!speechT0) speechT0 = now; if (now - speechT0 > 160){ speechOn = true; setMode("hear"); $("ny-me").textContent = ""; $("ny-cap").textContent = "Je t'écoute…"; } }
+    } else if (!speechOn) speechT0 = 0;
+    if (speechOn && now - lastVoice > 1150){ speechOn = false; stopRec(now - speechT0 > 650); return; }   // fin de phrase : un petit silence
+    if (speechOn && now - speechT0 > 60000){ speechOn = false; stopRec(true); return; }                     // une minute max
+    if (!speechOn && now - segT0 > 25000) stopRec(false);                                                  // rien entendu : on repart à neuf
+    if (!speechOn && mode === "idle" && now - lastVoice > 120000 && now - segT0 > 2000) setMode("sleep");
   }
   async function envoyer(blob){
-    setMode("think"); caption("Je transcris…", "only");
+    setMode("think"); $("ny-cap").textContent = "…"; releaseMic();
     try {
       const r = await fetch(`${AGENDA_BASE}/voix`, {method: "POST", headers: {"Content-Type": (blob.type || "audio/webm").split(";")[0]}, body: blob});
       const j = await r.json(), t = String(j.text || "").trim();
-      if (!r.ok || HALLU.test(t)){ setMode("idle"); caption(r.ok ? "Je n'ai pas bien entendu. Réessaie, un peu plus près." : "La dictée ne répond pas pour le moment."); return; }
-      caption(t, "me"); $("ny-cap").textContent = "Athéna réfléchit…";
+      if (!r.ok || HALLU.test(t) || t.length < 2){ setMode("idle"); $("ny-cap").textContent = r.ok ? "" : "La dictée ne répond pas pour le moment."; resumeSoon(); return; }
+      caption(t, "me");
+      if (await voiceAnswer(t)){ resumeSoon(1500); hud(); return; }
+      $("ny-cap").textContent = "Athéna réfléchit…";
       await sendChat(t);
       const m = chat[chat.length - 1];
-      if (m && m.role === "assistant"){ caption(m.content); actions(); say(m.content + (m.actions && m.actions.length ? " Je te propose de l'enregistrer : touche Valider." : ""), {force: true}); }
-      if (!speechSynthesis.speaking && !speechSynthesis.pending) setMode("idle");
-    } catch(e){ setMode("idle"); caption("Pas de réseau : Athéna a besoin d'internet pour te répondre."); }
+      if (m && m.role === "assistant"){
+        caption(m.content); actions();
+        say(m.content + (m.actions && m.actions.length ? " Je te propose de l'enregistrer : dis-moi oui, ou touche Valider." : ""), {force: true});
+        // si la voix ne part pas (pas de réseau…), on se remet quand même à écouter
+        setTimeout(() => { if (mode === "think"){ setMode("idle"); resumeSoon(); } }, 9000);
+      } else { setMode("idle"); resumeSoon(); }
+    } catch(e){ setMode("idle"); caption("Pas de réseau : Athéna a besoin d'internet pour te répondre.", "only"); resumeSoon(1500); }
     hud();
+  }
+  // « oui » / « non » à voix haute quand Athéna propose d'enregistrer
+  const pendingActs = () => { const m = chat[chat.length - 1]; return m && m.role === "assistant" && m.actions && m.actions.length && !m.applied ? chat.length - 1 : -1; };
+  async function voiceAnswer(t){
+    const i = pendingActs(); if (i < 0) return false;
+    const x = t.toLowerCase().replace(/[^a-zàâçéèêëîïôûùüÿœ' ]/g, " ").trim();
+    if (/^(oui|ouais|vas-y|vas y|valide|d'accord|ok|c'est bon|enregistre)/.test(x)){ const b = document.querySelector(`#ny-act [data-act="${i}|oui"]`); if (b) b.click(); return true; }
+    if (/^(non|pas la peine|laisse|annule)/.test(x)){ const b = document.querySelector(`#ny-act [data-act="${i}|non"]`); if (b) b.click(); setMode("idle"); caption("D'accord, je n'enregistre rien.", "only"); say("D'accord, je n'enregistre rien.", {force: true}); return true; }
+    return false;
   }
   function open(){
     if (!ctx){ show("coach"); return; }
-    ov.hidden = false; document.body.classList.add("noyau-on"); t0 = Date.now(); boot = 0; setMode("idle"); hud(); $("ny-me").textContent = ""; W = 0; requestAnimationFrame(taille); if (ro) ro.observe($("ny-stage"));
-    const P = lsGet("phm-point", null), hello = P && P.day === ymd(new Date()) ? P.text : (prenom() ? `Bonjour ${prenom()}. Raconte-moi ta journée : touche le micro et parle.` : "Raconte-moi ta journée : touche le micro et parle.");
+    ov.hidden = false; document.body.classList.add("noyau-on"); t0 = Date.now(); boot = 0; muted = false; live = true; setMode("idle"); hud(); $("ny-me").textContent = ""; W = 0; requestAnimationFrame(taille); if (ro) ro.observe($("ny-stage"));
+    const P = lsGet("phm-point", null), hello = P && P.day === ymd(new Date()) ? P.text : (prenom() ? `Bonjour ${prenom()}. Je t'écoute : parle quand tu veux.` : "Je t'écoute : parle quand tu veux.");
     caption(hello, "only"); actions(); unlockVoice();
-    say(prenom() ? `Bonjour ${prenom()}. Touche le micro et raconte-moi ta journée.` : "Bonjour. Touche le micro et raconte-moi ta journée.", {force: true});
     cancelAnimationFrame(raf); last = 0; bootAt = performance.now(); raf = requestAnimationFrame(frame); clock = setInterval(hud, 1000); try { grabWake(); } catch(e){}
+    if (!navigator.mediaDevices || !window.MediaRecorder){ live = false; caption("L'écoute n'est pas possible sur ce téléphone : écris à Athéna dans son onglet.", "only"); return; }
+    // d'abord le bonjour (haut-parleur), puis l'écoute ; si la voix ne part pas, on écoute quand même
+    say(prenom() ? `Bonjour ${prenom()}. Je t'écoute, parle quand tu veux.` : "Bonjour. Je t'écoute, parle quand tu veux.", {force: true});
+    setTimeout(() => { if (live && mode !== "talk" && !rec) resumeSoon(0); }, 4000);
   }
   function close(){
+    live = false; clearInterval(vad); clearTimeout(resumeT);
     ov.hidden = true; document.body.classList.remove("noyau-on"); cancelAnimationFrame(raf); clearInterval(clock); if (ro) ro.disconnect(); stopAudio();
-    if (rec && rec.state === "recording"){ rec.onstop = null; rec.stop(); } if (stream) stream.getTracks().forEach(t => t.stop()); rec = null; an = null; try { dropWake(); } catch(e){}
+    if (rec && rec.state === "recording"){ rec.onstop = null; rec.stop(); } releaseMic(); rec = null; try { dropWake(); } catch(e){}
     renderAll(); renderToday();
   }
   $("ny-close").addEventListener("click", close);
   $("ny-mic").addEventListener("click", () => { unlockVoice();
-    if (rec && rec.state === "recording"){ rec.stop(); return; }
-    if (mode === "talk"){ stopAudio(); setMode("idle"); return; }
-    if (mode !== "think") micStartN();
+    if (mode === "talk"){ stopAudio(); setMode("idle"); resumeSoon(200); return; }   // l'interrompre
+    muted = !muted; ov.classList.toggle("muted", muted);
+    if (muted){ stopRec(false); setMode("idle"); $("ny-hint").textContent = "Micro coupé"; }
+    else resumeSoon(0);
   });
   ov.addEventListener("click", e => { if (mode === "sleep" && !e.target.closest("button")){ setMode("idle"); } });
   document.addEventListener("ath-talk-start", () => { if (!ov.hidden) setMode("talk"); });
-  document.addEventListener("ath-talk-end", () => { if (!ov.hidden && mode === "talk") setMode("idle"); });
+  document.addEventListener("ath-talk-start", () => { if (!ov.hidden){ stopRec(false); releaseMic(); } });
+  document.addEventListener("ath-talk-end", () => { if (!ov.hidden && mode === "talk"){ setMode("idle"); resumeSoon(400); } });
   document.addEventListener("click", e => {
     if (e.target.closest("[data-noyau]")) open();
     const a = e.target.closest("#ny-act [data-act]"); if (a && a.dataset.act.endsWith("|oui")) setTimeout(() => { setMode("happy"); caption("C'est enregistré. Bien joué."); say("C'est enregistré. Bien joué.", {force: true}); hud(); $("ny-act").innerHTML = ""; ov.classList.remove("has-act"); setTimeout(() => { if (mode === "happy") setMode("idle"); }, 4000); }, 600);

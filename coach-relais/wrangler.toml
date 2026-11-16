@@ -22,3 +22,7 @@ crons = ["*/15 * * * *"]
 name = "VOIXLIM"
 namespace_id = "1002"
 simple = { limit = 60, period = 60 }
+
+# Synthèse vocale gratuite (Workers AI, MeloTTS français)
+[ai]
+binding = "AI"
