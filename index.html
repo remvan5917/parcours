@@ -814,7 +814,7 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--accent)}
 .rap li{display:grid;grid-template-columns:22px 1fr;gap:8px;align-items:start;border-top:1px solid var(--line);padding-top:8px}
 .rap .rap-ic{font-weight:800;color:var(--accent);text-align:center}
 .rap p{margin:2px 0 4px}
-.mic{width:44px;height:44px;flex:0 0 44px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--ink);display:grid;place-items:center;cursor:pointer;padding:0}
+.mic{width:100%;min-height:52px;border-radius:14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;font:inherit;font-weight:700;margin:4px 0 10px}
 .mic svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
 .mic.on{background:#E5383B;border-color:#E5383B;color:#fff;animation:micPulse 1.2s ease-in-out infinite}
 @keyframes micPulse{0%,100%{box-shadow:0 0 0 0 rgba(229,56,59,.5)}50%{box-shadow:0 0 0 10px rgba(229,56,59,0)}}
@@ -1254,12 +1254,12 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--accent)}
     <div id="ai-on" class="col" hidden>
       <div class="chat" id="chat-log" aria-live="polite"></div>
       <div class="chips" id="chat-sugg"></div>
+      <button type="button" class="mic" id="mic" aria-label="Parler à Athéna"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg><span id="mic-lab">Parler à Athéna</span></button>
       <form class="row" id="chat-form">
         <input type="text" id="chat-in" placeholder="Pose ta question au coach…" autocomplete="off" style="flex:1 1 200px;font:inherit;font-size:.95rem;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)">
         <button type="submit" class="ghost small">Envoyer</button>
-        <button type="button" class="mic" id="mic" aria-label="Parler à Athéna"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
       </form>
-      <div class="voice-bar"><span class="note" id="mic-state">Touche le micro et parle : Athéna t'écoute et te répond à voix haute.</span><label class="note vtog"><input type="checkbox" id="voix-on"> Voix d'Athéna</label></div>
+      <div class="voice-bar"><span class="note" id="mic-state">Raconte ta journée de vive voix : Athéna t'écoute et te répond.</span><label class="note vtog"><input type="checkbox" id="voix-on"> Voix d'Athéna</label></div>
       <p class="note" style="font-size:.8rem">Athéna peut se tromper : les règles officielles sont dans le guide des ateliers (onglet Plan). En cas de douleur, demande l'avis d'un médecin.</p>
     </div>
   </div>
@@ -3255,20 +3255,20 @@ async function micStart(){
     rec.ondataavailable = e => { if (e.data && e.data.size) recChunks.push(e.data); };
     rec.onstop = async () => { stream.getTracks().forEach(t => t.stop()); clearTimeout(recTimer); await micSend(new Blob(recChunks, {type: rec.mimeType || type || "audio/webm"})); rec = null; };
     rec.start(); speechSynthesis.cancel();
-    $("mic").classList.add("on"); setMic("Je t'écoute… touche encore le micro quand tu as fini.");
+    $("mic").classList.add("on"); $("mic-lab").textContent = "J'écoute… touche pour envoyer"; setMic("Parle normalement, comme à quelqu'un. Touche le bouton quand tu as fini.");
     recTimer = setTimeout(() => { if (rec && rec.state === "recording") rec.stop(); }, 120000);
   } catch(e){ setMic("Micro refusé : autorise le micro pour Athéna dans les réglages du téléphone, ou écris ton message."); }
 }
 function setMic(t){ const el = $("mic-state"); if (el) el.textContent = t; }
 async function micSend(blob){
-  $("mic").classList.remove("on");
+  $("mic").classList.remove("on"); $("mic-lab").textContent = "Parler à Athéna";
   if (!blob.size){ setMic("Je n'ai rien entendu. Réessaie."); return; }
   setMic("Je transcris…");
   try {
     const r = await fetch(`${AGENDA_BASE}/voix`, {method: "POST", headers: {"Content-Type": (blob.type || "audio/webm").split(";")[0]}, body: blob});
     const j = await r.json(); const t = String(j.text || "").trim();
     if (!r.ok || HALLU.test(t)){ setMic(r.ok ? "Je n'ai pas bien entendu. Réessaie, un peu plus près du micro." : (j.error && j.error.message) || "La dictée ne marche pas pour le moment."); return; }
-    setMic("Touche le micro et parle : Athéna t'écoute et te répond à voix haute.");
+    setMic("Raconte ta journée de vive voix : Athéna t'écoute et te répond.");
     lsSet("phm-voix", $("voix-on").checked ? true : lsGet("phm-voix", true));
     sendChat(t, {voice: true});
   } catch(e){ setMic("Pas de réseau : la dictée a besoin d'internet."); }
