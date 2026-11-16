@@ -848,7 +848,7 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--accent)}
 .pv-verdict.ko{background:color-mix(in srgb,#E5383B 14%,transparent);color:#E5383B}
 .pv .gbtns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .pv .gbtns>*{width:100%}
-.noyau-ov{position:fixed;inset:0;z-index:100;background:#07070a;color:#F4EDE4;font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;overflow:hidden;display:grid;grid-template-rows:auto auto minmax(120px,1fr) auto auto auto;padding:calc(14px + env(safe-area-inset-top)) 14px calc(12px + env(safe-area-inset-bottom))}
+.noyau-ov{position:fixed;inset:0;z-index:100;background:#07070a;color:#F4EDE4;font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;overflow:hidden;display:grid;grid-template-rows:auto auto minmax(110px,1fr) auto auto auto auto;padding:calc(14px + env(safe-area-inset-top)) 14px calc(12px + env(safe-area-inset-bottom))}
 .noyau-ov[hidden]{display:none}
 body.noyau-on{overflow:hidden}
 body.noyau-on nav.tabs{display:none}
@@ -866,11 +866,14 @@ body.noyau-on nav.tabs{display:none}
 .ny-pan em{font-style:normal;color:#F4EDE4;letter-spacing:.05em;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ny-pr{align-items:flex-end;text-align:right}
 .ny-pr p{border-left:0;border-right:1px solid #2a2530;padding:0 8px 0 0;align-items:flex-end}
-.ny-talk{display:flex;flex-direction:column;gap:8px;max-height:34vh;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:2px 2px 6px;font-family:var(--body,system-ui)}
+.ny-talk{display:flex;flex-direction:column;gap:8px;max-height:28vh;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:2px 2px 6px;font-family:var(--body,system-ui)}
 .ny-talk:empty{display:none}
 .ny-me{color:#a59fac;font-style:italic;font-size:.88rem;line-height:1.35;text-align:center}
 .ny-me:empty,.ny-cap:empty{display:none}
 .ny-cap{text-align:center;font-size:.98rem;line-height:1.45;color:#F4EDE4}
+.ny-act:empty{display:none}
+.ny-act{margin-top:6px;font-family:var(--body,system-ui)}
+.noyau-ov.has-act .ny-hud{display:none}
 .ny-actbox{border:1px solid #E8C68A;border-radius:12px;padding:10px 12px;font-size:.88rem;display:flex;flex-direction:column;gap:6px;background:rgba(232,198,138,.06);text-align:left}
 .ny-actbox ul{margin:0;padding-left:18px}
 .ny-actbox .gbtns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -1394,7 +1397,8 @@ body.noyau-on nav.tabs{display:none}
   <div id="ny-etat" class="ny-etat">En attente</div>
   <div class="ny-stage" id="ny-stage"><canvas id="noyau-cv"></canvas></div>
   <div class="ny-hud"><div class="ny-pan" id="ny-pl"></div><div class="ny-pan ny-pr" id="ny-pr"></div></div>
-  <div class="ny-talk" id="ny-talk"><div id="ny-me" class="ny-me"></div><div id="ny-cap" class="ny-cap"></div><div id="ny-act"></div></div>
+  <div class="ny-talk" id="ny-talk"><div id="ny-me" class="ny-me"></div><div id="ny-cap" class="ny-cap"></div></div>
+  <div id="ny-act" class="ny-act"></div>
   <div class="ny-ctl"><button type="button" class="ny-x" id="ny-close" aria-label="Fermer">Fermer</button><button type="button" class="ny-mic" id="ny-mic" aria-label="Parler à Athéna"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button><span class="ny-hint" id="ny-hint">Touche et parle</span></div>
 </div>
 <nav class="tabs" aria-label="Navigation">
@@ -2614,7 +2618,7 @@ function describeAction(a){
     case "fait": return `Cocher « ${nm} » comme faite ${day}${[a.km ? fr(a.km) + " km" : "", a.min ? a.min + " min" : "", a.ressenti ? "ressenti " + a.ressenti : ""].filter(Boolean).map((x, i) => (i ? ", " : " (") + x).join("")}${a.km || a.min || a.ressenti ? ")" : ""}`;
     case "en_plus": return `Ajouter une séance en plus ${day} : ${EXTRA[a.seance] || "séance"}${a.km ? ", " + fr(a.km) + " km" : ""}${a.min ? ", " + a.min + " min" : ""}`;
     case "routine": return `Cocher dans la routine ${day} : ${(a.items || []).map(k => (ROUTINE.find(r => r.k === k) || {}).l).filter(Boolean).join(", ")}`;
-    case "deplacer": return `Déplacer « ${nm} » de ${day} à ${dLab(a.vers_date || a.date)}${a.vers_heure ? " à " + fmtH(a.vers_heure) : ""}`;
+    case "deplacer": return !a.vers_date || a.vers_date === a.date ? `Décaler « ${nm} » ${day}${a.vers_heure ? " à " + fmtH(a.vers_heure) : ""}` : `Déplacer « ${nm} » de ${day} à ${dLab(a.vers_date)}${a.vers_heure ? " à " + fmtH(a.vers_heure) : ""}`;
     case "enlever": return `Enlever « ${nm} » ${day}`;
     case "ajouter": return `Prévoir ${day}${a.heure ? " à " + fmtH(a.heure) : ""} : ${(a.ensemble ? typeLabel("ensemble") + " · " : "") + typeLabel(a.seance)}`;
     case "note": return `Noter pour ${day} : ${[a.forme ? "forme " + (ENERGIE[a.forme - 1] || "").toLowerCase() : "", a.sommeil ? "sommeil " + fr(a.sommeil) + " h" : "", a.douleur ? "douleur : " + a.douleur : "", a.texte ? "« " + a.texte + " »" : ""].filter(Boolean).join(", ")}`;
@@ -3665,7 +3669,8 @@ const NOYAU = (() => {
   }
   function actions(){
     const el = $("ny-act"), i = chat.length - 1, m = chat[i];
-    if (!m || m.role !== "assistant" || !m.actions || !m.actions.length || m.applied){ el.innerHTML = ""; return; }
+    if (!m || m.role !== "assistant" || !m.actions || !m.actions.length || m.applied){ el.innerHTML = ""; ov.classList.remove("has-act"); return; }
+    ov.classList.add("has-act");
     el.innerHTML = `<div class="ny-actbox"><b>À enregistrer :</b><ul>${m.actions.map(describeAction).filter(Boolean).map(x => `<li>${esc(x)}</li>`).join("")}</ul><div class="gbtns"><button type="button" class="btn" data-act="${i}|oui">Valider</button><button type="button" class="ghost small" data-act="${i}|non">Non merci</button></div></div>`;
   }
   async function micStartN(){
@@ -3678,7 +3683,7 @@ const NOYAU = (() => {
       rec = new MediaRecorder(stream, type ? {mimeType: type} : undefined); chunks = [];
       rec.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
       rec.onstop = () => { const blob = new Blob(chunks, {type: rec.mimeType || type || "audio/webm"}); stream.getTracks().forEach(t => t.stop()); an = null; rec = null; envoyer(blob); };
-      rec.start(250); setMode("hear"); caption("Je t'écoute… parle normalement, puis touche le micro.", "only"); $("ny-act").innerHTML = "";
+      rec.start(250); setMode("hear"); caption("Je t'écoute… parle normalement, puis touche le micro.", "only"); $("ny-act").innerHTML = ""; ov.classList.remove("has-act");
       setTimeout(() => { if (rec && rec.state === "recording") rec.stop(); }, 120000);
     } catch(e){ caption("Autorise le micro pour Athéna dans les réglages du téléphone."); setMode("idle"); }
   }
@@ -3720,8 +3725,8 @@ const NOYAU = (() => {
   document.addEventListener("ath-talk-end", () => { if (!ov.hidden && mode === "talk") setMode("idle"); });
   document.addEventListener("click", e => {
     if (e.target.closest("[data-noyau]")) open();
-    const a = e.target.closest("#ny-act [data-act]"); if (a && a.dataset.act.endsWith("|oui")) setTimeout(() => { setMode("happy"); caption("C'est enregistré. Bien joué."); say("C'est enregistré. Bien joué.", {force: true}); hud(); $("ny-act").innerHTML = ""; setTimeout(() => { if (mode === "happy") setMode("idle"); }, 4000); }, 600);
-    if (a && a.dataset.act.endsWith("|non")) setTimeout(() => { $("ny-act").innerHTML = ""; }, 100);
+    const a = e.target.closest("#ny-act [data-act]"); if (a && a.dataset.act.endsWith("|oui")) setTimeout(() => { setMode("happy"); caption("C'est enregistré. Bien joué."); say("C'est enregistré. Bien joué.", {force: true}); hud(); $("ny-act").innerHTML = ""; ov.classList.remove("has-act"); setTimeout(() => { if (mode === "happy") setMode("idle"); }, 4000); }, 600);
+    if (a && a.dataset.act.endsWith("|non")) setTimeout(() => { $("ny-act").innerHTML = ""; ov.classList.remove("has-act"); }, 100);
   });
   addEventListener("resize", () => { if (!ov.hidden) taille(); });
   return {open, close};
