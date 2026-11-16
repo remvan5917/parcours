@@ -825,6 +825,29 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--accent)}
 .prep{margin:4px 0 0;font-size:.84rem;color:var(--muted)}
 .prep b{color:var(--ink);font-weight:600}
 .rap-h{margin:12px 0 0;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.simu-band{margin:8px 0}
+.simu-cta{width:100%;display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;border:1px solid var(--accent);border-radius:14px;padding:10px 14px;background:color-mix(in srgb,var(--accent) 8%,transparent);color:var(--ink);font:inherit;cursor:pointer}
+.simu-cta b{font-family:var(--display);font-size:1rem}
+.simu-cta span{font-size:.84rem;color:var(--muted)}
+.simu-on{display:flex;flex-direction:column;gap:6px;border:2px solid var(--accent);border-radius:14px;padding:10px 14px}
+.simu-hero h2{margin:4px 0 8px}
+.simu-steps{margin:8px 0 10px;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.simu-rest{font-family:var(--display);font-size:4rem;font-weight:800;text-align:center;font-variant-numeric:tabular-nums;margin:10px 0}
+.pv-head{display:flex;gap:12px;align-items:center;margin-bottom:10px}
+.pv-head .ath-ava{width:52px;height:52px;flex:0 0 52px}
+.pv-head h2{margin:2px 0}
+.pv-t{width:100%;border-collapse:collapse;margin:8px 0}
+.pv-t th,.pv-t td{border-top:1px solid var(--line);padding:10px 4px;text-align:left;vertical-align:top;font-size:.9rem}
+.pv-t th{font-weight:600}
+.pv-n{text-align:right;font-family:var(--display);font-weight:800;font-size:1.1rem;white-space:nowrap}
+.pv-n.ko{color:var(--warn)}
+.pv-final{display:flex;justify-content:space-between;align-items:baseline;border-top:2px solid var(--ink);padding-top:10px;margin-top:4px}
+.pv-final b{font-family:var(--display);font-size:2.2rem;white-space:nowrap}
+.pv-verdict{margin:10px 0;padding:10px 12px;border-radius:12px;font-weight:700;text-align:center}
+.pv-verdict.ok{background:color-mix(in srgb,#1E9E5A 16%,transparent);color:#1E9E5A}
+.pv-verdict.ko{background:color-mix(in srgb,#E5383B 14%,transparent);color:#E5383B}
+.pv .gbtns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pv .gbtns>*{width:100%}
 </style>
 </head>
 <body>
@@ -872,6 +895,11 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--accent)}
 </section>
 
 <!-- =================== RÉGLAGES =================== -->
+<!-- =================== RÉPÉTITION GÉNÉRALE =================== -->
+<section class="view" id="v-simu" data-view="simu" hidden>
+  <div id="simu-box"></div>
+</section>
+
 <!-- =================== NUTRITION =================== -->
 <section class="view" id="v-nutrition" data-view="nutrition" hidden>
   <h2>Nutrition</h2>
@@ -1040,6 +1068,7 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--accent)}
 <!-- =================== PARCOURS =================== -->
 <section class="view" id="v-parcours" data-view="parcours" hidden>
   <div class="trainnav"></div>
+  <div class="simu-band" data-simu-band="phm"></div>
   <div class="row between">
     <span class="kicker">Lieu de l'essai</span>
     <select id="lieu" aria-label="Lieu de l'essai">
@@ -1091,6 +1120,7 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--accent)}
 <!-- =================== LUC LÉGER =================== -->
 <section class="view" id="v-luc" data-view="luc" hidden>
   <div class="trainnav"></div>
+  <div class="simu-band" data-simu-band="luc"></div>
   <p class="note">Le téléphone fait les bips à ta place. À chaque bip, tu dois être sur la ligne d'en face (20 m). Quand tu n'arrives plus à suivre, on appuie sur « Arrêt » : ton palier et ta note s'affichent.</p>
   <div class="panel">
     <div class="luc-pal" id="ll-pal">1</div>
@@ -1544,17 +1574,18 @@ const palTxt = (p, s) => `palier ${p}${s ? " + " + s + " s" : ""}`;
 const palBig = (p, s) => `Palier ${p}${s ? " + " + s + " s" : ""}`;
 
 /* ======================= NAVIGATION ======================= */
-const VIEWS = ["accueil", "parcours", "luc", "frac", "tests", "ateliers", "plan", "coach", "progres", "reglages", "nutrition"];
+const VIEWS = ["accueil", "parcours", "luc", "frac", "tests", "ateliers", "plan", "coach", "progres", "reglages", "nutrition", "simu"];
 function show(v, noScroll){
   if (!VIEWS.includes(v)) v = "accueil";
   const cur = document.querySelector(".view:not([hidden])"); if (cur && cur.dataset.view !== v) prevView = cur.dataset.view;
   document.querySelectorAll(".view").forEach(el => el.hidden = el.dataset.view !== v);
-  const tab = TRAIN.includes(v) ? "train" : v === "ateliers" ? "plan" : v === "nutrition" ? "accueil" : v;
+  const tab = TRAIN.includes(v) || v === "simu" ? "train" : v === "ateliers" ? "plan" : v === "nutrition" ? "accueil" : v;
   document.querySelectorAll("[data-tab]").forEach(b => b.setAttribute("aria-current", b.dataset.tab === tab ? "page" : "false"));
   chrome(v);
   if (v === "frac") frFill();
   if (v === "tests") renderMesures();
   if (v === "reglages" && typeof renderPush === "function") renderPush();
+  if (typeof renderSimu === "function") renderSimu();
   if (v === "nutrition" && typeof renderNutrition === "function") renderNutrition();
   if (v === "plan" && typeof renderGcal === "function") renderGcal(true);
   try { history.replaceState(null, "", "#" + v); } catch(e){}
@@ -1581,7 +1612,7 @@ function setSync(msg, warn){ const el = $("sync"); el.textContent = msg; el.clas
 function loadLocal(){
   for (const k of COLLS) S[k] = lsGet(LKEY[k], []).filter(x => x && x.id).map(x => cleanItem(k, x));
   const ex = lsGet("phm-exam-obj", EXAM_DEFAULT); S.exam = ex.date; S.examLabel = ex.label;
-  S.plan = lsGet("phm-plan", null); S.lieux = lsGet("phm-lieux", null); S.fait = lsGet("phm-fait", null); S.profil = lsGet("phm-profil", null);
+  S.plan = lsGet("phm-plan", null); S.lieux = lsGet("phm-lieux", null); S.fait = lsGet("phm-fait", null); S.profil = lsGet("phm-profil", null); S.simus = lsGet("phm-simus", []);
 }
 function writeErr(){ setSync("Enregistrement en ligne impossible pour le moment. Le résultat est gardé sur ce téléphone et partira dès que possible.", true); }
 // rejoindre une équipe avec un lien ?equipe=CODE
@@ -1629,6 +1660,10 @@ async function connectFirebase(){
   F.onSnapshot(F.doc(db, "equipes", team, "reglages", "fait"), snap => {
     if (snap.exists()){ S.fait = snap.data(); lsSet("phm-fait", S.fait); renderToday(); renderTiles(); renderSetup(); }
     else if (S.fait) F.setDoc(F.doc(db, "equipes", team, "reglages", "fait"), S.fait).catch(() => {});
+  }, () => {});
+  F.onSnapshot(F.doc(db, "equipes", team, "reglages", "simulations"), snap => {
+    if (snap.exists()){ S.simus = (snap.data().items || []); lsSet("phm-simus", S.simus); if (typeof renderSimu === "function") renderSimu(); }
+    else if (S.simus && S.simus.length) F.setDoc(F.doc(db, "equipes", team, "reglages", "simulations"), {items: S.simus}).catch(() => {});
   }, () => {});
   F.onSnapshot(F.doc(db, "equipes", team, "reglages", "profil"), snap => {
     if (snap.exists()){ S.profil = snap.data(); lsSet("phm-profil", S.profil); renderAll(); }
@@ -1972,7 +2007,7 @@ async function press(){
       coachAfterRun(lastBody);
       prevBestAtRun = S.essais.length ? Math.min(...S.essais.map(e => e.total)) : null;
       showRecord();
-      lastId = await addDoc("essais", lastBody); return;
+      lastId = await addDoc("essais", lastBody); simuHook("phm", lastId); return;
     }
     setStatus(); renderChrono(); return;
   }
@@ -2071,7 +2106,7 @@ async function llPress(){
       $("ll-status").innerHTML = `Arrêt au <strong>${palTxt(p, q)}</strong>, ${LL.nav} navettes. Résultat enregistré.`;
       const prevL = S.luc.length ? Math.max(...S.luc.map(e => e.palier + e.sec / 60)) : null;
       if (prevL != null && p + q / 60 > prevL){ $("ll-love").innerHTML = recordMot(); $("ll-love").hidden = false; }
-      await addDoc("luc", {at: Date.now(), palier: p, sec: q, note, age: ageBonus(), navettes: LL.nav, source: "chrono"});
+      const lid = await addDoc("luc", {at: Date.now(), palier: p, sec: q, note, age: ageBonus(), navettes: LL.nav, source: "chrono"}); simuHook("luc", lid);
     } else $("ll-status").innerHTML = `Arrêt au <strong>${palTxt(p, q)}</strong> (entraînement, non enregistré).`;
   }
 }
@@ -2401,6 +2436,7 @@ function journalText(){
   const P = S.profil || {}, T0 = nutTargets(today);
   return `SON AGENDA RÉEL (clé de séance entre crochets) :\n${L.join("\n")}
 Contenu des séances d'aujourd'hui et demain :\n${nx || "aucune"}
+Répétitions générales : ${(S.simus || []).slice(-4).map(h => `${ymd(new Date(h.at))} ${h.elim ? "éliminatoire" : fr(h.moy) + "/20"} (parcours ${fmt(h.total)} ${noteTxt(h.nP)}/20, Luc ${palTxt(h.palier, h.sec)} ${noteTxt(h.nL)}/20)`).join(" ; ") || "aucune"}.
 Calendrier officiel du concours : ${CONCOURS.map(c => c.d + " " + c.t).join(" ; ")}. Inscription : ${(S.profil || {}).inscrit ? "faite" : "pas encore confirmée dans l'appli (à rappeler avant le 18 janvier 18 h)"}. Elle prépare aussi les épreuves écrites du 9 mars : pas de grosse séance la veille.
 Objectifs datés pas encore atteints : ${O || "aucun"}
 Nutrition : ${P.poids ? `objectif « ${({seche: "sécher en douceur", maintien: "garder son poids", muscle: "prendre du muscle"})[P.obj] || "sécher en douceur"} »${T0 ? `, besoins du jour ${T0.kcal} kcal dont ${T0.sport} kcal de sport, ${T0.p} g de protéines` : ""}` : "profil pas rempli"}.
@@ -3185,7 +3221,7 @@ function rappels(){
     if (h >= 14 && n === 0) R.push({ic: "•", t: "Aucun repas noté aujourd'hui", d: "Note ton petit-déjeuner et ton déjeuner pour suivre tes protéines.", btn: {l: "Noter un repas", attr: `data-goto="nutrition"`}});
     else if (h >= 19 && T && t.p < T.p * 0.7) R.push({ic: "•", t: `Protéines : ${Math.round(t.p)} / ${T.p} g`, d: "Pense à une source de protéines ce soir (œufs, poisson, viande, skyr, tofu).", btn: {l: "Noter un repas", attr: `data-goto="nutrition"`}});
   }
-  if (!S.essais.length && !S.luc.length && Date.now() > calStart().getTime() + 3 * 864e5) R.push({ic: "!", t: "Tes tests de départ ne sont pas encore faits", d: "Un parcours chronométré puis, 30 min après, un Luc Léger complet. Ils servent de point de départ à tout le programme : cale-les à ta prochaine séance de parcours (ou dis à Athéna quand tu peux les faire)."});
+  if (!S.essais.length && !S.luc.length && Date.now() > calStart().getTime() + 3 * 864e5) R.push({ic: "!", t: "Tes tests de départ ne sont pas encore faits", d: "Un parcours chronométré puis, 30 min après, un Luc Léger complet : la répétition générale te guide pas à pas. C'est le point de départ de tout le programme.", btn: {l: "Répétition générale", attr: `data-goto="simu"`}});
   const lastLuc = S.luc.length ? Math.max(...S.luc.map(x => x.at)) : 0, started = Date.now() > calStart().getTime() + 14 * 864e5;
   if (started && Date.now() - lastLuc > 21 * 864e5) R.push({ic: "•", t: "Pas de Luc Léger depuis 3 semaines", d: "Fais-en un complet à une de tes prochaines séances de course : c'est la moitié de ta note."});
   objectifs().filter(o => !o.ok && o.due >= ymd(today) && o.due <= ymd(addDays(today, 10))).forEach(o => R.push({ic: "◆", t: `Objectif avant le ${parseDay(o.due).toLocaleDateString("fr-FR", {day: "numeric", month: "long"})}`, d: o.label}));
@@ -3332,9 +3368,131 @@ document.addEventListener("change", async e => {
   pushCall("prefs", {id: P.id, prefs: P.prefs}).catch(() => {});
 });
 
+
+/* ======================= RÉPÉTITION GÉNÉRALE ======================= */
+// l'épreuve comme le jour J : sac + parcours chronométré, 30 min de récupération, Luc Léger, puis procès-verbal officiel
+const SIMU_REST = 30 * 60e3;
+let SIMU = lsGet("phm-simu", null), simuTick = null, simuSaid = {};
+const simuSave = () => lsSet("phm-simu", SIMU);
+function simuHook(kind, id){
+  if (!SIMU || !SIMU.active) return;
+  if (kind === "phm" && SIMU.stage === "phm"){ SIMU.phmId = id; simuSave(); say("Parcours terminé. Ajoute les pénalités s'il y en a, puis touche Continuer : trente minutes de récupération avant le Luc Léger.", {force: true}); }
+  if (kind === "luc" && SIMU.stage === "luc"){ SIMU.lucId = id; SIMU.stage = "resultat"; simuSave(); setTimeout(() => { show("simu"); simuResultSay(); }, 2500); }
+  renderSimuBands();
+}
+function renderSimuBands(){
+  document.querySelectorAll("[data-simu-band]").forEach(el => {
+    const k = el.dataset.simuBand;
+    if (SIMU && SIMU.active && SIMU.stage === k){
+      const ready = k === "phm" && SIMU.phmId;
+      el.innerHTML = `<div class="simu-on"><b>Répétition générale · ${k === "phm" ? "1/3 · le parcours" : "3/3 · le Luc Léger"}</b><span class="note">${k === "phm" ? (ready ? "Parcours enregistré. Ajoute les pénalités ci-dessous si besoin, puis continue." : "Comme le jour J : sac de 25 kg sur 20 m (hors chrono), puis 15 s pour rejoindre les pompes.") : "Départ au palier 1, jusqu'au bout. Le résultat compte pour ta répétition."}</span>${ready ? `<button type="button" class="btn" data-simu="repos">Continuer : 30 min de récupération</button>` : ""}<button type="button" class="link" data-simu="stop">Arrêter la répétition</button></div>`;
+    } else el.innerHTML = `<button type="button" class="simu-cta" data-goto="simu"><b>Répétition générale</b><span>Vis l'épreuve comme le jour du concours ›</span></button>`;
+  });
+}
+function simuCompute(sm){
+  const e = S.essais.find(x => x.id === sm.phmId), l = S.luc.find(x => x.id === sm.lucId);
+  const nP = e ? e.note : null, nL = l ? l.note : null;
+  const elim = (nP == null || nP < 7) || (nL == null || nL < 7);
+  const moy = nP != null && nL != null ? Math.round((nP + nL) / 2 * 100) / 100 : null;
+  return {e, l, nP, nL, moy, elim};
+}
+function simuResultSay(){
+  const R = simuCompute(SIMU || {}); if (!R.e || !R.l) return;
+  say(`Résultat de ta répétition générale. Parcours : ${fmt(R.e.total).replace(":", " minute ")} secondes, ${noteTxt(R.nP)} sur 20. Luc Léger : ${palTxt(R.l.palier, R.l.sec)}, ${noteTxt(R.nL)} sur 20. ${R.elim ? "Attention, une des deux notes est sous 7 : ce serait éliminatoire. On va travailler ça." : `Ta note de sport serait de ${fr(R.moy)} sur 20. Bravo.`}`, {force: true});
+}
+function renderSimu(){
+  renderSimuBands();
+  const el = $("simu-box"); if (!el) return;
+  clearInterval(simuTick);
+  const hist = (S.simus || []).slice().sort((a, b) => b.at - a.at);
+  const histHTML = hist.length ? `<div class="panel"><h3>Tes répétitions</h3><ul class="steps">${hist.slice(0, 8).map(h => `<li><div><div class="s-t">${dateTxt(h.at)} : ${h.elim ? "éliminatoire" : fr(h.moy) + "/20"}</div><div class="s-d">Parcours ${fmt(h.total)} (${noteTxt(h.nP)}/20) · Luc Léger ${palTxt(h.palier, h.sec)} (${noteTxt(h.nL)}/20)</div></div></li>`).join("")}</ul></div>` : "";
+  if (!SIMU || !SIMU.active){
+    el.innerHTML = `<div class="panel simu-hero"><span class="kicker">Mode jour J</span><h2>Répétition générale</h2>
+      <p>Tu vis l'épreuve sportive exactement comme le jour du concours, guidée par Athéna à voix haute. À la fin : ta feuille de résultats officielle.</p>
+      <ol class="simu-steps"><li><b>Le sac</b> : 25 kg sur 20 m, hors chrono, 3 essais max (sinon −1 point).</li><li><b>Le parcours</b> : le chrono part 15 s après la pose du sac, 9 ateliers, pénalités officielles.</li><li><b>30 minutes de récupération</b>, minutées par Athéna.</li><li><b>Le Luc Léger</b>, du palier 1 jusqu'au bout.</li><li><b>Le procès-verbal</b> : tes deux notes, ta moyenne, admissible ou non.</li></ol>
+      <p class="note"><b>À prévoir :</b> 1 h 30, une gourde, le sac lesté, le parcours monté, 20 m mesurés pour les navettes, et quelqu'un pour tenir le chrono. Échauffe-toi 15 minutes avant de commencer.</p>
+      <button type="button" class="btn" data-simu="start" style="width:100%">Commencer la répétition</button></div>` + histHTML;
+    return;
+  }
+  const st = SIMU.stage;
+  if (st === "phm" || st === "luc"){
+    el.innerHTML = `<div class="panel"><span class="kicker">Répétition en cours</span><h3>${st === "phm" ? "Étape 1/3 · le parcours" : "Étape 3/3 · le Luc Léger"}</h3><button type="button" class="btn" data-goto="${st === "phm" ? "parcours" : "luc"}" style="width:100%">Aller au ${st === "phm" ? "parcours" : "Luc Léger"}</button><button type="button" class="link" data-simu="stop" style="margin-top:10px">Arrêter la répétition</button></div>`;
+    return;
+  }
+  if (st === "repos"){
+    const draw = () => {
+      const left = Math.max(0, SIMU.restEnd - Date.now()), m = Math.floor(left / 60000), sec = Math.floor(left / 1000) % 60;
+      const box = $("simu-rest"); if (!box) return clearInterval(simuTick);
+      box.textContent = `${m}:${String(sec).padStart(2, "0")}`;
+      $("simu-rest-bar").style.width = (100 - left / SIMU_REST * 100) + "%";
+      [[20, "Encore vingt minutes. Marche un peu et bois quelques gorgées."], [10, "Plus que dix minutes : commence à t'échauffer doucement, un peu de footing léger."], [5, "Cinq minutes. Quelques accélérations et des montées de genoux."], [1, "Une minute. Mets-toi en place sur la ligne de départ."]].forEach(([mm, t]) => { if (left <= mm * 60000 && left > (mm * 60000 - 30000) && !simuSaid[mm]){ simuSaid[mm] = 1; say(t, {force: true}); } });
+      if (!left){ clearInterval(simuTick); $("simu-rest-go").disabled = false; $("simu-rest-go").textContent = "C'est l'heure : place au Luc Léger"; if (!simuSaid.end){ simuSaid.end = 1; say("C'est l'heure. Place au Luc Léger. Départ au palier un, et tiens jusqu'au bout.", {force: true}); } }
+    };
+    el.innerHTML = `<div class="panel simu-hero"><span class="kicker">Étape 2/3 · récupération</span><h2>30 minutes de repos</h2>
+      <div class="simu-rest" id="simu-rest">30:00</div><div class="luc-bar" aria-hidden="true"><i id="simu-rest-bar"></i></div>
+      <p class="note">Comme au concours : au moins 30 minutes entre le parcours et le Luc Léger. Marche, bois, garde-toi au chaud. Les 10 dernières minutes, échauffe-toi doucement. Athéna te prévient à voix haute.</p>
+      <button type="button" class="btn" id="simu-rest-go" data-simu="luc" disabled style="width:100%">Encore un peu de patience…</button>
+      <button type="button" class="link" data-simu="luc-now" style="margin-top:10px">Passer tout de suite au Luc Léger (moins réaliste)</button>
+      <button type="button" class="link" data-simu="stop" style="margin-top:6px">Arrêter la répétition</button></div>`;
+    draw(); simuTick = setInterval(draw, 1000); grabWake();
+    return;
+  }
+  if (st === "resultat"){
+    const R = simuCompute(SIMU);
+    if (!R.e || !R.l){ el.innerHTML = `<div class="panel"><p class="note">Résultats en cours d'enregistrement…</p></div>`; return; }
+    const prev = hist.find(h => h.at < (SIMU.startedAt || Date.now()));
+    el.innerHTML = `<div class="panel pv"><div class="pv-head"><span class="ath-ava" data-athena></span><div><span class="kicker">Procès-verbal · répétition générale</span><h2>Épreuves sportives</h2><span class="note">${dateTxt(R.l.at)} · femmes${ageBonus() ? ` · bonus d'âge +${ageBonus()}` : ""}</span></div></div>
+      <table class="pv-t"><tr><th>Parcours d'habileté motrice</th><td>${fmt(R.e.total)}${R.e.pen ? ` <span class="note">(dont +${R.e.pen} s de pénalités)</span>` : ""}${R.e.sac ? ` <span class="note">(sac raté : −1)</span>` : ""}</td><td class="pv-n${R.nP == null || R.nP < 7 ? " ko" : ""}">${noteTxt(R.nP)}/20</td></tr>
+        <tr><th>Luc Léger</th><td>${palTxt(R.l.palier, R.l.sec)}</td><td class="pv-n${R.nL == null || R.nL < 7 ? " ko" : ""}">${noteTxt(R.nL)}/20</td></tr></table>
+      <div class="pv-final"><span>Note de sport</span><b>${R.elim ? "Éliminée" : R.moy != null ? fr(R.moy) + "/20" : "—"}</b></div>${R.elim && R.moy != null ? `<p class="note" style="text-align:right;margin:2px 0 0">Moyenne sans le seuil : ${fr(R.moy)}/20</p>` : ""}
+      <div class="pv-verdict ${R.elim ? "ko" : "ok"}">${R.elim ? "Éliminatoire : une note sous 7/20" : "Au-dessus du seuil : épreuve validée"}</div>
+      ${prev ? `<p class="note">Répétition précédente (${dateTxt(prev.at)}) : ${prev.elim ? "éliminatoire" : fr(prev.moy) + "/20"}${!prev.elim && R.moy != null ? ` → ${R.moy >= prev.moy ? "+" : ""}${fr(Math.round((R.moy - prev.moy) * 100) / 100)} point` : ""}.</p>` : ""}
+      <div id="simu-ai" class="nu-adv"></div>
+      <div class="gbtns"><button type="button" class="ghost small" data-simu="say">Écouter</button><button type="button" class="btn" data-simu="done">Terminer</button></div></div>`;
+    renderAthena();
+    simuAI(R);
+    return;
+  }
+}
+async function simuAI(R){
+  const box = $("simu-ai"); if (!box || !aiOn()) return;
+  if (SIMU && SIMU.ai){ box.innerHTML = mdLite(SIMU.ai); return; }
+  if (box.dataset.done) return; box.dataset.done = 1; box.innerHTML = `<p class="note">Athéna analyse ta répétition…</p>`;
+  try {
+    const pens = (R.e.penBy || []).map(p => byN(p.n).short + " +" + p.s + " s").join(", ") || "aucune";
+    const t = await askGroq([{role: "system", content: systemPrompt()}, {role: "user", content: `Je viens de faire une répétition générale dans les conditions du concours : parcours ${fmt(R.e.total)} (${noteTxt(R.nP)}/20, pénalités : ${pens}, temps par atelier : ${(R.e.splits || []).map((v, i) => TIMED[i].short + " " + (v / 1000).toFixed(1) + " s").join(", ")}), Luc Léger ${palTxt(R.l.palier, R.l.sec)} (${noteTxt(R.nL)}/20). En 70 mots maximum : ce qui rapporte le plus de points d'ici le jour J et un mot pour me féliciter. Pas de liste longue.`}], 400);
+    const txt = cleanTxt(t); if (SIMU){ SIMU.ai = txt; simuSave(); } const b2 = $("simu-ai"); if (b2) b2.innerHTML = mdLite(txt);
+  } catch(e){ box.innerHTML = ""; }
+}
+function simuStore(){
+  const R = simuCompute(SIMU); if (!R.e || !R.l) return;
+  const item = {at: Date.now(), total: R.e.total, nP: R.nP, palier: R.l.palier, sec: R.l.sec, nL: R.nL, moy: R.moy, elim: R.elim, essai: R.e.id, luc: R.l.id};
+  S.simus = (S.simus || []).filter(h => h.essai !== item.essai).concat(item).slice(-30); lsSet("phm-simus", S.simus);
+  if (FS) FS.setDoc(FS.doc(FS.db, "equipes", team, "reglages", "simulations"), {items: S.simus}).catch(writeErr);
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-simu]"); if (!b) return;
+  const a = b.dataset.simu;
+  if (a === "start"){
+    SIMU = {active: true, stage: "phm", startedAt: Date.now()}; simuSaid = {}; simuSave();
+    if (typeof reset === "function") try { reset(); } catch(err){}
+    show("parcours"); renderSimuBands();
+    say("Répétition générale. Comme le jour du concours : d'abord le sac de vingt-cinq kilos sur vingt mètres, hors chrono. Dès que tu le poses, le chrono attend quinze secondes. Respire, tu es prête.", {force: true});
+  }
+  if (a === "repos"){ SIMU.stage = "repos"; SIMU.restEnd = Date.now() + SIMU_REST; simuSaid = {}; simuSave(); show("simu"); say("Trente minutes de récupération. Marche, bois, et garde-toi au chaud. Je te préviens quand il faut repartir.", {force: true}); }
+  if (a === "luc" || a === "luc-now"){
+    clearInterval(simuTick); dropWake(); SIMU.stage = "luc"; simuSave();
+    try { $("ll-start").value = "1"; $("ll-start").dispatchEvent(new Event("change")); } catch(err){}
+    show("luc"); renderSimuBands();
+  }
+  if (a === "say") simuResultSay();
+  if (a === "done"){ simuStore(); SIMU = null; simuSave(); renderSimu(); setSync("Répétition enregistrée. Athéna en tient compte."); }
+  if (a === "stop"){ if (!confirm("Arrêter la répétition générale ? Ce qui est déjà chronométré reste enregistré.")) return; clearInterval(simuTick); dropWake(); SIMU = null; simuSave(); renderSimu(); show("simu"); }
+});
+
 /* ======================= REFONTE : navigation, aujourd'hui, minuteur ======================= */
 const TRAIN = ["parcours", "luc", "frac", "tests"];
-const TITLES = {accueil: "Athéna", parcours: "S'entraîner", luc: "S'entraîner", frac: "S'entraîner", tests: "S'entraîner", progres: "Progrès", coach: "Athéna", plan: "Ton plan", ateliers: "Les 10 ateliers", reglages: "Réglages", nutrition: "Nutrition"};
+const TITLES = {accueil: "Athéna", parcours: "S'entraîner", luc: "S'entraîner", frac: "S'entraîner", tests: "S'entraîner", progres: "Progrès", coach: "Athéna", plan: "Ton plan", ateliers: "Les 10 ateliers", reglages: "Réglages", nutrition: "Nutrition", simu: "Jour J"};
 const TRAIN_LABELS = {parcours: "Parcours", luc: "Luc Léger", frac: "Fractionné", tests: "Tests"};
 let prevView = "accueil";
 function renderTrainNav(v){
@@ -3413,7 +3571,7 @@ let selDay = null;
 function actionFor(s, d, x){
   const test = /Test Luc Léger complet/.test(x.L.join(" "));
   if (s.t === "course_frac" || s.t === "luc") return test ? {l: "Lancer le Luc Léger", go: "luc"} : x.timer ? {l: "Lancer le minuteur", go: "frac"} : null;
-  if (s.t === "parcours") return {l: "Lancer le chrono", go: "parcours"};
+  if (s.t === "parcours") return x.titre && /Test|Simulation/.test(x.titre) ? {l: "Lancer la répétition générale", go: "simu"} : {l: "Lancer le chrono", go: "parcours"};
   if (s.t === "course_end") return {l: "Noter ma distance", go: "tests", mes: "course"};
   if (s.t === "gym") return {l: "Plan vertige", go: "ateliers", mode: "club"};
   return null;
