@@ -216,8 +216,126 @@ async function gOff(env, team, id){
   return gStatus(env, team);
 }
 
+// ===================== Notifications (Web Push, iPhone 16.4+ appli installée) =====================
+// Abonnements dans KV « p:<équipe>:<id> ». Messages du matin (7 h 30) et du soir (21 h 30), heure de Paris,
+// écrits à partir de son agenda réel (reglages/agenda) et de ce qu'elle a coché (reglages/fait).
+const VAPID_PUBLIC = "BCt4b4Gz4ZS1cPCbPoJ3il-rMBm4hf1DzBLM4HRg771tf_KfiSUXjb3pjHBurWpZ4BM5r5OUWKEWwfRzxX2U1mU";
+const b64u = s => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((s.length + 3) % 4)), c => c.charCodeAt(0));
+const cat = (...a) => { const n = a.reduce((x, y) => x + y.length, 0), o = new Uint8Array(n); let i = 0; for (const x of a){ o.set(x, i); i += x.length; } return o; };
+const te = new TextEncoder();
+async function hmac(key, data){ const k = await crypto.subtle.importKey("raw", key, {name: "HMAC", hash: "SHA-256"}, false, ["sign"]); return new Uint8Array(await crypto.subtle.sign("HMAC", k, data)); }
+async function vapidAuth(env, endpoint){
+  const jwk = JSON.parse(env.VAPID_PRIVATE_JWK), key = await crypto.subtle.importKey("jwk", jwk, {name: "ECDSA", namedCurve: "P-256"}, false, ["sign"]);
+  const head = b64url(te.encode(JSON.stringify({typ: "JWT", alg: "ES256"}))), aud = new URL(endpoint).origin;
+  const body = b64url(te.encode(JSON.stringify({aud, exp: Math.floor(Date.now() / 1000) + 12 * 3600, sub: "mailto:remyvancoppenolle@gmail.com"})));
+  const sig = await crypto.subtle.sign({name: "ECDSA", hash: "SHA-256"}, key, te.encode(head + "." + body));
+  return `vapid t=${head}.${body}.${b64url(sig)}, k=${VAPID_PUBLIC}`;
+}
+// chiffrement aes128gcm (RFC 8291)
+async function encryptPush(sub, payload){
+  const ua = b64u(sub.keys.p256dh), auth = b64u(sub.keys.auth);
+  const as = await crypto.subtle.generateKey({name: "ECDH", namedCurve: "P-256"}, true, ["deriveBits"]);
+  const asPub = new Uint8Array(await crypto.subtle.exportKey("raw", as.publicKey));
+  const uaKey = await crypto.subtle.importKey("raw", ua, {name: "ECDH", namedCurve: "P-256"}, false, []);
+  const ecdh = new Uint8Array(await crypto.subtle.deriveBits({name: "ECDH", public: uaKey}, as.privateKey, 256));
+  const prkKey = await hmac(auth, ecdh);
+  const ikm = (await hmac(prkKey, cat(te.encode("WebPush: info\0"), ua, asPub, new Uint8Array([1])))).slice(0, 32);
+  const salt = crypto.getRandomValues(new Uint8Array(16)), prk = await hmac(salt, ikm);
+  const cek = (await hmac(prk, cat(te.encode("Content-Encoding: aes128gcm\0"), new Uint8Array([1])))).slice(0, 16);
+  const nonce = (await hmac(prk, cat(te.encode("Content-Encoding: nonce\0"), new Uint8Array([1])))).slice(0, 12);
+  const k = await crypto.subtle.importKey("raw", cek, {name: "AES-GCM"}, false, ["encrypt"]);
+  const ct = new Uint8Array(await crypto.subtle.encrypt({name: "AES-GCM", iv: nonce}, k, cat(te.encode(payload), new Uint8Array([2]))));
+  return cat(salt, new Uint8Array([0, 0, 16, 0]), new Uint8Array([asPub.length]), asPub, ct);
+}
+async function sendPush(env, sub, msg){
+  const body = await encryptPush(sub, JSON.stringify(msg));
+  const r = await fetch(sub.endpoint, {method: "POST", headers: {Authorization: await vapidAuth(env, sub.endpoint), TTL: "43200", Urgency: "normal", "Content-Encoding": "aes128gcm", "Content-Type": "application/octet-stream"}, body});
+  return r.status;
+}
+const parisNow = () => { const p = Object.fromEntries(new Intl.DateTimeFormat("en-GB", {timeZone: "Europe/Paris", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false}).formatToParts(new Date()).map(x => [x.type, x.value])); return {day: `${p.year}-${p.month}-${p.day}`, h: Number(p.hour) % 24, m: Number(p.minute)}; };
+const addDay = (d, n) => { const x = new Date(d + "T12:00:00Z"); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); };
+const hTxt = h => { const [a, b] = String(h || "").split(":"); return a ? (+a) + " h" + (b && b !== "00" ? " " + b : "") : ""; };
+async function fsDoc(team, name){
+  const r = await fetch(`https://firestore.googleapis.com/v1/projects/${FB_PROJECT}/databases/(default)/documents/equipes/${team}/reglages/${name}?key=${FB_WEB_KEY}`);
+  if (!r.ok) return null;
+  const val = v => { const k = Object.keys(v)[0], x = v[k]; if (k === "mapValue") return Object.fromEntries(Object.entries(x.fields || {}).map(([a, b]) => [a, val(b)])); if (k === "arrayValue") return (x.values || []).map(val); if (k === "integerValue") return Number(x); return x; };
+  const d = await r.json(); return Object.fromEntries(Object.entries(d.fields || {}).map(([a, b]) => [a, val(b)]));
+}
+const ROUT = {susp: "suspensions", pompes: "pompes", poignets: "poignets"};
+async function buildMsg(team, when){
+  const {day} = parisNow(), ag = await fsDoc(team, "agenda"), fait = (await fsDoc(team, "fait")) || {}, prof = (await fsDoc(team, "profil")) || {};
+  let ev = []; try { ev = JSON.parse(ag.json).ev || []; } catch (e) {}
+  const sport = d => ev.filter(e => e.d === d && !e.allDay && e.sport !== false && !e.love), F = d => fait[d] || {};
+  const done = (d, e) => e.k ? !!F(d)[e.k] : false;
+  const out = [];
+  if (when === "matin"){
+    const today = ev.filter(e => e.d === day && !e.allDay).map(e => `${hTxt(e.h)} ${e.t.replace(/^.*? · (?=Course|Parcours|Tests|Test|Gym|Krav|Jujitsu|Freeletics|Navettes|Renfo|Simulation)/, "")}${e.love ? "" : ""}`);
+    out.push(today.length ? "Aujourd'hui : " + today.join(", ") + "." : "Pas de séance prévue aujourd'hui : profite, et pense à ta routine.");
+    const y = addDay(day, -1), miss = sport(y).filter(e => e.k && !done(y, e));
+    if (miss.length) out.push(`Hier, pas coché : ${miss.map(e => e.t.split(" · ").slice(-1)[0]).join(", ")}.`);
+    ev.filter(e => e.allDay && /^Concours/.test(e.t) && e.d >= day && e.d <= addDay(day, 7)).forEach(e => out.push(e.t.replace("Concours · ", "") + " le " + e.d.split("-").reverse().slice(0, 2).join("/") + "."));
+    if (!prof.inscrit && day <= "2027-01-18"){ const left = Math.round((new Date("2027-01-18T12:00:00Z") - new Date(day + "T12:00:00Z")) / 864e5); if (left <= 45) out.push(`Inscription au concours : plus que ${left} jour${left > 1 ? "s" : ""}.`); }
+    return {title: "Bonjour, le point d'Athéna", body: out.join(" "), url: "./index.html#accueil"};
+  }
+  const todo = sport(day).filter(e => e.k && !done(day, e) && (e.h || "") < "21:00");
+  if (todo.length) out.push(`Tu as fait ${todo.map(e => e.t.split(" · ").slice(-1)[0].toLowerCase()).join(" et ")} ? Coche-la dans l'appli, ou dis à Athéna ce qui a changé.`);
+  const left = Object.keys(ROUT).filter(k => !F(day)["routine:" + k]);
+  if (left.length && left.length < 3) out.push(`Ta routine : il reste ${left.map(k => ROUT[k]).join(", ")}.`);
+  else if (left.length === 3) out.push("Ta routine de 10 minutes t'attend : suspensions, pompes, poignets.");
+  if (!out.length) return {title: "Athéna", body: "Journée complète : tout est coché. Bravo, repose-toi bien.", url: "./index.html#accueil"};
+  const tm = sport(addDay(day, 1)).filter(e => (e.h || "") < "11:00");
+  if (tm.length) out.push(`Demain ${hTxt(tm[0].h)} : prépare tes affaires ce soir.`);
+  return {title: "Athéna", body: out.join(" "), url: "./index.html#accueil"};
+}
+async function pushRound(env){
+  const {day, h, m} = parisNow(), when = h === 7 && m >= 30 && m < 45 ? "matin" : h === 21 && m >= 30 && m < 45 ? "soir" : null;
+  if (!when) return;
+  const list = await env.GKV.list({prefix: "p:"}), cache = {};
+  for (const k of list.keys){
+    const st = JSON.parse(await env.GKV.get(k.name) || "null"); if (!st || !st.sub) continue;
+    if (st.prefs && st.prefs[when] === false) continue;
+    if ((st.last || {})[when] === day) continue;
+    const team = k.name.split(":")[1];
+    const msg = cache[team + when] || (cache[team + when] = await buildMsg(team, when));
+    const code = await sendPush(env, st.sub, msg).catch(() => 0);
+    if (code === 404 || code === 410){ await env.GKV.delete(k.name); continue; }
+    st.last = Object.assign({}, st.last, {[when]: day}); st.code = code; await env.GKV.put(k.name, JSON.stringify(st));
+  }
+}
+async function pushApi(env, path, b){
+  const team = String(b.equipe || "");
+  if (!TEAM_RE.test(team)) return {error: "code invalide"};
+  if (!env.VAPID_PRIVATE_JWK) return {configured: false};
+  if (path === "/push/abonner"){
+    const sub = b.sub; if (!sub || !/^https:\/\//.test(sub.endpoint || "") || !sub.keys || !sub.keys.p256dh || !sub.keys.auth) return {error: "abonnement invalide"};
+    const id = (await evId("push", sub.endpoint)).slice(3, 15), k = `p:${team}:${id}`, old = JSON.parse(await env.GKV.get(k) || "null") || {};
+    await env.GKV.put(k, JSON.stringify(Object.assign(old, {sub: {endpoint: sub.endpoint, keys: {p256dh: sub.keys.p256dh, auth: sub.keys.auth}}, prefs: Object.assign({matin: true, soir: true}, old.prefs, b.prefs || {}), at: Date.now()})));
+    return {ok: true, id};
+  }
+  const id = String(b.id || ""); if (!/^[0-9a-f]{12}$/.test(id)) return {error: "id invalide"};
+  const k = `p:${team}:${id}`, st = JSON.parse(await env.GKV.get(k) || "null");
+  if (path === "/push/retirer"){ await env.GKV.delete(k); return {ok: true}; }
+  if (!st) return {error: "inconnu"};
+  if (path === "/push/prefs"){ st.prefs = Object.assign({matin: true, soir: true}, st.prefs, b.prefs || {}); await env.GKV.put(k, JSON.stringify(st)); return {ok: true, prefs: st.prefs}; }
+  if (path === "/push/test"){ const msg = b.quoi === "soir" || b.quoi === "matin" ? await buildMsg(team, b.quoi) : {title: "Athéna", body: "Les notifications marchent : je te tiendrai au courant de ta journée.", url: "./index.html#accueil"}; return {status: await sendPush(env, st.sub, msg), msg}; }
+  return {error: "inconnu"};
+}
+// ===================== Dictée (reconnaissance vocale Groq Whisper) =====================
+async function transcribe(env, req, cors){
+  const type = (req.headers.get("Content-Type") || "audio/webm").split(";")[0];
+  if (!/^audio\//.test(type)) return json({error: {message: "format audio attendu"}}, 400, cors);
+  const buf = await req.arrayBuffer();
+  if (buf.byteLength > 6 * 1024 * 1024) return json({error: {message: "message trop long (2 minutes max)"}}, 413, cors);
+  const ext = /mp4|m4a|aac/.test(type) ? "m4a" : /ogg/.test(type) ? "ogg" : /wav/.test(type) ? "wav" : /mpeg|mp3/.test(type) ? "mp3" : "webm";
+  const fd = new FormData();
+  fd.append("file", new Blob([buf], {type}), "voix." + ext); fd.append("model", "whisper-large-v3-turbo"); fd.append("language", "fr"); fd.append("response_format", "json");
+  const r = await fetch("https://api.groq.com/openai/v1/audio/transcriptions", {method: "POST", headers: {Authorization: "Bearer " + env.GROQ_API_KEY}, body: fd});
+  return new Response(await r.text(), {status: r.status, headers: {...cors, "Content-Type": "application/json"}});
+}
+
 export default {
   async scheduled(event, env, ctx) {
+    if (env.GKV && env.VAPID_PRIVATE_JWK) ctx.waitUntil(pushRound(env).catch(() => {}));
     if (!env.GKV || !env.GOOGLE_CLIENT_ID) return;
     const list = await env.GKV.list({prefix: "g:"});
     for (const k of list.keys) ctx.waitUntil(gSyncKey(env, k.name, k.name.slice(2).split(":")[0], false).catch(() => {}));
@@ -240,6 +358,14 @@ export default {
     };
     if (req.method === "OPTIONS") return new Response(null, { headers: cors });
     if (req.method !== "POST" || !ORIGINS.includes(origin)) return json({ error: { message: "interdit" } }, 403, cors);
+    if (url.pathname === "/voix"){
+      if (env.LIMITER) { const { success } = await env.LIMITER.limit({ key: (req.headers.get("CF-Connecting-IP") || "?") + ":voix" }); if (!success) return json({ error: { message: "trop de messages vocaux" } }, 429, cors); }
+      return transcribe(env, req, cors);
+    }
+    if (url.pathname.startsWith("/push/")){
+      let b = {}; try { b = await req.json(); } catch (e) {}
+      return json(await pushApi(env, url.pathname, b), 200, cors);
+    }
     if (url.pathname.startsWith("/google/")){
       if (!env.GKV || !env.GOOGLE_CLIENT_ID) return json({ configured: false }, 200, cors);
       let b = {}; try { b = await req.json(); } catch (e) {}

@@ -814,6 +814,12 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--accent)}
 .rap li{display:grid;grid-template-columns:22px 1fr;gap:8px;align-items:start;border-top:1px solid var(--line);padding-top:8px}
 .rap .rap-ic{font-weight:800;color:var(--accent);text-align:center}
 .rap p{margin:2px 0 4px}
+.mic{width:44px;height:44px;flex:0 0 44px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--ink);display:grid;place-items:center;cursor:pointer;padding:0}
+.mic svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
+.mic.on{background:#E5383B;border-color:#E5383B;color:#fff;animation:micPulse 1.2s ease-in-out infinite}
+@keyframes micPulse{0%,100%{box-shadow:0 0 0 0 rgba(229,56,59,.5)}50%{box-shadow:0 0 0 10px rgba(229,56,59,0)}}
+.voice-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:6px}
+.voice-bar .vtog{display:flex;gap:6px;align-items:center;color:var(--ink)}
 </style>
 </head>
 <body>
@@ -904,6 +910,11 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--accent)}
     <div class="ath-head"><span class="ath-ava" data-athena></span><div><h3>Athéna</h3><p class="note">Force &amp; stratégie</p></div></div>
     <p>Athéna, c'est ta coach. Comme la déesse grecque de la sagesse et de la stratégie, protectrice de la cité, elle t'aide à préparer le concours avec méthode : chaque jour quoi faire, comment progresser, et jusqu'où tu es arrivée.</p>
     <p>Elle grandira avec toi : ce n'est que le début.</p>
+  </div>
+  <div class="panel" id="push-panel">
+    <h3>Les notifications d'Athéna</h3>
+    <p class="note">Athéna t'écrit même quand l'appli est fermée : le point du jour à 7 h 30, et le soir à 21 h 30 ce qu'il reste à cocher (ou un bravo si tout est fait).</p>
+    <div id="push-box"></div>
   </div>
   <div class="panel">
     <h3>Toi</h3>
@@ -1040,6 +1051,7 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--accent)}
     <div class="status" id="status"></div>
     <div id="cur"></div>
     <button class="go" id="go" type="button">Sac posé</button>
+    <label class="row note" for="pc-voice" style="color:var(--ink);justify-content:center"><input type="checkbox" id="pc-voice" checked> Athéna annonce l'atelier suivant à voix haute</label>
     <div class="penrow">
       <span class="lab">Pénalités</span><span class="val" id="penval">+0 s</span>
       <button class="ghost small" type="button" id="undo">Annuler la dernière</button>
@@ -1245,7 +1257,9 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--accent)}
       <form class="row" id="chat-form">
         <input type="text" id="chat-in" placeholder="Pose ta question au coach…" autocomplete="off" style="flex:1 1 200px;font:inherit;font-size:.95rem;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)">
         <button type="submit" class="ghost small">Envoyer</button>
+        <button type="button" class="mic" id="mic" aria-label="Parler à Athéna"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
       </form>
+      <div class="voice-bar"><span class="note" id="mic-state">Touche le micro et parle : Athéna t'écoute et te répond à voix haute.</span><label class="note vtog"><input type="checkbox" id="voix-on"> Voix d'Athéna</label></div>
       <p class="note" style="font-size:.8rem">Athéna peut se tromper : les règles officielles sont dans le guide des ateliers (onglet Plan). En cas de douleur, demande l'avis d'un médecin.</p>
     </div>
   </div>
@@ -1535,6 +1549,7 @@ function show(v, noScroll){
   chrome(v);
   if (v === "frac") frFill();
   if (v === "tests") renderMesures();
+  if (v === "reglages" && typeof renderPush === "function") renderPush();
   if (v === "nutrition" && typeof renderNutrition === "function") renderNutrition();
   if (v === "plan" && typeof renderGcal === "function") renderGcal(true);
   try { history.replaceState(null, "", "#" + v); } catch(e){}
@@ -1941,12 +1956,14 @@ async function press(){
     state = "count"; countEnd = performance.now() + 15000; pens = []; lastId = null; lastBody = null;
     $("result").hidden = true; elTime.classList.add("countd"); grabWake(); cancelAnimationFrame(raf); loop(); setStatus(); renderChrono(); return;
   }
-  if (state === "count"){ startRun(performance.now()); return; }
+  if (state === "count"){ startRun(performance.now()); if ($("pc-voice") && $("pc-voice").checked) say("C'est parti ! " + TIMED[0].short, {force: true}); return; }
   if (state === "run"){
     splits.push(performance.now() - t0 - splits.reduce((a, b) => a + b, 0));
+    if ($("pc-voice") && $("pc-voice").checked && splits.length < TIMED.length) say(TIMED[splits.length].short + (splits.length === TIMED.length - 1 ? ", dernier atelier, fonce !" : ""), {force: true});
     if (splits.length === TIMED.length){
       cancelAnimationFrame(raf); dropWake(); state = "done"; doneAt = performance.now(); elGo.textContent = "Nouvel essai"; penSel = 10;
       lastBody = bodyNow(); showResult(lastBody); renderChrono();
+      if ($("pc-voice") && $("pc-voice").checked) say(`Arrivée ! ${Math.floor(lastBody.total / 60000) ? Math.floor(lastBody.total / 60000) + " minute " : ""}${Math.floor(lastBody.total / 1000) % 60} secondes. Note : ${fr(lastBody.note)} sur 20.`, {force: true});
       coachAfterRun(lastBody);
       prevBestAtRun = S.essais.length ? Math.min(...S.essais.map(e => e.total)) : null;
       showRecord();
@@ -2001,7 +2018,7 @@ function tone(freq, dur, when){
 function beep(){ if (LL.ctx) tone(1000, 0.14, LL.ctx.currentTime); }
 function palierSignal(p){
   if (LL.ctx){ const t = LL.ctx.currentTime; tone(700, 0.12, t); tone(700, 0.12, t + 0.18); tone(1100, 0.2, t + 0.36); }
-  if ($("ll-voice").checked){ try { const u = new SpeechSynthesisUtterance("Palier " + p); u.lang = "fr-FR"; speechSynthesis.cancel(); speechSynthesis.speak(u); } catch(e){} }
+  if ($("ll-voice").checked) say("Palier " + p + (p >= 4 ? [" ! Accroche-toi.", " ! Tu tiens.", " ! Encore un.", " ! Allez !"][p % 4] : "."), {force: true});
 }
 function llRender(el){
   const p = LL.pal, inPal = el - (p - 1) * 60;
@@ -2557,7 +2574,7 @@ document.addEventListener("click", async e => {
   b.disabled = true; b.textContent = "J'enregistre…";
   const done = await applyActions(m.actions); m.applied = "oui"; m.done = done; lsSet("phm-chat", chat); renderChat();
 });
-async function sendChat(text){
+async function sendChat(text, opt){
   text = text.trim(); if (!text || chatBusy) return;
   chatBusy = true; chat.push({role: "user", content: text}); renderChat();
   $("chat-log").insertAdjacentHTML("beforeend", `<div class="msg bot" id="typing">…</div>`);
@@ -2567,6 +2584,7 @@ async function sendChat(text){
     chat.push(Object.assign({role: "assistant", content: sp.text || "…"}, sp.actions.length ? {actions: sp.actions} : {}));
   } catch(e){ chat.push({role: "assistant", content: e.message || "Je n'arrive pas à répondre (réseau ?)."}); }
   chat = chat.slice(-40); lsSet("phm-chat", chat); chatBusy = false; renderChat();
+  if (opt && opt.voice){ const last = chat[chat.length - 1]; if (last && last.role === "assistant") say(last.content + (last.actions && last.actions.length && !last.applied ? " Je te propose de l'enregistrer : touche Valider." : "")); }
 }
 $("chat-form").addEventListener("submit", e => { e.preventDefault(); const v = $("chat-in").value; $("chat-in").value = ""; sendChat(v); });
 $("chat-sugg").addEventListener("click", e => { const b = e.target.closest("[data-ask]"); if (b) sendChat(b.dataset.ask); });
@@ -2896,7 +2914,7 @@ function agendaEvents(){
     slotsOn(d).forEach(s => {
       if (s.t === "repos") return;
       const x = session(s.t, d, s.h), m = x.m;
-      out.push({d: ymd(d), h: s.h || "18:00", dur: slotDur(s), t: slotTitle(s, d), love: s.t === "ensemble", sport: s.t !== "ensemble",
+      out.push({d: ymd(d), h: s.h || "18:00", dur: slotDur(s), t: slotTitle(s, d), k: slotKey(s), love: s.t === "ensemble", sport: s.t !== "ensemble",
         desc: [`Bloc ${m.n}${m.deload ? " (semaine allégée + tests)" : ""} · semaine ${weekType(d)}`, x.lieu ? "Lieu : " + x.lieu : "", ...x.L.map(stripTags), "", "Détails et chrono : " + location.origin + location.pathname].filter((l, i) => l || i > 0).join("\n")});
     });
   }
@@ -3177,10 +3195,11 @@ function renderPoint(){
   if (planEmpty()){ el.hidden = true; return; }
   const R = rappels(), P = lsGet("phm-point", null), k = ymd(new Date()), fresh = P && P.day === k;
   el.hidden = false;
-  el.innerHTML = `<div class="row between"><h3 style="margin:0">Le point d'Athéna</h3>${aiOn() ? `<button type="button" class="link" id="point-go">${pointBusy ? "…" : fresh ? "Actualiser" : "Demander"}</button>` : ""}</div>
+  el.innerHTML = `<div class="row between"><h3 style="margin:0">Le point d'Athéna</h3><span>${fresh ? `<button type="button" class="link" id="point-say">Écouter</button> · ` : ""}${aiOn() ? `<button type="button" class="link" id="point-go">${pointBusy ? "…" : fresh ? "Actualiser" : "Demander"}</button>` : ""}</span></div>
     ${fresh ? `<div class="point-txt">${mdLite(P.text)}</div>` : pointBusy ? `<p class="note">Athéna regarde ta journée…</p>` : ""}
     ${R.length ? `<ul class="rap">${R.map(r => `<li><span class="rap-ic">${r.ic}</span><div><b>${esc(r.t)}</b><p class="note">${esc(r.d)}</p>${r.btn ? `<button type="button" class="ghost tiny" ${r.btn.attr}>${r.btn.l}</button>` : ""}</div></li>`).join("")}</ul>` : `<p class="note">Rien à signaler : tout est à jour. Bravo.</p>`}
-    <button type="button" class="ghost small" data-goto="coach" style="width:100%;margin-top:8px">Raconter ma journée à Athéna</button>`;
+    <button type="button" class="ghost small" data-goto="coach" style="width:100%;margin-top:8px">Raconter ma journée à Athéna</button>
+    ${team && !lsGet("phm-push", null) && (!isIOS() || isStandalone()) && pushOk() ? `<button type="button" class="link" data-goto="reglages" data-anchor="push-panel" style="margin-top:8px">Recevoir le point d'Athéna en notification ›</button>` : ""}`;
 }
 async function genPoint(force){
   if (!aiOn() || pointBusy || !storeReady || planEmpty() || !navigator.onLine) return;
@@ -3196,7 +3215,116 @@ async function genPoint(force){
 }
 document.addEventListener("click", e => {
   if (e.target.closest("#point-go")) genPoint(true);
+  if (e.target.closest("#point-say")){ const P = lsGet("phm-point", null); if (P) say(P.text, {force: true}); }
   if (e.target.closest("[data-inscrit]")){ saveProfil(Object.assign({}, S.profil || {}, {inscrit: true})); setSync("Noté : tu es inscrite. Bravo !"); }
+});
+
+
+/* ======================= VOIX D'ATHÉNA ======================= */
+// elle parle : voix française de l'appareil (de préférence féminine) ; elle écoute : dictée transcrite par le relais
+let athVoice = null;
+function pickVoice(){
+  try {
+    const V = speechSynthesis.getVoices().filter(v => /^fr/i.test(v.lang));
+    const pref = ["Audrey", "Aurélie", "Amélie", "Marie", "Google français", "Hortense", "Julie", "Denise", "Céline", "Léa"];
+    athVoice = pref.map(n => V.find(v => v.name.includes(n))).find(Boolean) || V.find(v => /fr-FR/i.test(v.lang)) || V[0] || null;
+  } catch(e){}
+}
+try { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; } catch(e){}
+const voixOn = () => lsGet("phm-voix", true) !== false;
+const plain = t => String(t || "").replace(/<[^>]+>/g, " ").replace(/\*\*/g, "").replace(/[•#]/g, "").replace(/\s*[-–]\s+/g, ". ").replace(/♥/g, "").replace(/\bkcal\b/g, "kilocalories").replace(/\bkm\b/g, "kilomètres").replace(/\bmin\b/g, "minutes").replace(/(\d+) h (\d+)/g, "$1 heures $2").replace(/(\d+) h\b/g, "$1 heures").replace(/\s{2,}/g, " ").trim();
+function say(txt, opt){
+  opt = opt || {};
+  if (!opt.force && !voixOn()) return;
+  try {
+    if (opt.interrupt !== false) speechSynthesis.cancel();
+    const parts = plain(txt).match(/[^.!?]+[.!?]*/g) || [];
+    parts.forEach(p => { const u = new SpeechSynthesisUtterance(p.trim()); u.lang = "fr-FR"; if (athVoice) u.voice = athVoice; u.rate = opt.rate || 1.02; u.pitch = 1.05; speechSynthesis.speak(u); });
+  } catch(e){}
+}
+function frSpeak(txt){ say(txt, {force: true}); }
+// micro
+let rec = null, recChunks = [], recTimer = null;
+const HALLU = /^(\s*\.*\s*|sous-titr.*|merci d'avoir regardé.*|abonnez-vous.*)$/i;
+async function micStart(){
+  if (!navigator.mediaDevices || !window.MediaRecorder){ setMic("Ton téléphone ne permet pas la dictée ici : écris ton message."); return; }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({audio: true});
+    const type = ["audio/mp4", "audio/webm;codecs=opus", "audio/webm", "audio/ogg"].find(t => MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) || "";
+    rec = new MediaRecorder(stream, type ? {mimeType: type} : undefined); recChunks = [];
+    rec.ondataavailable = e => { if (e.data && e.data.size) recChunks.push(e.data); };
+    rec.onstop = async () => { stream.getTracks().forEach(t => t.stop()); clearTimeout(recTimer); await micSend(new Blob(recChunks, {type: rec.mimeType || type || "audio/webm"})); rec = null; };
+    rec.start(); speechSynthesis.cancel();
+    $("mic").classList.add("on"); setMic("Je t'écoute… touche encore le micro quand tu as fini.");
+    recTimer = setTimeout(() => { if (rec && rec.state === "recording") rec.stop(); }, 120000);
+  } catch(e){ setMic("Micro refusé : autorise le micro pour Athéna dans les réglages du téléphone, ou écris ton message."); }
+}
+function setMic(t){ const el = $("mic-state"); if (el) el.textContent = t; }
+async function micSend(blob){
+  $("mic").classList.remove("on");
+  if (!blob.size){ setMic("Je n'ai rien entendu. Réessaie."); return; }
+  setMic("Je transcris…");
+  try {
+    const r = await fetch(`${AGENDA_BASE}/voix`, {method: "POST", headers: {"Content-Type": (blob.type || "audio/webm").split(";")[0]}, body: blob});
+    const j = await r.json(); const t = String(j.text || "").trim();
+    if (!r.ok || HALLU.test(t)){ setMic(r.ok ? "Je n'ai pas bien entendu. Réessaie, un peu plus près du micro." : (j.error && j.error.message) || "La dictée ne marche pas pour le moment."); return; }
+    setMic("Touche le micro et parle : Athéna t'écoute et te répond à voix haute.");
+    lsSet("phm-voix", $("voix-on").checked ? true : lsGet("phm-voix", true));
+    sendChat(t, {voice: true});
+  } catch(e){ setMic("Pas de réseau : la dictée a besoin d'internet."); }
+}
+$("mic").addEventListener("click", () => { if (rec && rec.state === "recording") rec.stop(); else micStart(); });
+$("voix-on").checked = voixOn();
+$("voix-on").addEventListener("change", e => { lsSet("phm-voix", e.target.checked); if (!e.target.checked) speechSynthesis.cancel(); else say("C'est moi, Athéna. Je te répondrai à voix haute.", {force: true}); });
+
+
+/* ======================= NOTIFICATIONS ======================= */
+const VAPID_PUBLIC = "BCt4b4Gz4ZS1cPCbPoJ3il-rMBm4hf1DzBLM4HRg771tf_KfiSUXjb3pjHBurWpZ4BM5r5OUWKEWwfRzxX2U1mU";
+const pushOk = () => "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
+const isStandalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+const isIOS = () => /iPhone|iPad|iPod/.test(navigator.userAgent);
+const pushCall = (path, extra) => fetch(`${AGENDA_BASE}/push/${path}`, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(Object.assign({equipe: team}, extra || {}))}).then(r => r.json());
+function renderPush(){
+  const el = $("push-box"); if (!el) return;
+  const P = lsGet("phm-push", null);
+  if (!team){ el.innerHTML = `<p class="note">Relie d'abord ce téléphone à votre espace (ci-dessous, Partage entre téléphones).</p>`; return; }
+  if (isIOS() && !isStandalone()){ el.innerHTML = `<p class="note">Sur iPhone, les notifications marchent seulement depuis l'appli installée sur l'écran d'accueil (iOS 16.4 ou plus récent). Ouvre Athéna depuis son icône, puis reviens ici.</p>`; return; }
+  if (!pushOk()){ el.innerHTML = `<p class="note">Ce navigateur ne permet pas les notifications. Sur iPhone : appli installée sur l'écran d'accueil, iOS 16.4 ou plus récent.</p>`; return; }
+  if (Notification.permission === "denied"){ el.innerHTML = `<p class="note">Les notifications sont bloquées pour Athéna. Va dans Réglages de l'iPhone › Notifications › Athéna, active-les, puis reviens ici.</p>`; return; }
+  if (!P || !P.id || Notification.permission !== "granted"){ el.innerHTML = `<button type="button" class="btn" id="push-on" style="width:100%">Activer les notifications</button>`; return; }
+  const pr = P.prefs || {matin: true, soir: true};
+  el.innerHTML = `<p class="note"><b style="color:var(--ok)">Activées sur ce téléphone.</b></p>
+    <label class="row note" style="color:var(--ink)"><input type="checkbox" data-push-pref="matin"${pr.matin !== false ? " checked" : ""}> Le point du jour, à 7 h 30</label>
+    <label class="row note" style="color:var(--ink)"><input type="checkbox" data-push-pref="soir"${pr.soir !== false ? " checked" : ""}> Le bilan du soir, à 21 h 30</label>
+    <div class="gbtns"><button type="button" class="ghost small" id="push-test">M'envoyer un essai</button><button type="button" class="ghost small" id="push-off">Désactiver</button></div>`;
+}
+async function pushSubscribe(){
+  const b = $("push-on"); if (b){ b.disabled = true; b.textContent = "Activation…"; }
+  try {
+    const perm = await Notification.requestPermission();
+    if (perm !== "granted"){ renderPush(); return; }
+    const reg = await navigator.serviceWorker.ready;
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) sub = await reg.pushManager.subscribe({userVisibleOnly: true, applicationServerKey: Uint8Array.from(atob(VAPID_PUBLIC.replace(/-/g, "+").replace(/_/g, "/") + "=".repeat((4 - VAPID_PUBLIC.length % 4) % 4)), c => c.charCodeAt(0))});
+    const r = await pushCall("abonner", {sub: sub.toJSON()});
+    if (!r.id) throw new Error(r.error || "refus");
+    lsSet("phm-push", {id: r.id, prefs: {matin: true, soir: true}});
+    await pushCall("test", {id: r.id});
+    setSync("Notifications activées : tu viens d'en recevoir une pour essayer.");
+  } catch(e){ setSync("Impossible d'activer les notifications : " + (e.message || e), true); }
+  renderPush();
+}
+document.addEventListener("click", async e => {
+  if (e.target.closest("#push-on")) return pushSubscribe();
+  const P = lsGet("phm-push", null); if (!P) return;
+  if (e.target.closest("#push-test")){ const b = e.target.closest("#push-test"); b.disabled = true; const r = await pushCall("test", {id: P.id}).catch(() => ({})); b.disabled = false; b.textContent = r.status >= 200 && r.status < 300 ? "Envoyée ✓" : "Échec, réessaie"; }
+  if (e.target.closest("#push-off")){ await pushCall("retirer", {id: P.id}).catch(() => {}); try { const reg = await navigator.serviceWorker.ready, sub = await reg.pushManager.getSubscription(); if (sub) await sub.unsubscribe(); } catch(err){} lsSet("phm-push", null); renderPush(); }
+});
+document.addEventListener("change", async e => {
+  const c = e.target.closest("[data-push-pref]"); if (!c) return;
+  const P = lsGet("phm-push", null); if (!P) return;
+  P.prefs = Object.assign({matin: true, soir: true}, P.prefs, {[c.dataset.pushPref]: c.checked}); lsSet("phm-push", P);
+  pushCall("prefs", {id: P.id, prefs: P.prefs}).catch(() => {});
 });
 
 /* ======================= REFONTE : navigation, aujourd'hui, minuteur ======================= */
@@ -3583,7 +3711,7 @@ function frBuild(t){
   }
   return st;
 }
-function frSpeak(txt){ try { const u = new SpeechSynthesisUtterance(txt); u.lang = "fr-FR"; speechSynthesis.cancel(); speechSynthesis.speak(u); } catch(e){} }
+
 function frLoop(){
   const now = performance.now(), cur = FR.steps[FR.i], t = FR.steps.length ? frSettings() : null;
   const el = (now - FR.stepStart) / 1000, left = cur.d - el;
@@ -3729,7 +3857,6 @@ function renderAthena(){ document.querySelectorAll("[data-athena]").forEach(el =
 
 /* ======================= INSTALLATION ======================= */
 let deferredInstall = null;
-const isStandalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
 window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferredInstall = e; });
 window.addEventListener("appinstalled", () => { deferredInstall = null; renderInstall(true); });
 const UA = navigator.userAgent;
