@@ -3320,11 +3320,18 @@ function pickVoice(){
 try { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; } catch(e){}
 const voixOn = () => lsGet("phm-voix", true) !== false;
 const plain = t => String(t || "").replace(/<[^>]+>/g, " ").replace(/\*\*/g, "").replace(/[•#]/g, "").replace(/\s*[-–]\s+/g, ". ").replace(/♥/g, "").replace(/\bkcal\b/g, "kilocalories").replace(/\bkm\b/g, "kilomètres").replace(/\bmin\b/g, "minutes").replace(/(\d+) h (\d+)/g, "$1 heures $2").replace(/(\d+) h\b/g, "$1 heures").replace(/\s{2,}/g, " ").trim();
+// iPhone : la voix n'est autorisée qu'après un premier toucher → on la « débloque » à chaque geste utile
+let voiceUnlocked = false;
+function unlockVoice(){
+  try { if (!window.speechSynthesis) return; if (!athVoice) pickVoice(); if (voiceUnlocked) return; const u = new SpeechSynthesisUtterance(" "); u.volume = 0; u.lang = "fr-FR"; speechSynthesis.speak(u); voiceUnlocked = true; } catch(e){}
+}
+document.addEventListener("touchend", unlockVoice, {passive: true}); document.addEventListener("click", unlockVoice);
 function say(txt, opt){
   opt = opt || {};
   if (!opt.force && !voixOn()) return;
+  // sur iPhone, parler juste après « cancel » avale la phrase : petite pause si une voix était en cours
+  if (opt.interrupt !== false && (speechSynthesis.speaking || speechSynthesis.pending)){ try { speechSynthesis.cancel(); } catch(e){} setTimeout(() => say(txt, Object.assign({}, opt, {interrupt: false})), 120); return; }
   try {
-    if (opt.interrupt !== false) speechSynthesis.cancel();
     const parts = plain(txt).match(/[^.!?]+[.!?]*/g) || [];
     parts.forEach((p, i) => { const u = new SpeechSynthesisUtterance(p.trim()); u.lang = "fr-FR"; if (athVoice) u.voice = athVoice; u.rate = opt.rate || 1.02; u.pitch = 1.05;
       if (i === 0) u.onstart = () => document.dispatchEvent(new Event("ath-talk-start"));
@@ -3363,7 +3370,7 @@ async function micSend(blob){
     sendChat(t, {voice: true});
   } catch(e){ setMic("Pas de réseau : la dictée a besoin d'internet."); }
 }
-$("mic").addEventListener("click", () => { if (rec && rec.state === "recording") rec.stop(); else micStart(); });
+$("mic").addEventListener("click", () => { unlockVoice(); if (rec && rec.state === "recording") rec.stop(); else micStart(); });
 $("voix-on").checked = voixOn();
 $("voix-on").addEventListener("change", e => { lsSet("phm-voix", e.target.checked); if (!e.target.checked) speechSynthesis.cancel(); else say("C'est moi, Athéna. Je te répondrai à voix haute.", {force: true}); });
 
@@ -3647,7 +3654,8 @@ const NOYAU = (() => {
     if (!ctx){ show("coach"); return; }
     ov.hidden = false; document.body.classList.add("noyau-on"); t0 = Date.now(); boot = 0; setMode("idle"); taille(); hud();
     const P = lsGet("phm-point", null), hello = P && P.day === ymd(new Date()) ? P.text : (prenom() ? `Bonjour ${prenom()}. Raconte-moi ta journée : touche le micro et parle.` : "Raconte-moi ta journée : touche le micro et parle.");
-    caption(hello); actions();
+    caption(hello); actions(); unlockVoice();
+    say(prenom() ? `Bonjour ${prenom()}. Touche le micro et raconte-moi ta journée.` : "Bonjour. Touche le micro et raconte-moi ta journée.", {force: true});
     cancelAnimationFrame(raf); last = 0; bootAt = performance.now(); raf = requestAnimationFrame(frame); clock = setInterval(hud, 1000); try { grabWake(); } catch(e){}
   }
   function close(){
@@ -3656,7 +3664,7 @@ const NOYAU = (() => {
     renderAll(); renderToday();
   }
   $("ny-close").addEventListener("click", close);
-  $("ny-mic").addEventListener("click", () => {
+  $("ny-mic").addEventListener("click", () => { unlockVoice();
     if (rec && rec.state === "recording"){ rec.stop(); return; }
     if (mode === "talk"){ speechSynthesis.cancel(); setMode("idle"); return; }
     if (mode !== "think") micStartN();
