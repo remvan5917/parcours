@@ -822,6 +822,9 @@ nav.tabs button[aria-current="page"] svg{stroke:var(--accent)}
 @keyframes micPulse{0%,100%{box-shadow:0 0 0 0 rgba(229,56,59,.5)}50%{box-shadow:0 0 0 10px rgba(229,56,59,0)}}
 .voice-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:6px}
 .voice-bar .vtog{display:flex;gap:6px;align-items:center;color:var(--ink)}
+.prep{margin:4px 0 0;font-size:.84rem;color:var(--muted)}
+.prep b{color:var(--ink);font-weight:600}
+.rap-h{margin:12px 0 0;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -3173,7 +3176,7 @@ function rappels(){
   const F = d => (S.fait || {})[ymd(d)] || {};
   if (y >= calStart()) slotsOn(y).filter(s => s.t !== "ensemble" && s.t !== "repos" && !isDone(y, s)).forEach(s => R.push({ic: "!", t: `Hier : ${slotTitle(s, y)} pas cochée`, d: "Faite ? Coche-la. Pas faite ou changée ? Dis-le à Athéna, elle ajuste.", btn: {l: "C'est fait", attr: `data-done="${ymd(y)}|${esc(slotKey(s))}"`}}));
   const todo = slotsOn(today).filter(s => s.t !== "ensemble" && s.t !== "repos" && !isDone(today, s));
-  todo.forEach(s => { const x = session(s.t, today, s.h); const late = s.h && Number(s.h.split(":")[0]) < h - 2; R.push({ic: late ? "!" : "•", t: `${s.h ? fmtH(s.h) + " · " : ""}${slotTitle(s, today)}${late ? " : faite ?" : ""}`, d: (x.titre && /Test|Simulation/.test(x.titre) ? "Jour de test : mange léger 2 à 3 h avant, échauffe-toi 15 min, et lance le chrono depuis la séance. " : "") + "À prévoir : " + (PREP[s.t] || "ta tenue et une gourde") + ".", btn: late ? {l: "C'est fait", attr: `data-done="${ymd(today)}|${esc(slotKey(s))}"`} : null}); });
+  todo.filter(s => s.h && Number(s.h.split(":")[0]) < h - 2).forEach(s => R.push({ic: "!", t: `${fmtH(s.h)} · ${slotTitle(s, today)} : faite ?`, d: "Coche-la, ou dis à Athéna ce qui a changé.", btn: {l: "C'est fait", attr: `data-done="${ymd(today)}|${esc(slotKey(s))}"`}}));
   if (h >= 17){ const tmS = slotsOn(tm).filter(s => s.t !== "ensemble" && s.t !== "repos" && s.h && s.h < "11:00"); tmS.forEach(s => R.push({ic: "→", t: `Demain ${fmtH(s.h)} : ${slotTitle(s, tm)}`, d: "Prépare tes affaires ce soir (" + (PREP[s.t] || "tenue, gourde") + ") et couche-toi tôt."})); }
   const left = ROUTINE.filter(r => !F(today)["routine:" + r.k]);
   if (h >= 15 && left.length && !slotsOn(today).some(s => s.t === "repos")) R.push({ic: "•", t: `Routine : il te reste ${left.map(r => r.l.replace(/^3 (× 5 )?/, "")).join(", ")}`, d: "10 minutes suffisent. Coche au fur et à mesure dans ta journée."});
@@ -3195,23 +3198,23 @@ let pointBusy = false;
 function renderPoint(){
   const el = $("point"); if (!el) return;
   if (planEmpty()){ el.hidden = true; return; }
-  const R = rappels(), P = lsGet("phm-point", null), k = ymd(new Date()), fresh = P && P.day === k;
+  const R = rappels(), P = lsGet("phm-point", null), k = ymd(new Date()), fresh = P && P.day === k && P.v === 2;
   el.hidden = false;
   el.innerHTML = `<div class="row between"><h3 style="margin:0">Le point d'Athéna</h3><span>${fresh ? `<button type="button" class="link" id="point-say">Écouter</button> · ` : ""}${aiOn() ? `<button type="button" class="link" id="point-go">${pointBusy ? "…" : fresh ? "Actualiser" : "Demander"}</button>` : ""}</span></div>
     ${fresh ? `<div class="point-txt">${mdLite(P.text)}</div>` : pointBusy ? `<p class="note">Athéna regarde ta journée…</p>` : ""}
-    ${R.length ? `<ul class="rap">${R.map(r => `<li><span class="rap-ic">${r.ic}</span><div><b>${esc(r.t)}</b><p class="note">${esc(r.d)}</p>${r.btn ? `<button type="button" class="ghost tiny" ${r.btn.attr}>${r.btn.l}</button>` : ""}</div></li>`).join("")}</ul>` : `<p class="note">Rien à signaler : tout est à jour. Bravo.</p>`}
+    ${R.length ? `<p class="rap-h">À faire</p><ul class="rap">${R.map(r => `<li><span class="rap-ic">${r.ic}</span><div><b>${esc(r.t)}</b><p class="note">${esc(r.d)}</p>${r.btn ? `<button type="button" class="ghost tiny" ${r.btn.attr}>${r.btn.l}</button>` : ""}</div></li>`).join("")}</ul>` : (fresh ? "" : `<p class="note">Rien à signaler : tout est à jour. Bravo.</p>`)}
     <button type="button" class="ghost small" data-goto="coach" style="width:100%;margin-top:8px">Raconter ma journée à Athéna</button>
     ${team && !lsGet("phm-push", null) && (!isIOS() || isStandalone()) && pushOk() ? `<button type="button" class="link" data-goto="reglages" data-anchor="push-panel" style="margin-top:8px">Recevoir le point d'Athéna en notification ›</button>` : ""}`;
 }
 async function genPoint(force){
   if (!aiOn() || pointBusy || !storeReady || planEmpty() || !navigator.onLine) return;
   const P = lsGet("phm-point", null), k = ymd(new Date());
-  if (!force && P && P.day === k && Date.now() - P.at < 4 * 3600e3) return;
+  if (!force && P && P.day === k && P.v === 2 && Date.now() - P.at < 4 * 3600e3) return;
   pointBusy = true; renderPoint();
   try {
     const R = rappels().map(r => "- " + r.t + " : " + r.d).join("\n") || "rien";
-    const t = await askGroq([{role: "system", content: systemPrompt()}, {role: "user", content: `Fais-moi le point de ma journée en 70 mots maximum, comme une coach qui me connaît : ce qui m'attend aujourd'hui (d'après mon agenda), ce que je n'ai pas encore fait ou coché, ce qu'il faut préparer, et un encouragement adapté à ma forme et à mes notes. Rappels calculés par l'appli :\n${R}\nPas de liste longue, pas de titre.`}], 350);
-    if (t) lsSet("phm-point", {day: k, at: Date.now(), text: splitActions(t).text});
+    const t = await askGroq([{role: "system", content: systemPrompt()}, {role: "user", content: `Écris-moi le mot du jour en 45 mots maximum, comme une coach qui me connaît : LA priorité du jour et un encouragement adapté à ma forme, mes notes et ma semaine. Ne répète pas la liste ci-dessous ni le détail de mes séances (je les vois déjà à l'écran) ; deux ou trois phrases, pas de liste, pas de titre. Ce que l'appli m'affiche déjà :\n${R}`}], 350);
+    if (t) lsSet("phm-point", {v: 2, day: k, at: Date.now(), text: splitActions(t).text});
   } catch(e){}
   pointBusy = false; renderPoint();
 }
@@ -3537,7 +3540,7 @@ function renderToday(){
     const main = x.L[0] || "", more = x.L.slice(1);
     return `<div class="sess${done ? " done" : ""}"><span class="ic ${T.ic}" style="position:relative">${ICONS[T.ic] || ICONS.daily}${s.duo ? `<em class="duo-badge">♥</em>` : ""}</span><div>
       <h3>${esc(slotTitle(s, d))}</h3><div class="when">${s.h ? slotHours(s) : "Quand tu veux"}${x.lieu ? " · " + esc(x.lieu) : ""}</div>
-      <p class="what">${main}</p>${s.t !== "ensemble" && s.t !== "repos" ? energyLine(sessEnergy(s, d)) : ""}
+      <p class="what">${main}</p>${s.t !== "ensemble" && s.t !== "repos" ? energyLine(sessEnergy(s, d)) : ""}${s.t !== "ensemble" && s.t !== "repos" && !done && PREP[s.t] ? `<p class="prep"><b>À prévoir :</b> ${x.titre && /Test|Simulation/.test(x.titre) ? "mange léger 2 à 3 h avant, échauffe-toi 15 min ; " : ""}${PREP[s.t]}.</p>` : ""}
       ${more.length ? `<details><summary>Détails</summary>${more.map(l => `<p>${l}</p>`).join("")}</details>` : ""}
       ${s.t === "repos" || s.t === "ensemble" ? "" : `<div class="acts">${a ? `<button type="button" class="btn" data-goto="${a.go}"${a.mode ? ` data-mode="${a.mode}"` : ""}${a.mes ? ` data-mes="${a.mes}"` : ""}>${a.l}</button>` : ""}<button type="button" class="ghost done-btn" data-done="${ymd(d)}|${esc(slotKey(s))}" aria-pressed="${done}">${done ? "Fait ✓" : "Fait"}</button></div>`}
       ${rpeRow}${editBtn}
